@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity
@@ -38,6 +39,9 @@ public class HomeActivity extends AppCompatActivity
     int column_index_data, column_index_folder_name, column_id, thum;
     Toolbar toolbar;
     String a;
+    List<String> listWithoutDuplicates;
+    int count = 0;
+    int count1 = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,25 +78,30 @@ public class HomeActivity extends AppCompatActivity
         } else {
             getfolders();
         }
-
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-                android.R.layout.simple_spinner_item, videoFolderNamearray);
         navigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
-        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, videoFolderNamearray));
+        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
         toolbar.addView(navigationSpinner, 0);
-
-
         navigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 // your code here
-                a = String.valueOf(navigationSpinner.getSelectedItem());
+                a = String.valueOf(navigationSpinner.getSelectedItemPosition());
                 Toast.makeText(HomeActivity.this, a, Toast.LENGTH_SHORT).show();
 
+
                 for (int i = 0; i < videoPatharray.size(); i++) {
-                    if (videoPatharray.get(i).contains("Android")) {
-                        Toast.makeText(HomeActivity.this, "fdfdfdfdfdfdfdfdfd", Toast.LENGTH_SHORT).show();
+                    if (videoPatharray.get(i).contains("Camera")) {
+                        count++;
+                        ArrayList cameravideos = new ArrayList();
+                        cameravideos.add(videoPatharray.get(i));
+                        Log.i("cam", "" + cameravideos);
+                    } else {
+                        count1++;
+                        ArrayList other = new ArrayList();
+                        other.add(videoPatharray.get(i));
+                        Log.i("camm", "" + other);
                     }
+
                 }
             }
 
@@ -102,6 +111,8 @@ public class HomeActivity extends AppCompatActivity
             }
 
         });
+
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -172,7 +183,7 @@ public class HomeActivity extends AppCompatActivity
         String[] projection = {MediaStore.Video.Thumbnails.DATA, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
 
-        while (cursor.moveToNext()) {
+     /*   while (cursor.moveToNext()) {
 
             column_index_data = cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA);
             column_index_folder_name = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME);
@@ -183,10 +194,8 @@ public class HomeActivity extends AppCompatActivity
             ArrayList<String> name = new ArrayList<>(column_index_folder_name);
             ArrayList<String> id = new ArrayList<>(column_id);
             ArrayList<String> thumb = new ArrayList<>(thum);
-
-
         }
-
+*/
 
         try {
             cursor.moveToFirst();
@@ -194,7 +203,12 @@ public class HomeActivity extends AppCompatActivity
             do {
                 videoFolderNamearray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME))));
                 videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA))));
-                Log.e("prerna", String.valueOf(videoFolderNamearray));
+//                videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA))));
+                HashSet<String> listToSet = new HashSet<String>(videoFolderNamearray);
+
+                listWithoutDuplicates = new ArrayList<>(listToSet);
+
+                Log.e("prerna1", String.valueOf(listWithoutDuplicates));
                 Log.e("prerna", String.valueOf(videoPatharray));
 
 
