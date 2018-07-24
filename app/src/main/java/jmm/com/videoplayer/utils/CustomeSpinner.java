@@ -1,4 +1,4 @@
-package jmm.com.videoplayer;
+package jmm.com.videoplayer.utils;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import jmm.com.videoplayer.R;
 
 public class CustomeSpinner extends ArrayAdapter<String> {
     private List<String> objects;
