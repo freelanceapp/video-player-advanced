@@ -28,6 +28,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
+import jmm.com.videoplayer.model.Video;
+
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private String[] category = {};
@@ -35,8 +37,10 @@ public class HomeActivity extends AppCompatActivity
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
     ArrayList<String> data = new ArrayList<>();
+    ArrayList<Video> arrayList = new ArrayList<>();
+
     Spinner navigationSpinner;
-    int column_index_data, column_index_folder_name, column_id, thum;
+    String column_index_data, column_index_folder_name, column_id, thum, duration, language;
     Toolbar toolbar;
     String a;
     List<String> listWithoutDuplicates;
@@ -89,12 +93,12 @@ public class HomeActivity extends AppCompatActivity
                 Toast.makeText(HomeActivity.this, a, Toast.LENGTH_SHORT).show();
 
 
-                for (int i = 0; i < videoPatharray.size(); i++) {
-                    if (videoPatharray.get(i).contains("Camera")) {
+           /*     for (int i = 0; i < videoPatharray.size(); i++) {
+                    if (videoPatharray.get(i).contains(a)) {
                         count++;
                         ArrayList cameravideos = new ArrayList();
                         cameravideos.add(videoPatharray.get(i));
-                        Log.i("cam", "" + cameravideos);
+                        Log.i("cam", "" + cameravideos+"..."+count);
                     } else {
                         count1++;
                         ArrayList other = new ArrayList();
@@ -102,7 +106,7 @@ public class HomeActivity extends AppCompatActivity
                         Log.i("camm", "" + other);
                     }
 
-                }
+                }*/
             }
 
             @Override
@@ -165,11 +169,16 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             // Handle the camera action
+            Toast.makeText(HomeActivity.this, "home", Toast.LENGTH_SHORT).show();
+
         } else if (id == R.id.nav_settings) {
+            Toast.makeText(HomeActivity.this, "settings", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_share) {
+            Toast.makeText(HomeActivity.this, "share", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_aboutus) {
+            Toast.makeText(HomeActivity.this, "about us", Toast.LENGTH_SHORT).show();
 
         }
 
@@ -201,17 +210,25 @@ public class HomeActivity extends AppCompatActivity
             cursor.moveToFirst();
 
             do {
+                column_index_data = String.valueOf(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA));
+                column_index_folder_name = String.valueOf(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
+                column_id = String.valueOf(cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID));
+                thum = String.valueOf(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
+                duration = String.valueOf(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+                language = String.valueOf(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.LANGUAGE));
+                data.add(column_index_folder_name);
+                HashSet<String> listToSet = new HashSet<String>(data);
+                listWithoutDuplicates = new ArrayList<>(listToSet);
+                arrayList.add(new Video(thum, column_index_data, column_id, duration, language, column_index_folder_name));
+
+            /*
                 videoFolderNamearray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME))));
                 videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA))));
 //                videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA))));
                 HashSet<String> listToSet = new HashSet<String>(videoFolderNamearray);
-
                 listWithoutDuplicates = new ArrayList<>(listToSet);
-
-                Log.e("prerna1", String.valueOf(listWithoutDuplicates));
-                Log.e("prerna", String.valueOf(videoPatharray));
-
-
+*/
+                Log.e("prerna", String.valueOf(column_index_data));
             } while (cursor.moveToNext());
 
             cursor.close();
