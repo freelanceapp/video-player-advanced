@@ -1,6 +1,7 @@
 package jmm.com.videoplayer.activity;
 
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -45,26 +46,24 @@ import jmm.com.videoplayer.adapter.ShowVideoAdapter;
 import jmm.com.videoplayer.model.ShowVideo;
 import jmm.com.videoplayer.utils.CustomeSpinner;
 import jmm.com.videoplayer.utils.Helper;
+import jmm.com.videoplayer.utils.RecyclerItemClickListener;
 
 public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     private static final int REQUEST_PERMISSIONS = 100;
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
-    ArrayList<String> data = new ArrayList<>();
     ArrayList<ShowVideo> arrayList = new ArrayList<>();
-
     RecyclerView rv_showvideo;
     ShowVideoAdapter showAppointmentAdapter;
-
     Spinner navigationSpinner;
     String url, foldername, thumb, duration, date, name;
     Toolbar toolbar;
     String a;
     List<String> listWithoutDuplicates;
-    int count = 0;
-    int count1 = 0;
-    private StaggeredGridLayoutManager gaggeredGridLayoutManager;
+    ProgressDialog progressDialog;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,16 +75,30 @@ public class HomeActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+
+
+
         rv_showvideo = findViewById(R.id.rv_showvideo);
         rv_showvideo.setLayoutManager(new LinearLayoutManager(this));
         showAppointmentAdapter = new ShowVideoAdapter(arrayList, this);
         rv_showvideo.setAdapter(showAppointmentAdapter);
-    /*    arrayList.add(new ShowVideo("https://www.w3schools.com/w3images/fjords.jpg", "prerna", "1", "1.25", "Hindi", "prerna", "pgfgppp"));
-        arrayList.add(new ShowVideo("https://www.w3schools.com/w3images/fjords.jpg", "sdtd", "1", "1.25", "Hindi", "prerna", "df"));
-        arrayList.add(new ShowVideo("https://cdn.theatlantic.com/assets/media/img/photo/2015/11/images-from-the-2016-sony-world-pho/s01_130921474920553591/main_900.jpg?1448476701", "dgg", "1", "1.25", "Hindi", "prerna", "ser"));
-        arrayList.add(new ShowVideo("https://www.w3schools.com/w3images/fjords.jpg", "prerna", "1", "1.25", "Hindi", "prerna", "nmn"));
-        arrayList.add(new ShowVideo("https://cdn.theatlantic.com/assets/media/img/photo/2015/11/images-from-the-2016-sony-world-pho/s01_130921474920553591/main_900.jpg?1448476701", "prerna", "1", "1.25", "Hindi", "prerna", "pppp"));
-*/
+
+        progressDialog=new ProgressDialog(this);
+        progressDialog.setMessage("Wait...");
+
+      /*  rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), rv_showvideo, new RecyclerItemClickListener(this).ClickListener()) {
+            @Override
+            public void onClick(View view, int position) {
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+
+            }
+        });*/
+
+
+
         if ((ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
@@ -112,22 +125,15 @@ public class HomeActivity extends AppCompatActivity
                 a = navigationSpinner.getSelectedItem().toString();
                 Toast.makeText(HomeActivity.this, a, Toast.LENGTH_SHORT).show();
 
-//                getVideoCatWise(a);
+                if (a.equals("All")) {
+                    arrayList.clear();
+                    getfolders();
+                } else {
+                    progressDialog.show();
 
-           /*     for (int i = 0; i < videoPatharray.size(); i++) {
-                    if (videoPatharray.get(i).contains(a)) {
-                        count++;
-                        ArrayList cameravideos = new ArrayList();
-                        cameravideos.add(videoPatharray.get(i));
-                        Log.i("cam", "" + cameravideos+"..."+count);
-                    } else {
-                        count1++;
-                        ArrayList other = new ArrayList();
-                        other.add(videoPatharray.get(i));
-                        Log.i("camm", "" + other);
-                    }
+                    getVideoCatWise(a);
 
-                }*/
+                }
             }
 
             @Override
@@ -235,16 +241,53 @@ public class HomeActivity extends AppCompatActivity
                 String tt = Helper.Time(duration);
 
                 Log.e("prerna", da);
-
-
                 arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name));
             } while (cursor.moveToPrevious());
 
             cursor.close();
+            showAppointmentAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
 //        ArrayList<String> downloadedList = new ArrayList<>(videoItemHashSet);
+    }
+
+    public void getVideoCatWise(String s) {
+        arrayList.clear();
+        String[] projection = {MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
+        Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
+
+        try {
+            cursor.moveToLast();
+
+            do {
+                foldername = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
+
+                if (foldername.contains(s)){
+                    url = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
+                    thumb = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
+                    name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
+                    duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+                    date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATE_ADDED));
+
+                    String da = Helper.LongToDate(date);
+                    String tt = Helper.Time(duration);
+
+                    Log.e("aaaaaa", thumb);
+                    arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name));
+
+                }
+
+            }while (cursor.moveToPrevious());
+            progressDialog.dismiss();
+
+            cursor.close();
+
+            showAppointmentAdapter.notifyDataSetChanged();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

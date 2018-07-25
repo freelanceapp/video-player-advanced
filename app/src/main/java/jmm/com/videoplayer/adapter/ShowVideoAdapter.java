@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 
 import java.util.ArrayList;
 
+import de.hdodenhof.circleimageview.CircleImageView;
 import jmm.com.videoplayer.R;
 import jmm.com.videoplayer.model.ShowVideo;
 
@@ -25,6 +26,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     ArrayList<ShowVideo> filteredList = new ArrayList<>();
     Activity activity;
     Context context;
+    int flag=0;
 
     public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
@@ -40,7 +42,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ShowVideoHolder showVideoHolder, int i) {
+    public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, int i) {
 
         final ShowVideo showVideo = showVideoArrayList.get(i);
         showVideoHolder.txt_title.setText(showVideo.getName());
@@ -48,6 +50,21 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         showVideoHolder.txt_date.setText(showVideo.getDate());
         Glide.with(activity).load("file://" + showVideo.getThumb())
                 .into(showVideoHolder.img_thumb);
+
+        showVideoHolder.img_favrt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (flag==0){
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.starefull);
+                    flag=1;
+                }else {
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.starempty);
+                    flag=0;
+
+                }
+
+            }
+        });
 
 
     }
@@ -63,13 +80,14 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
     public class ShowVideoHolder extends RecyclerView.ViewHolder {
 
-        ImageView img_thumb;
+        ImageView img_thumb,img_favrt;
         TextView txt_title, txt_duration, txt_date;
 
         public ShowVideoHolder(@NonNull View itemView) {
             super(itemView);
 
             img_thumb = itemView.findViewById(R.id.img_thumb);
+            img_favrt = itemView.findViewById(R.id.img_favrt);
             txt_title = itemView.findViewById(R.id.txt_title);
             txt_duration = itemView.findViewById(R.id.txt_duration);
             txt_date = itemView.findViewById(R.id.txt_date);
