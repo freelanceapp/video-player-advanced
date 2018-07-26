@@ -31,6 +31,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
     public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
+        this.filteredListttt=showVideoArrayList;
         this.activity = activity;
     }
 
@@ -45,7 +46,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     @Override
     public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, int i) {
 
-        final ShowVideo showVideo = showVideoArrayList.get(i);
+        final ShowVideo showVideo = filteredListttt.get(i);
         showVideoHolder.txt_title.setText(showVideo.getName());
         showVideoHolder.txt_duration.setText(showVideo.getTime());
         showVideoHolder.txt_date.setText(showVideo.getDate());
@@ -72,9 +73,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
     @Override
     public int getItemCount() {
-        if (showVideoArrayList == null)
+        if (filteredListttt == null)
             return 0;
-        return showVideoArrayList.size();
+        return filteredListttt.size();
     }
 
     @Override
@@ -105,7 +106,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                showVideoArrayList = (ArrayList<ShowVideo>) filterResults.values;
+                filteredListttt = (ArrayList<ShowVideo>) filterResults.values;
                 notifyDataSetChanged();
             }
         };

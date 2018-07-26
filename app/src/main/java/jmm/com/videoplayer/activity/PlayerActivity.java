@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import jmm.com.videoplayer.R;
@@ -24,21 +25,17 @@ public class PlayerActivity extends AppCompatActivity {
 
         img_play = findViewById(R.id.img_play);
         seekbar = findViewById(R.id.seekbar);
+
+        seekbar.setProgress(0);
+        seekbar.incrementProgressBy(10);
+        seekbar.setMax(200);
+
+
         img_play.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (flag == 0) {
                     img_play.setImageResource(R.drawable.pause);
-                    try {
-                        runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                seekbar.setProgress(50);
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
                     flag = 1;
 
                 } else {
@@ -47,7 +44,6 @@ public class PlayerActivity extends AppCompatActivity {
                 }
             }
         });
-
 
     }
 

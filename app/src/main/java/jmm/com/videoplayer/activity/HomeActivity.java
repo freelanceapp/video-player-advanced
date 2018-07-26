@@ -17,6 +17,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
+import android.text.TextUtils;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -107,18 +108,6 @@ public class HomeActivity extends AppCompatActivity
         spec.setIndicator("Cloud");
         host.addTab(spec);
 
-      /*  rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), rv_showvideo, new RecyclerItemClickListener(this).ClickListener()) {
-            @Override
-            public void onClick(View view, int position) {
-            }
-
-            @Override
-            public void onLongClick(View view, int position) {
-
-            }
-        });*/
-
-
         if ((ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
@@ -150,7 +139,6 @@ public class HomeActivity extends AppCompatActivity
                     getfolders();
                 } else {
                     progressDialog.show();
-
                     getVideoCatWise(a);
 
                 }
@@ -177,7 +165,6 @@ public class HomeActivity extends AppCompatActivity
             }
         }));
 
-
         linearLayout=findViewById(R.id.tab2);
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -191,7 +178,7 @@ public class HomeActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        NavigationView navigationView =  findViewById(R.id.nav_view);
 //        navigationView.setItemIconTintList(null);
 
         navigationView.setNavigationItemSelectedListener(this);
@@ -210,6 +197,11 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+
+
+
+
+
         getMenuInflater().inflate(R.menu.home, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.search)
@@ -231,7 +223,7 @@ public class HomeActivity extends AppCompatActivity
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
                 showVideoAdapter.getFilter().filter(query);
-                return false;
+                return true;
             }
         });
         return true;
@@ -354,4 +346,6 @@ public class HomeActivity extends AppCompatActivity
             e.printStackTrace();
         }
     }
+
+
 }
