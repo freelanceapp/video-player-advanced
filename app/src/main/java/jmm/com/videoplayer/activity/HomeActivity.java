@@ -7,8 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
@@ -27,13 +29,16 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Spinner;
+import android.widget.TabHost;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashSet;
@@ -55,36 +60,52 @@ public class HomeActivity extends AppCompatActivity
     ArrayList<String> videoPatharray = new ArrayList<>();
     ArrayList<ShowVideo> arrayList = new ArrayList<>();
     RecyclerView rv_showvideo;
-    ShowVideoAdapter showAppointmentAdapter;
+    ShowVideoAdapter showVideoAdapter;
     Spinner navigationSpinner;
     String url, foldername, thumb, duration, date, name;
     Toolbar toolbar;
     String a;
     List<String> listWithoutDuplicates;
     ProgressDialog progressDialog;
-
-
-
+    LinearLayout linearLayout;
+    SearchView searchView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-
-
-
         rv_showvideo = findViewById(R.id.rv_showvideo);
         rv_showvideo.setLayoutManager(new LinearLayoutManager(this));
-        showAppointmentAdapter = new ShowVideoAdapter(arrayList, this);
-        rv_showvideo.setAdapter(showAppointmentAdapter);
+        showVideoAdapter = new ShowVideoAdapter(arrayList, this);
+        rv_showvideo.setAdapter(showVideoAdapter);
 
-        progressDialog=new ProgressDialog(this);
+        progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Wait...");
+
+
+        TabHost host = (TabHost) findViewById(R.id.tabHost);
+        host.setup();
+        //Tab 1
+        TabHost.TabSpec spec = host.newTabSpec("Device");
+        spec.setContent(R.id.tab1);
+        spec.setIndicator("Device");
+        host.addTab(spec);
+
+        //Tab 2
+        spec = host.newTabSpec("favourite");
+        spec.setContent(R.id.tab2);
+        spec.setIndicator("Favourite");
+        host.addTab(spec);
+
+        //Tab 3
+        spec = host.newTabSpec("Cloud");
+        spec.setContent(R.id.tab3);
+        spec.setIndicator("Cloud");
+        host.addTab(spec);
 
       /*  rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(getApplicationContext(), rv_showvideo, new RecyclerItemClickListener(this).ClickListener()) {
             @Override
@@ -96,7 +117,6 @@ public class HomeActivity extends AppCompatActivity
 
             }
         });*/
-
 
 
         if ((ContextCompat.checkSelfPermission(getApplicationContext(),
@@ -117,13 +137,13 @@ public class HomeActivity extends AppCompatActivity
         navigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
         navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
         toolbar.addView(navigationSpinner, 0);
+
         navigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 // your code here
 //                a = String.valueOf(navigationSpinner.getSelectedItemPosition());
                 a = navigationSpinner.getSelectedItem().toString();
-                Toast.makeText(HomeActivity.this, a, Toast.LENGTH_SHORT).show();
 
                 if (a.equals("All")) {
                     arrayList.clear();
@@ -143,7 +163,28 @@ public class HomeActivity extends AppCompatActivity
 
         });
 
+        rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
+            @Override
+            public void onClick(View view, int position) {
+                String s = arrayList.get(position).getName();
+                Toast.makeText(HomeActivity.this, s, Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(HomeActivity.this,PlayerActivity.class));
 
+            }
+
+            @Override
+            public void onLongClick(View view, int position) {
+            }
+        }));
+
+
+        linearLayout=findViewById(R.id.tab2);
+        linearLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -170,7 +211,29 @@ public class HomeActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.home, menu);
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView = (SearchView) menu.findItem(R.id.search)
+                .getActionView();
+        searchView.setSearchableInfo(searchManager
+                .getSearchableInfo(getComponentName()));
+        searchView.setMaxWidth(Integer.MAX_VALUE);
 
+        // listening to search query text change
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                // filter recycler view when query submitted
+                showVideoAdapter.getFilter().filter(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String query) {
+                // filter recycler view when text is changed
+                showVideoAdapter.getFilter().filter(query);
+                return false;
+            }
+        });
         return true;
     }
 
@@ -229,6 +292,7 @@ public class HomeActivity extends AppCompatActivity
 //                videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA))));
                 HashSet<String> listToSet = new HashSet<String>(videoFolderNamearray);
                 listWithoutDuplicates = new ArrayList<>(listToSet);
+                Collections.sort(listWithoutDuplicates);
 
                 foldername = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
                 url = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
@@ -245,7 +309,7 @@ public class HomeActivity extends AppCompatActivity
             } while (cursor.moveToPrevious());
 
             cursor.close();
-            showAppointmentAdapter.notifyDataSetChanged();
+            showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -264,7 +328,7 @@ public class HomeActivity extends AppCompatActivity
             do {
                 foldername = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
 
-                if (foldername.contains(s)){
+                if (foldername.contains(s)) {
                     url = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
                     thumb = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
                     name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
@@ -279,12 +343,12 @@ public class HomeActivity extends AppCompatActivity
 
                 }
 
-            }while (cursor.moveToPrevious());
+            } while (cursor.moveToPrevious());
             progressDialog.dismiss();
 
             cursor.close();
 
-            showAppointmentAdapter.notifyDataSetChanged();
+            showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
             e.printStackTrace();

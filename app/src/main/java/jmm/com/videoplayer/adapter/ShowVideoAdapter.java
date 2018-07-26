@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.SearchView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
@@ -20,13 +21,13 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import jmm.com.videoplayer.R;
 import jmm.com.videoplayer.model.ShowVideo;
 
-public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder>  {
+public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder> implements Filterable {
 
     ArrayList<ShowVideo> showVideoArrayList = new ArrayList<>();
-    ArrayList<ShowVideo> filteredList = new ArrayList<>();
+    ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
     Activity activity;
     Context context;
-    int flag=0;
+    int flag = 0;
 
     public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
@@ -54,12 +55,12 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         showVideoHolder.img_favrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (flag==0){
+                if (flag == 0) {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.starefull);
-                    flag=1;
-                }else {
+                    flag = 1;
+                } else {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.starempty);
-                    flag=0;
+                    flag = 0;
 
                 }
 
@@ -76,11 +77,44 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         return showVideoArrayList.size();
     }
 
+    @Override
+    public Filter getFilter() {
+        return new Filter() {
+            @Override
+            protected FilterResults performFiltering(CharSequence charSequence) {
+                String charString = charSequence.toString();
+                if (charString.isEmpty()) {
+                    filteredListttt= showVideoArrayList ;
+                } else {
+                    ArrayList<ShowVideo> filteredList = new ArrayList<>();
+                    for (ShowVideo row : showVideoArrayList) {
+
+                        //condition to search for
+                        if (row.getName().toLowerCase().contains(charString.toLowerCase())) {
+                            filteredList.add(row);
+                        }
+                    }
+
+                    filteredListttt = filteredList;
+                }
+
+                FilterResults filterResults = new FilterResults();
+                filterResults.values = filteredListttt;
+                return filterResults;
+            }
+
+            @Override
+            protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
+                showVideoArrayList = (ArrayList<ShowVideo>) filterResults.values;
+                notifyDataSetChanged();
+            }
+        };
+    }
 
 
     public class ShowVideoHolder extends RecyclerView.ViewHolder {
 
-        ImageView img_thumb,img_favrt;
+        ImageView img_thumb, img_favrt;
         TextView txt_title, txt_duration, txt_date;
 
         public ShowVideoHolder(@NonNull View itemView) {
