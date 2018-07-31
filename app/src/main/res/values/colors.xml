@@ -1,8 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#8E44AD</color>
-    <color name="colorPrimaryDark">#ce8e44ad</color>
+    <color name="colorPrimary">#d81354</color>
+    <color name="colorPrimaryDark">#e5333e</color>
     <color name="colorAccent">#FF4081</color>
     <color name="purple">#8E44AD</color>
     <color name="lightpurp">#2d8e44ad</color>
+    <color name="pink">#d81354</color>
+    <color name="red">#e5333e</color>
+    <color name="redlight">#32e5333e</color>
+    <color name="orange">#f76f15</color>
+    <color name="grey">#ebebeb</color>
 </resources>

@@ -19,8 +19,8 @@
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
-        app:itemTextColor="@color/purple"
-        app:itemIconTint="@color/purple"
+        app:itemTextColor="@color/red"
+        app:itemIconTint="@color/pink"
         app:headerLayout="@layout/nav_header_home"
         app:menu="@menu/activity_home_drawer" />
 

@@ -9,13 +9,17 @@ public class ShowVideo {
     String date;
     String folder;
     String name;
+    String resolution;
 
-    public ShowVideo(String thumb, String date, String id, String time, String data, String folder,String name) {
+    public ShowVideo() {
+    }
+
+    public ShowVideo(String thumb, String resolution, String id, String time, String data, String folder, String name) {
         this.thumb = thumb;
         this.data = data;
         this.id = id;
         this.time = time;
-        this.date = date;
+        this.resolution = resolution;
         this.folder = folder;
         this.name = name;
     }
@@ -74,5 +78,13 @@ public class ShowVideo {
 
     public void setFolder(String folder) {
         this.folder = folder;
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
     }
 }

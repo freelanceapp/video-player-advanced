@@ -14,6 +14,7 @@
 
         <TabHost
             android:id="@+id/tabHost"
+            android:background="@drawable/tabs"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_alignParentTop="true"
@@ -27,7 +28,8 @@
                 <TabWidget
                     android:id="@android:id/tabs"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content"
+                    >
 
                 </TabWidget>
 
@@ -56,11 +58,17 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:orientation="vertical">
-
-                        <TextView
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="show"
+                            android:id="@+id/show"/>
+                        <android.support.v7.widget.RecyclerView
+                            android:id="@+id/rv_showfavrt"
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Favourite" />
+                            android:layout_height="match_parent">
+
+                        </android.support.v7.widget.RecyclerView>
                     </LinearLayout>
 
                     <LinearLayout

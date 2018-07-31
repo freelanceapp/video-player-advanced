@@ -1,6 +1,7 @@
 package jmm.com.videoplayer.utils;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -35,6 +36,10 @@ public class CustomeSpinner extends ArrayAdapter<String> {
     private View getCustomView(final int position, View convertView, ViewGroup parent) {
         View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_spinner, parent, false);
         final TextView label = (TextView) row.findViewById(R.id.tv_spinnervalue);
+        Typeface font = Typeface.createFromAsset(getContext().getAssets(), "PoetsenOne-Regular.ttf");
+        label.setTypeface(font);
+
+
         label.setText(objects.get(position));
         return row;
     }

@@ -5,8 +5,10 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -15,6 +17,7 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.text.TextUtils;
@@ -30,6 +33,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Spinner;
@@ -45,6 +49,7 @@ import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.TimeZone;
 
 import jmm.com.videoplayer.R;
@@ -60,16 +65,18 @@ public class HomeActivity extends AppCompatActivity
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
     ArrayList<ShowVideo> arrayList = new ArrayList<>();
-    RecyclerView rv_showvideo;
+    RecyclerView rv_showvideo, rv_showfavrt;
     ShowVideoAdapter showVideoAdapter;
     Spinner navigationSpinner;
-    String url, foldername, thumb, duration, date, name;
+    String url, foldername, thumb, duration, date, name,resolution;
     Toolbar toolbar;
     String a;
     List<String> listWithoutDuplicates;
     ProgressDialog progressDialog;
     LinearLayout linearLayout;
     SearchView searchView;
+    Button show;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,8 +94,7 @@ public class HomeActivity extends AppCompatActivity
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Wait...");
 
-
-        TabHost host = (TabHost) findViewById(R.id.tabHost);
+        TabHost host = findViewById(R.id.tabHost);
         host.setup();
         //Tab 1
         TabHost.TabSpec spec = host.newTabSpec("Device");
@@ -107,6 +113,7 @@ public class HomeActivity extends AppCompatActivity
         spec.setContent(R.id.tab3);
         spec.setIndicator("Cloud");
         host.addTab(spec);
+
 
         if ((ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getApplicationContext(),
@@ -132,6 +139,8 @@ public class HomeActivity extends AppCompatActivity
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 // your code here
 //                a = String.valueOf(navigationSpinner.getSelectedItemPosition());
+
+
                 a = navigationSpinner.getSelectedItem().toString();
 
                 if (a.equals("All")) {
@@ -151,21 +160,45 @@ public class HomeActivity extends AppCompatActivity
 
         });
 
-        rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
+        show=findViewById(R.id.show);
+        show.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                getfavrt();
+            }
+        });
+
+
+     /*   SharedPreferences prefs = getSharedPreferences("favrt", MODE_PRIVATE);
+        String restoredText = prefs.getString("text", null);
+        if (restoredText != null) {
+            String name = prefs.getString("name", "No name defined");//"No name defined" is the default value.
+        } else {
+            String name = prefs.getString("name", null);
+            Log.i("name", name);
+
+        }
+*/
+
+      /*  rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                String s = arrayList.get(position).getName();
-                Toast.makeText(HomeActivity.this, s, Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(HomeActivity.this,PlayerActivity.class));
+               *//* String s = arrayList.get(position).getFolder();
+                Log.e("prerna", s);
 
+                Toast.makeText(HomeActivity.this, s, Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(HomeActivity.this, PlayerActivity.class);
+                intent.putExtra("prerna", s);
+                startActivity(intent);*//*
             }
 
             @Override
             public void onLongClick(View view, int position) {
-            }
-        }));
 
-        linearLayout=findViewById(R.id.tab2);
+            }
+        }));*/
+
+        linearLayout = findViewById(R.id.tab2);
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -178,7 +211,7 @@ public class HomeActivity extends AppCompatActivity
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView =  findViewById(R.id.nav_view);
+        NavigationView navigationView = findViewById(R.id.nav_view);
 //        navigationView.setItemIconTintList(null);
 
         navigationView.setNavigationItemSelectedListener(this);
@@ -197,9 +230,6 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-
-
-
 
 
         getMenuInflater().inflate(R.menu.home, menu);
@@ -271,7 +301,7 @@ public class HomeActivity extends AppCompatActivity
 
     public void getfolders() {
 
-        String[] projection = {MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
+        String[] projection = {MediaStore.Video.Media.RESOLUTION,MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
 
         try {
@@ -292,12 +322,21 @@ public class HomeActivity extends AppCompatActivity
                 name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
                 duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                 date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATE_ADDED));
+                resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RESOLUTION));
 
                 String da = Helper.LongToDate(date);
                 String tt = Helper.Time(duration);
+                Log.e("prerna", resolution);
 
-                Log.e("prerna", da);
-                arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name));
+                ShowVideo showVideo = new ShowVideo();
+                showVideo.setThumb(thumb);
+                showVideo.setDate(da);
+                showVideo.setTime(tt);
+                showVideo.setFolder(url);
+                showVideo.setName(name);
+
+
+                arrayList.add(new ShowVideo(thumb, resolution, "1", tt, da, url, name));
             } while (cursor.moveToPrevious());
 
             cursor.close();
@@ -345,6 +384,21 @@ public class HomeActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public void getfavrt() {
+
+        ArrayList<ShowVideo> sssss = new ArrayList<>();
+        sssss = ShowVideoAdapter.listWithoutDuplicates;
+
+        SharedPreferences prefs = getSharedPreferences("favrt", MODE_PRIVATE);
+        String ssss = prefs.getString("name", null);
+        Log.i("restoredText", sssss + "");
+        rv_showfavrt = findViewById(R.id.rv_showfavrt);
+        rv_showfavrt.setLayoutManager(new LinearLayoutManager(this));
+        showVideoAdapter = new ShowVideoAdapter(sssss, this);
+        rv_showfavrt.setAdapter(showVideoAdapter);
+
     }
 
 
