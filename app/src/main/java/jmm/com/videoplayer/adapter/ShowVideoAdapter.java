@@ -1,12 +1,19 @@
 package jmm.com.videoplayer.adapter;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.Uri;
+import android.os.Build;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -18,10 +25,12 @@ import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -41,6 +50,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     Activity activity;
     Context context;
     int flag = 0;
+    int postion;
 
     public static ArrayList<ShowVideo> listWithoutDuplicates;
 
@@ -63,24 +73,26 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     @Override
     public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, int i) {
 
+
         final ShowVideo showVideo = filteredListttt.get(i);
         showVideoHolder.txt_title.setText(showVideo.getName());
         showVideoHolder.txt_duration.setText(showVideo.getTime());
         showVideoHolder.txt_resolution.setText(showVideo.getResolution());
         Glide.with(activity).load("file://" + showVideo.getThumb())
                 .into(showVideoHolder.img_thumb);
+        showVideo.setId(String.valueOf(i));
 
         showVideoHolder.img_favrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 if (flag == 0) {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
-                    favrtArraylist.add(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName(),showVideo.getSize()));
+                    favrtArraylist.add(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName(), showVideo.getSize()));
                     flag = 1;
 
                 } else {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
-                    favrtArraylist.remove(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName(),showVideo.getSize()));
+                    favrtArraylist.remove(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName(), showVideo.getSize()));
                     flag = 0;
 
                 }
@@ -120,11 +132,28 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.nav_dot_detail:
-                                DetailDialog cdd = new DetailDialog(activity,showVideo.getName(),showVideo.getSize(),showVideo.getResolution(),showVideo.getFolder(),showVideo.getData(),showVideo.getTime());
+                                DetailDialog cdd = new DetailDialog(activity, showVideo.getName(), showVideo.getSize(), showVideo.getResolution(), showVideo.getFolder(), showVideo.getData(), showVideo.getTime());
                                 cdd.show();
                                 return true;
                             case R.id.nav_dot_delete:
-                                //handle menu2 click
+
+
+                                File dir = activity.getFilesDir();
+                                File file = new File(showVideo.getFolder());
+                                if (file.exists()) {
+                                    boolean deleted = file.delete();
+                                    if (deleted) {
+                                        sendBroadcast(file);
+                                    }
+                                    Log.i("asfd", "" + deleted);
+
+                                }
+
+
+                                Log.i("asfd", "" + file);
+
+                                removeItem(Integer.valueOf(showVideo.getId()));
+
                                 return true;
                             case R.id.nav_dot_share:
                                 Helper.ShareSingleFile(showVideo.getFolder(), activity, activity.getResources().getString(R.string.file_provider_authority));
@@ -205,4 +234,32 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         }
     }
+
+    private void removeItem(int position) {
+        showVideoArrayList.remove(position);
+        notifyItemRemoved(position);
+        notifyItemRangeChanged(position, showVideoArrayList.size());
+    }
+
+    private void sendBroadcast(File outputFile) {
+        //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
+        //this broadcast clear the deleted images from  android file system
+        //it makes the MediaScanner service run again that keep  track of files in android
+        // to  run it a permission  in manifest file has been given
+        // <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            final Uri contentUri = Uri.fromFile(outputFile);
+            scanIntent.setData(contentUri);
+            activity.sendBroadcast(scanIntent);
+        } else {
+            final Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory()));
+            activity.sendBroadcast(intent);
+        }
+
+
+    }
+
 }

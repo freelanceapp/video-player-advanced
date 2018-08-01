@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Environment;
 import android.support.v4.content.FileProvider;
 import android.webkit.MimeTypeMap;
 
@@ -33,6 +34,9 @@ public class Helper {
         int scs = Integer.parseInt(t) % 60000 / 1000;
         return (hrs+":"+mns+":"+scs);
     }
+
+
+
 
     public static void ShareSingleFile(String name, Context ctx, String authority)
     {
@@ -87,4 +91,5 @@ public class Helper {
 
 
     }
+
 }
