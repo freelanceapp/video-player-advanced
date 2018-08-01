@@ -10,11 +10,12 @@ public class ShowVideo {
     String folder;
     String name;
     String resolution;
+    String size;
 
     public ShowVideo() {
     }
 
-    public ShowVideo(String thumb, String resolution, String id, String time, String data, String folder, String name) {
+    public ShowVideo(String thumb, String resolution, String id, String time, String data, String folder, String name,String size) {
         this.thumb = thumb;
         this.data = data;
         this.id = id;
@@ -22,6 +23,7 @@ public class ShowVideo {
         this.resolution = resolution;
         this.folder = folder;
         this.name = name;
+        this.size = size;
     }
 
     public String getName() {
@@ -86,5 +88,13 @@ public class ShowVideo {
 
     public void setResolution(String resolution) {
         this.resolution = resolution;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 }

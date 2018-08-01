@@ -16,5 +16,5 @@
         <item>Movies</item>
     </string-array>
 
-
+    <string name="file_provider_authority" translatable="false">jmm.com.videoplayer.provider</string>
 </resources>

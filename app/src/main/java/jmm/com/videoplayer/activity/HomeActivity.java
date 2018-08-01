@@ -68,7 +68,14 @@ public class HomeActivity extends AppCompatActivity
     RecyclerView rv_showvideo, rv_showfavrt;
     ShowVideoAdapter showVideoAdapter;
     Spinner navigationSpinner;
-    String url, foldername, thumb, duration, date, name,resolution;
+    String url;
+    String foldername;
+    String thumb;
+    String duration;
+    String date;
+    String name;
+    String resolution;
+    String size;
     Toolbar toolbar;
     String a;
     List<String> listWithoutDuplicates;
@@ -160,7 +167,7 @@ public class HomeActivity extends AppCompatActivity
 
         });
 
-        show=findViewById(R.id.show);
+        show = findViewById(R.id.show);
         show.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -301,7 +308,7 @@ public class HomeActivity extends AppCompatActivity
 
     public void getfolders() {
 
-        String[] projection = {MediaStore.Video.Media.RESOLUTION,MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
+        String[] projection = {MediaStore.Video.Media.SIZE, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
 
         try {
@@ -311,7 +318,6 @@ public class HomeActivity extends AppCompatActivity
                 videoFolderNamearray.add("All");
                 videoFolderNamearray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME))));
                 videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA))));
-//                videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA))));
                 HashSet<String> listToSet = new HashSet<String>(videoFolderNamearray);
                 listWithoutDuplicates = new ArrayList<>(listToSet);
                 Collections.sort(listWithoutDuplicates);
@@ -323,10 +329,19 @@ public class HomeActivity extends AppCompatActivity
                 duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                 date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATE_ADDED));
                 resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RESOLUTION));
+                size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
+
+                long fileSizeInBytes = Long.parseLong(size);
+// Convert the bytes to Kilobytes (1 KB = 1024 Bytes)
+                long fileSizeInKB = fileSizeInBytes / 1024;
+// Convert the KB to MegaBytes (1 MB = 1024 KBytes)
+                long fileSizeInMB = fileSizeInKB / 1024;
+                String s= String.valueOf(fileSizeInMB);
+
 
                 String da = Helper.LongToDate(date);
                 String tt = Helper.Time(duration);
-                Log.e("prerna", resolution);
+                Log.e("prerna", String.valueOf(fileSizeInMB));
 
                 ShowVideo showVideo = new ShowVideo();
                 showVideo.setThumb(thumb);
@@ -336,7 +351,7 @@ public class HomeActivity extends AppCompatActivity
                 showVideo.setName(name);
 
 
-                arrayList.add(new ShowVideo(thumb, resolution, "1", tt, da, url, name));
+                arrayList.add(new ShowVideo(thumb, resolution, "1", tt, da, url, name,s));
             } while (cursor.moveToPrevious());
 
             cursor.close();
@@ -370,7 +385,7 @@ public class HomeActivity extends AppCompatActivity
                     String tt = Helper.Time(duration);
 
                     Log.e("aaaaaa", thumb);
-                    arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name));
+                    arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name,s));
 
                 }
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
@@ -20,12 +21,15 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
 
 import jmm.com.videoplayer.R;
 import jmm.com.videoplayer.activity.PlayerActivity;
 import jmm.com.videoplayer.model.ShowVideo;
+import jmm.com.videoplayer.utils.DetailDialog;
+import jmm.com.videoplayer.utils.Helper;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -71,12 +75,12 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             public void onClick(View view) {
                 if (flag == 0) {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
-                    favrtArraylist.add(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName()));
+                    favrtArraylist.add(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName(),showVideo.getSize()));
                     flag = 1;
 
                 } else {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
-                    favrtArraylist.remove(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName()));
+                    favrtArraylist.remove(new ShowVideo(showVideo.getThumb(), showVideo.getDate(), "1", showVideo.getTime(), showVideo.getDate(), showVideo.getFolder(), showVideo.getName(),showVideo.getSize()));
                     flag = 0;
 
                 }
@@ -116,12 +120,14 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                     public boolean onMenuItemClick(MenuItem item) {
                         switch (item.getItemId()) {
                             case R.id.nav_dot_detail:
-                                //handle menu1 click
+                                DetailDialog cdd = new DetailDialog(activity,showVideo.getName(),showVideo.getSize(),showVideo.getResolution(),showVideo.getFolder(),showVideo.getData(),showVideo.getTime());
+                                cdd.show();
                                 return true;
                             case R.id.nav_dot_delete:
                                 //handle menu2 click
                                 return true;
                             case R.id.nav_dot_share:
+                                Helper.ShareSingleFile(showVideo.getFolder(), activity, activity.getResources().getString(R.string.file_provider_authority));
                                 //handle menu3 click
                                 return true;
 
