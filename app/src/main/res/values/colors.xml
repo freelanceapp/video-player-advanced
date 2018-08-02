@@ -10,4 +10,6 @@
     <color name="redlight">#32e5333e</color>
     <color name="orange">#f76f15</color>
     <color name="grey">#ebebeb</color>
+    <color name="blacklight">#20000000</color>
+    <color name="white">#ffffff</color>
 </resources>

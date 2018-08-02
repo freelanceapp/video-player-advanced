@@ -28,13 +28,13 @@ public class DeviceFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_device, container, false);
 
-        rv_showvideo = view.findViewById(R.id.rv_showvideo);
+    /*    rv_showvideo = view.findViewById(R.id.rv_showvideo);
         rv_showvideo.setLayoutManager(new LinearLayoutManager(getActivity()));
         showVideoAdapter = new ShowVideoAdapter(arrayList, getActivity());
         rv_showvideo.setAdapter(showVideoAdapter);
 
 
-
+*/
         return view ;
     }
 }

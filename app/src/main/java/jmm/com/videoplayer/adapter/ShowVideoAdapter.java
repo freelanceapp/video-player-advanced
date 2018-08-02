@@ -1,19 +1,16 @@
 package jmm.com.videoplayer.adapter;
 
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.ContentUris;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -21,16 +18,17 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 
@@ -44,19 +42,21 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder> implements Filterable {
 
-    ArrayList<ShowVideo> showVideoArrayList = new ArrayList<>();
-    ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
+    public ArrayList<ShowVideo> showVideoArrayList = new ArrayList<>();
+    public ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
     ArrayList<ShowVideo> favrtArraylist = new ArrayList<>();
+    public ArrayList<ShowVideo> selected_ApkList=new ArrayList<>();
+
     Activity activity;
     Context context;
     int flag = 0;
-    int postion;
 
     public static ArrayList<ShowVideo> listWithoutDuplicates;
 
-    public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, Activity activity) {
+    public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, ArrayList<ShowVideo> selectedApkList,Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
         this.filteredListttt = showVideoArrayList;
+        this.selected_ApkList = selectedApkList;
         this.activity = activity;
     }
 
@@ -137,22 +137,46 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                                 return true;
                             case R.id.nav_dot_delete:
 
+                                AlertDialog.Builder builder1 = new AlertDialog.Builder(activity);
+                                builder1.setMessage("Are you sure delete this video ?");
+                                builder1.setCancelable(false);
 
-                                File dir = activity.getFilesDir();
-                                File file = new File(showVideo.getFolder());
-                                if (file.exists()) {
-                                    boolean deleted = file.delete();
-                                    if (deleted) {
-                                        sendBroadcast(file);
-                                    }
-                                    Log.i("asfd", "" + deleted);
+                                builder1.setPositiveButton(
+                                        "Yes",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                Toast.makeText(activity, "Yes", Toast.LENGTH_SHORT).show();
 
-                                }
+                                                File file = new File(showVideo.getFolder());
+                                                if (file.exists()) {
+                                                    boolean deleted = file.delete();
+                                                    if (deleted) {
+                                                        sendBroadcast(file);
+                                                    }
+                                                    Log.i("asfd", "" + deleted);
+
+                                                }
 
 
-                                Log.i("asfd", "" + file);
+                                                Log.i("asfd", "" + file);
 
-                                removeItem(Integer.valueOf(showVideo.getId()));
+                                                removeItem(Integer.valueOf(showVideo.getId()));
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                                builder1.setNegativeButton(
+                                        "No",
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog, int id) {
+                                                Toast.makeText(activity, "No", Toast.LENGTH_SHORT).show();
+
+                                                dialog.cancel();
+                                            }
+                                        });
+
+                                AlertDialog alert11 = builder1.create();
+                                alert11.show();
 
                                 return true;
                             case R.id.nav_dot_share:
@@ -169,6 +193,19 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 popup.show();
             }
         });
+
+
+        if(selected_ApkList.contains(showVideoArrayList.get(i))) {
+            showVideoHolder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
+//            showVideoHolder.ll_select.setBackgroundColor(activity.getResources().getColor(R.color.orange));
+        }
+        else {
+            showVideoHolder.chbx.setVisibility(View.INVISIBLE); // for time being checkbox not shown   layout backgroud being changed
+//            showVideoHolder.ll_select.setBackgroundColor(activity.getResources().getColor(R.color.grey));
+        }
+
+
+
     }
 
     @Override
@@ -216,6 +253,8 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         ImageView img_thumb, img_favrt, img_options;
         TextView txt_title, txt_duration, txt_resolution;
+        CheckBox chbx;
+        LinearLayout ll_select;
 
         public ShowVideoHolder(@NonNull View itemView) {
             super(itemView);
@@ -226,6 +265,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             txt_title = itemView.findViewById(R.id.txt_title);
             txt_duration = itemView.findViewById(R.id.txt_duration);
             txt_resolution = itemView.findViewById(R.id.txt_resolution);
+            chbx = itemView.findViewById(R.id.chbx);
+            ll_select = itemView.findViewById(R.id.ll_select);
+
 
             Typeface font = Typeface.createFromAsset(activity.getAssets(), "PoetsenOne-Regular.ttf");
             txt_title.setTypeface(font);

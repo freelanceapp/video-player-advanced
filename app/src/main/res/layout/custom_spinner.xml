@@ -1,20 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/rounded">
+    android:layout_margin="10dp"
+    android:background="@android:color/white">
+    <LinearLayout
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@android:color/white"
+        android:weightSum="1">
+
+
     <TextView
         android:id="@+id/tv_spinnervalue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textColor="@android:color/black"
         android:gravity="center"
+        android:layout_weight=".5"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp"
         android:layout_alignParentLeft="true"
         android:textSize="18sp"
-        android:layout_marginTop="5sp"
         android:text="prerna"
        />
 
-</RelativeLayout>
+        <TextView
+            android:id="@+id/txt_total"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="@android:color/black"
+            android:gravity="center"
+         android:layout_weight=".5"
+            android:layout_alignParentLeft="true"
+            android:textSize="18sp"
+            android:visibility="gone"
+            android:text="prerna"
+            />
+    </LinearLayout>
+<View
+    android:layout_width="match_parent"
+    android:layout_height="2dp"
+    android:background="@android:color/darker_gray"/>
+
+</LinearLayout>

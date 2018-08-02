@@ -35,7 +35,7 @@ public class CustomeSpinner extends ArrayAdapter<String> {
 
     private View getCustomView(final int position, View convertView, ViewGroup parent) {
         View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_spinner, parent, false);
-        final TextView label = (TextView) row.findViewById(R.id.tv_spinnervalue);
+        final TextView label =  row.findViewById(R.id.tv_spinnervalue);
         Typeface font = Typeface.createFromAsset(getContext().getAssets(), "PoetsenOne-Regular.ttf");
         label.setTypeface(font);
 

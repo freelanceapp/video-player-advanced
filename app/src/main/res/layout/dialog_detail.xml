@@ -17,12 +17,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="1">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".7"
             android:text="Name" />
 
         <TextView
@@ -30,27 +30,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
-            android:layout_weight="1"
+            android:layout_weight=".3"
             android:text="TextView" />
     </LinearLayout>
 
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/black"
+        android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:background="@android:color/black" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="1">
 
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".7"
 
             android:text="Size" />
 
@@ -58,26 +59,28 @@
             android:id="@+id/txt_dialog_size"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".3"
 
             android:text="TextView" />
     </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/black"
+        android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:background="@android:color/black" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="1">
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".7"
 
             android:text="Resolution" />
 
@@ -85,27 +88,29 @@
             android:id="@+id/txt_dialog_resolution"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".3"
 
             android:text="TextView" />
     </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/black"
+        android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:background="@android:color/black" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="1">
 
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".7"
 
             android:text="Location" />
 
@@ -113,26 +118,28 @@
             android:id="@+id/txt_dialog_location"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".3"
             android:text="TextView" />
     </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/black"
+        android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:background="@android:color/black" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="1">
 
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".7"
 
             android:text="Date" />
 
@@ -140,27 +147,29 @@
             android:id="@+id/txt_dialog_date"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".3"
 
             android:text="TextView" />
     </LinearLayout>
+
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="@android:color/black"
+        android:layout_marginBottom="10dp"
         android:layout_marginTop="10dp"
-        android:layout_marginBottom="10dp"/>
+        android:background="@android:color/black" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:weightSum="2">
+        android:weightSum="1">
 
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:layout_weight=".7"
 
             android:text="Duration" />
 
@@ -169,7 +178,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
-            android:layout_weight="1"
+            android:layout_weight=".3"
             android:text="TextView" />
     </LinearLayout>
 

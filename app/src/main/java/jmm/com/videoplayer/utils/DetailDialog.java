@@ -53,7 +53,15 @@ public class DetailDialog extends Dialog implements
 
 
         txt_dialog_folder.setText(folder);
-        txt_dialog_size.setText(size + " MB");
+        int s=Integer.parseInt(size);
+
+        if (s<=100){
+            txt_dialog_size.setText(size + " MB");
+
+        }else {
+            txt_dialog_size.setText(size + " KB");
+
+        }
         txt_dialog_resolution.setText(resolution);
         txt_dialog_location.setText(location);
         txt_dialog_date.setText(date);

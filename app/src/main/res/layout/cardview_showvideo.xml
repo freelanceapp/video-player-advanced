@@ -20,6 +20,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:id="@+id/ll_select"
+
             android:weightSum="1">
 
             <LinearLayout
@@ -118,6 +120,14 @@
                     android:layout_height="110dp"
                     android:layout_weight=".4"
                     android:orientation="vertical">
+
+                    <CheckBox
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:visibility="gone"
+                        android:checked="true"
+                        android:buttonTint="@color/red"
+                        android:id="@+id/chbx"/>
 
                     <ImageView
                         android:id="@+id/img_options"

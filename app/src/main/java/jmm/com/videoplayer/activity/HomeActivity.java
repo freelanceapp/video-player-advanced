@@ -9,10 +9,14 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Typeface;
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.GridLayoutManager;
@@ -28,6 +32,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.view.ActionMode;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -38,8 +43,10 @@ import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TabHost;
+import android.widget.TabWidget;
 import android.widget.Toast;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -55,12 +62,13 @@ import java.util.TimeZone;
 import jmm.com.videoplayer.R;
 import jmm.com.videoplayer.adapter.ShowVideoAdapter;
 import jmm.com.videoplayer.model.ShowVideo;
+import jmm.com.videoplayer.utils.AlertDialogHelper;
 import jmm.com.videoplayer.utils.CustomeSpinner;
 import jmm.com.videoplayer.utils.Helper;
 import jmm.com.videoplayer.utils.RecyclerItemClickListener;
 
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, AlertDialogHelper.AlertDialogListener {
     private static final int REQUEST_PERMISSIONS = 100;
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
@@ -83,6 +91,14 @@ public class HomeActivity extends AppCompatActivity
     LinearLayout linearLayout;
     SearchView searchView;
     Button show;
+    String MBKB;
+    ArrayList<ShowVideo> multiselect_list = new ArrayList<>();
+    Menu context_menu;
+    AppBarLayout appbar;
+    AlertDialogHelper alertDialogHelper;
+    boolean isMultiSelect = false;
+    ActionMode mActionMode;
+    TabWidget tabs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,16 +106,20 @@ public class HomeActivity extends AppCompatActivity
         setContentView(R.layout.activity_home);
 
         toolbar = findViewById(R.id.toolbar);
+        appbar = findViewById(R.id.appbar);
+        tabs = findViewById(android.R.id.tabs);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         rv_showvideo = findViewById(R.id.rv_showvideo);
         rv_showvideo.setLayoutManager(new LinearLayoutManager(this));
-        showVideoAdapter = new ShowVideoAdapter(arrayList, this);
+        showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, this);
         rv_showvideo.setAdapter(showVideoAdapter);
 
-        progressDialog = new ProgressDialog(this);
+        progressDialog = new ProgressDialog(HomeActivity.this);
         progressDialog.setMessage("Wait...");
+
+        alertDialogHelper = new AlertDialogHelper(this);
 
         TabHost host = findViewById(R.id.tabHost);
         host.setup();
@@ -138,8 +158,14 @@ public class HomeActivity extends AppCompatActivity
             getfolders();
         }
         navigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
-        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
-        toolbar.addView(navigationSpinner, 0);
+        if (listWithoutDuplicates.isEmpty()) {
+
+            Toast.makeText(this, "No Video Available", Toast.LENGTH_SHORT).show();
+        } else {
+            navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
+            toolbar.addView(navigationSpinner, 0);
+
+        }
 
         navigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -176,42 +202,42 @@ public class HomeActivity extends AppCompatActivity
         });
 
 
-     /*   SharedPreferences prefs = getSharedPreferences("favrt", MODE_PRIVATE);
-        String restoredText = prefs.getString("text", null);
-        if (restoredText != null) {
-            String name = prefs.getString("name", "No name defined");//"No name defined" is the default value.
-        } else {
-            String name = prefs.getString("name", null);
-            Log.i("name", name);
-
-        }
-*/
-
-      /*  rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
+        rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-               *//* String s = arrayList.get(position).getFolder();
+               /* String s = arrayList.get(position).getFolder();
                 Log.e("prerna", s);
 
                 Toast.makeText(HomeActivity.this, s, Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(HomeActivity.this, PlayerActivity.class);
                 intent.putExtra("prerna", s);
-                startActivity(intent);*//*
+                startActivity(intent);*/
+                if (isMultiSelect)
+                    multi_select(position);
+
+                else {
+
+                    // openDocument(ApkList.get(position).getFilePath());
+                }
             }
 
             @Override
             public void onLongClick(View view, int position) {
+                if (!isMultiSelect) {
+                    isMultiSelect = true;
 
+                    if (mActionMode == null) {
+//                        mActionMode = startActionMode(mActionModeCallback);
+                        mActionMode = startSupportActionMode(mActionModeCallback);
+
+                    }
+                }
+
+                multi_select(position);
             }
-        }));*/
+        }));
 
-        linearLayout = findViewById(R.id.tab2);
-        linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-            }
-        });
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -318,9 +344,11 @@ public class HomeActivity extends AppCompatActivity
                 videoFolderNamearray.add("All");
                 videoFolderNamearray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME))));
                 videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA))));
+
                 HashSet<String> listToSet = new HashSet<String>(videoFolderNamearray);
                 listWithoutDuplicates = new ArrayList<>(listToSet);
                 Collections.sort(listWithoutDuplicates);
+
 
                 foldername = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
                 url = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
@@ -336,8 +364,13 @@ public class HomeActivity extends AppCompatActivity
                 long fileSizeInKB = fileSizeInBytes / 1024;
 // Convert the KB to MegaBytes (1 MB = 1024 KBytes)
                 long fileSizeInMB = fileSizeInKB / 1024;
-                String s= String.valueOf(fileSizeInMB);
 
+                if (fileSizeInMB == 0) {
+                    MBKB = String.valueOf(fileSizeInKB);
+
+                } else {
+                    MBKB = String.valueOf(fileSizeInMB);
+                }
 
                 String da = Helper.LongToDate(date);
                 String tt = Helper.Time(duration);
@@ -351,7 +384,7 @@ public class HomeActivity extends AppCompatActivity
                 showVideo.setName(name);
 
 
-                arrayList.add(new ShowVideo(thumb, resolution, "1", tt, da, url, name,s));
+                arrayList.add(new ShowVideo(thumb, resolution, "1", tt, da, url, name, MBKB));
             } while (cursor.moveToPrevious());
 
             cursor.close();
@@ -385,7 +418,7 @@ public class HomeActivity extends AppCompatActivity
                     String tt = Helper.Time(duration);
 
                     Log.e("aaaaaa", thumb);
-                    arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name,s));
+                    arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name, s));
 
                 }
 
@@ -411,10 +444,203 @@ public class HomeActivity extends AppCompatActivity
         Log.i("restoredText", sssss + "");
         rv_showfavrt = findViewById(R.id.rv_showfavrt);
         rv_showfavrt.setLayoutManager(new LinearLayoutManager(this));
-        showVideoAdapter = new ShowVideoAdapter(sssss, this);
+        showVideoAdapter = new ShowVideoAdapter(sssss, multiselect_list, this);
         rv_showfavrt.setAdapter(showVideoAdapter);
 
     }
 
+    public void multi_select(int position) {
+        if (mActionMode != null) {
+            if (multiselect_list.contains(arrayList.get(position)))
+                multiselect_list.remove(arrayList.get(position));
+            else
+                multiselect_list.add(arrayList.get(position));
 
+            if (multiselect_list.size() > 0) {
+                mActionMode.setTitle("" + multiselect_list.size());
+            } else {
+                mActionMode.setTitle("");
+            }
+
+            refreshAdapter();
+
+        }
+    }
+
+    public void refreshAdapter() {
+        showVideoAdapter.selected_ApkList = multiselect_list;
+        showVideoAdapter.showVideoArrayList = arrayList;
+        showVideoAdapter.notifyDataSetChanged();
+    }
+
+    public ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
+
+        @Override
+        public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+            // Inflate a menu resource providing context menu items
+            MenuInflater inflater = mode.getMenuInflater();
+            inflater.inflate(R.menu.menu_multi_select, menu);
+            context_menu = menu;
+            return true;
+        }
+
+        @Override
+        public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+            return false; // Return false if nothing is done
+        }
+
+        @Override
+        public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+            switch (item.getItemId()) {
+                case R.id.action_delete:
+                    alertDialogHelper.showAlertDialog("", "Delete Video", "DELETE", "CANCEL", 1, false);
+
+//                    alertDialogHelper.showAlertDialog("","Delete Video","DELETE","CANCEL",1,false);
+                    return true;
+                case R.id.action_select:
+                    selectAll();
+                    return true;
+
+                default:
+                    return false;
+            }
+        }
+
+        @Override
+        public void onDestroyActionMode(ActionMode mode) {
+            mActionMode = null;
+            isMultiSelect = false;
+            multiselect_list = new ArrayList<ShowVideo>();
+            refreshAdapter();
+        }
+    };
+
+    private void selectAll() {
+        if (mActionMode != null) {
+            multiselect_list.clear();
+
+            for (int i = 0; i < arrayList.size(); i++) {
+                if (!multiselect_list.contains(multiselect_list.contains(arrayList.get(i)))) {
+                    multiselect_list.add(arrayList.get(i));
+                }
+            }
+            if (multiselect_list.size() > 0)
+                mActionMode.setTitle("" + multiselect_list.size());
+            else
+                mActionMode.setTitle("");
+
+            refreshAdapter();
+
+        }
+    }
+
+
+    @Override
+    public void onPositiveClick(int from) {
+        if (from == 1) {
+            if (multiselect_list.size() > 0) {
+                new DeleteFileTask(multiselect_list).execute();
+                for (int i = 0; i < multiselect_list.size(); i++)
+                    arrayList.remove(multiselect_list.get(i));
+
+                showVideoAdapter.notifyDataSetChanged();
+
+                if (mActionMode != null) {
+                    mActionMode.finish();
+                }
+
+            }
+        } else if (from == 2) {
+            if (mActionMode != null) {
+                mActionMode.finish();
+            }
+
+            //this yet to be implemented
+//            Grid_Model mImg = new Grid_Model();
+//            mImg.setImgPath("");
+//            ApkList.add(mImg);
+            showVideoAdapter.notifyDataSetChanged();
+
+        }
+    }
+
+    @Override
+    public void onNegativeClick(int from) {
+
+    }
+
+    @Override
+    public void onNeutralClick(int from) {
+
+    }
+
+    private class DeleteFileTask extends AsyncTask<Void, Void, Integer> {
+        ArrayList<ShowVideo> multiselect_list;
+
+        DeleteFileTask(ArrayList<ShowVideo> multiselect_list) {
+            this.multiselect_list = multiselect_list;
+        }
+
+
+        @Override
+        protected Integer doInBackground(Void... voids) {
+            return deleteFile(multiselect_list);
+        }
+
+        @Override
+        protected void onPostExecute(Integer FileCount) {
+            super.onPostExecute(FileCount);
+
+            Toast.makeText(HomeActivity.this, FileCount + " file deleted", Toast.LENGTH_SHORT).show();
+
+
+        }
+    }
+
+    private int deleteFile(ArrayList<ShowVideo> delete_list) {
+        int count = 0;
+
+        for (int i = 0; i < delete_list.size(); i++) {
+            File f = new File(String.valueOf(delete_list.get(i).getFolder()));
+            if (f.exists())
+                if (f.delete()) {
+                    count++;
+                    sendBroadcast(f);
+                }
+
+        }
+
+
+        // clear  existing cache of glide library
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+//                Glide.get(mcontext).clearDiskCache();
+                // Glide.getPhotoCacheDir(mcontext).delete();
+            }
+        }).start();
+
+        return count;
+    }
+
+    private void sendBroadcast(File outputFile) {
+        //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
+        //this broadcast clear the deleted images from  android file system
+        //it makes the MediaScanner service run again that keep  track of files in android
+        // to  run it a permission  in manifest file has been given
+        // <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
+
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final Intent scanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            final Uri contentUri = Uri.fromFile(outputFile);
+            scanIntent.setData(contentUri);
+            sendBroadcast(scanIntent);
+        } else {
+            final Intent intent = new Intent(Intent.ACTION_MEDIA_MOUNTED, Uri.parse("file://" + Environment.getExternalStorageDirectory()));
+            sendBroadcast(intent);
+        }
+
+
+    }
 }

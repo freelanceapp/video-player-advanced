@@ -3,16 +3,17 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="10dp"
     android:orientation="vertical">
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/rounded"
-        android:gravity="center_vertical"
+        android:gravity="center"
         android:minHeight="?android:attr/listPreferredItemHeightSmall"
         android:paddingLeft="12dp"
         android:paddingRight="12dp"
         android:textAppearance="?android:attr/textAppearanceListItemSmall"/>
+
 </LinearLayout>
