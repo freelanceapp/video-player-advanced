@@ -11,11 +11,12 @@ public class ShowVideo {
     String name;
     String resolution;
     String size;
+    boolean isFavrt;
 
     public ShowVideo() {
     }
 
-    public ShowVideo(String thumb, String resolution, String id, String time, String data, String folder, String name,String size) {
+    public ShowVideo(String thumb, String resolution,  String time, String data, String folder, String name,String size) {
         this.thumb = thumb;
         this.data = data;
         this.id = id;
@@ -96,5 +97,13 @@ public class ShowVideo {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public boolean isFavrt() {
+        return isFavrt;
+    }
+
+    public void setFavrt(boolean favrt) {
+        isFavrt = favrt;
     }
 }

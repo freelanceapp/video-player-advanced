@@ -29,7 +29,7 @@ import static android.content.Context.MODE_PRIVATE;
 
 public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.ShowVideoHolder> /*implements Filterable*/ {
 
-    ArrayList<Favrt> favrtArrayList = new ArrayList<>();
+    ArrayList<ShowVideo> showVideoArrayList = new ArrayList<>();
 //    ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
     Activity activity;
     Context context;
@@ -37,8 +37,8 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.ShowVideoHol
 
     public static ArrayList<ShowVideo> listWithoutDuplicates;
 
-    public FavrtAdapter(ArrayList<Favrt> favrtArrayList, Activity activity) {
-        this.favrtArrayList = favrtArrayList;
+    public FavrtAdapter(ArrayList<ShowVideo> showVideoArrayList, Activity activity) {
+        this.showVideoArrayList = showVideoArrayList;
 //        this.filteredListttt = showVideoArrayList;
         this.activity = activity;
     }
@@ -54,23 +54,34 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.ShowVideoHol
     @Override
     public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, int i) {
 
-        final Favrt favrt = favrtArrayList.get(i);
-        showVideoHolder.txt_title.setText(favrt.getName());
-        showVideoHolder.txt_duration.setText(favrt.getTime());
-        showVideoHolder.txt_date.setText(favrt.getDate());
-        Glide.with(activity).load("file://" + favrt.getThumb())
+        final ShowVideo showVideo = showVideoArrayList.get(i);
+        showVideoHolder.txt_title.setText(showVideo.getName());
+        showVideoHolder.txt_duration.setText(showVideo.getTime());
+        showVideoHolder.txt_resolutionfavrt.setText(showVideo.getDate());
+        Glide.with(activity).load("file://" + showVideo.getThumb())
                 .into(showVideoHolder.img_thumb);
 
 
         showVideoHolder.img_thumb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s = favrt.getFolder();
-                String ss = favrt.getName();
+                String s = showVideo.getFolder();
+                String ss = showVideo.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("prerna", s);
                 intent.putExtra("prernaa", ss);
                 activity.startActivity(intent);
+            }
+        });
+
+        showVideoHolder.img_favrtfavrt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                showVideo.setFavrt(true);
+
+
+
             }
         });
 
@@ -79,9 +90,9 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.ShowVideoHol
 
     @Override
     public int getItemCount() {
-        if (favrtArrayList == null)
+        if (showVideoArrayList == null)
             return 0;
-        return favrtArrayList.size();
+        return showVideoArrayList.size();
     }
 
   /*  @Override
@@ -121,8 +132,8 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.ShowVideoHol
 
     public class ShowVideoHolder extends RecyclerView.ViewHolder {
 
-        ImageView img_thumb, img_favrt;
-        TextView txt_title, txt_duration, txt_date;
+        ImageView img_thumb, img_favrtfavrt;
+        TextView txt_title, txt_duration, txt_resolutionfavrt;
 
         public ShowVideoHolder(@NonNull View itemView) {
             super(itemView);
@@ -130,7 +141,8 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.ShowVideoHol
             img_thumb = itemView.findViewById(R.id.img_thumbfavrt);
             txt_title = itemView.findViewById(R.id.txt_titlefavrt);
             txt_duration = itemView.findViewById(R.id.txt_durationfavrt);
-            txt_date = itemView.findViewById(R.id.txt_datefavrt);
+            txt_resolutionfavrt = itemView.findViewById(R.id.txt_resolutionfavrt);
+            img_favrtfavrt = itemView.findViewById(R.id.img_favrtfavrt);
 
         }
     }

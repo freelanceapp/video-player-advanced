@@ -4,16 +4,22 @@ public class Favrt {
 
     String thumb;
     String name;
+    String resolution;
     String folder;
     String time;
     String date;
+    String size;
+    String id;
 
-    public Favrt(String thumb, String name, String folder, String time, String date) {
-        this.thumb = thumb;
-        this.name = name;
-        this.folder = folder;
-        this.time = time;
-        this.date = date;
+    public Favrt() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getThumb() {
@@ -54,5 +60,21 @@ public class Favrt {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getResolution() {
+        return resolution;
+    }
+
+    public void setResolution(String resolution) {
+        this.resolution = resolution;
+    }
+
+    public String getSize() {
+        return size;
+    }
+
+    public void setSize(String size) {
+        this.size = size;
     }
 }

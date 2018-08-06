@@ -5,26 +5,19 @@ import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.annotation.RequiresApi;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.StaggeredGridLayoutManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -47,17 +40,10 @@ import android.widget.TabWidget;
 import android.widget.Toast;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-import java.util.TimeZone;
 
 import jmm.com.videoplayer.R;
 import jmm.com.videoplayer.adapter.ShowVideoAdapter;
@@ -384,7 +370,7 @@ public class HomeActivity extends AppCompatActivity
                 showVideo.setName(name);
 
 
-                arrayList.add(new ShowVideo(thumb, resolution, "1", tt, da, url, name, MBKB));
+                arrayList.add(new ShowVideo(thumb, resolution, tt, da, url, name, MBKB));
             } while (cursor.moveToPrevious());
 
             cursor.close();
@@ -418,7 +404,7 @@ public class HomeActivity extends AppCompatActivity
                     String tt = Helper.Time(duration);
 
                     Log.e("aaaaaa", thumb);
-                    arrayList.add(new ShowVideo(thumb, da, "1", tt, da, "5454", name, s));
+                    arrayList.add(new ShowVideo(thumb, da, tt, da, "5454", name, s));
 
                 }
 
@@ -436,16 +422,17 @@ public class HomeActivity extends AppCompatActivity
 
     public void getfavrt() {
 
-        ArrayList<ShowVideo> sssss = new ArrayList<>();
-        sssss = ShowVideoAdapter.listWithoutDuplicates;
+      /*  ArrayList<ShowVideo> sssss = new ArrayList<>();
+        sssss = ShowVideoAdapter.favrtArraylist;
 
-        SharedPreferences prefs = getSharedPreferences("favrt", MODE_PRIVATE);
-        String ssss = prefs.getString("name", null);
+//        SharedPreferences prefs = getSharedPreferences("favrt", MODE_PRIVATE);
+//        String ssss = prefs.getString("name", null);
         Log.i("restoredText", sssss + "");
         rv_showfavrt = findViewById(R.id.rv_showfavrt);
         rv_showfavrt.setLayoutManager(new LinearLayoutManager(this));
         showVideoAdapter = new ShowVideoAdapter(sssss, multiselect_list, this);
         rv_showfavrt.setAdapter(showVideoAdapter);
+        showVideoAdapter.notifyDataSetChanged();*/
 
     }
 
