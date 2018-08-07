@@ -1,6 +1,7 @@
 package jmm.com.videoplayer.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -12,10 +13,13 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -46,19 +50,25 @@ import java.util.HashSet;
 import java.util.List;
 
 import jmm.com.videoplayer.R;
+import jmm.com.videoplayer.adapter.FavrtAdapter;
 import jmm.com.videoplayer.adapter.ShowVideoAdapter;
+import jmm.com.videoplayer.model.Favrt;
 import jmm.com.videoplayer.model.ShowVideo;
 import jmm.com.videoplayer.utils.AlertDialogHelper;
 import jmm.com.videoplayer.utils.CustomeSpinner;
+import jmm.com.videoplayer.utils.DatabaseHelper;
 import jmm.com.videoplayer.utils.Helper;
+import jmm.com.videoplayer.utils.MyPagerAdapter;
 import jmm.com.videoplayer.utils.RecyclerItemClickListener;
 
+
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, AlertDialogHelper.AlertDialogListener {
+        implements NavigationView.OnNavigationItemSelectedListener, AlertDialogHelper.AlertDialogListener,TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
     private static final int REQUEST_PERMISSIONS = 100;
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
     ArrayList<ShowVideo> arrayList = new ArrayList<>();
+    ArrayList<Favrt> favrtArrayList = new ArrayList<>();
     RecyclerView rv_showvideo, rv_showfavrt;
     ShowVideoAdapter showVideoAdapter;
     Spinner navigationSpinner;
@@ -74,7 +84,6 @@ public class HomeActivity extends AppCompatActivity
     String a;
     List<String> listWithoutDuplicates;
     ProgressDialog progressDialog;
-    LinearLayout linearLayout;
     SearchView searchView;
     Button show;
     String MBKB;
@@ -85,21 +94,28 @@ public class HomeActivity extends AppCompatActivity
     boolean isMultiSelect = false;
     ActionMode mActionMode;
     TabWidget tabs;
+    FavrtAdapter favrtAdapter;
+    DatabaseHelper databaseHelper;
+    ViewPager pager;
+    TabHost host;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-
+        databaseHelper = new DatabaseHelper(this);
         toolbar = findViewById(R.id.toolbar);
         appbar = findViewById(R.id.appbar);
         tabs = findViewById(android.R.id.tabs);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
+
         rv_showvideo = findViewById(R.id.rv_showvideo);
-        rv_showvideo.setLayoutManager(new LinearLayoutManager(this));
-        showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, this);
+
+
+        rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
         rv_showvideo.setAdapter(showVideoAdapter);
 
         progressDialog = new ProgressDialog(HomeActivity.this);
@@ -107,7 +123,9 @@ public class HomeActivity extends AppCompatActivity
 
         alertDialogHelper = new AlertDialogHelper(this);
 
-        TabHost host = findViewById(R.id.tabHost);
+        host = findViewById(R.id.tabHost);
+        pager = findViewById(R.id.viewpager);
+
         host.setup();
         //Tab 1
         TabHost.TabSpec spec = host.newTabSpec("Device");
@@ -121,11 +139,17 @@ public class HomeActivity extends AppCompatActivity
         spec.setIndicator("Favourite");
         host.addTab(spec);
 
+
         //Tab 3
         spec = host.newTabSpec("Cloud");
         spec.setContent(R.id.tab3);
         spec.setIndicator("Cloud");
         host.addTab(spec);
+
+
+        pager.setAdapter(new MyPagerAdapter(this));
+        pager.setOnPageChangeListener(this);
+        host.setOnTabChangedListener(this);
 
 
         if ((ContextCompat.checkSelfPermission(getApplicationContext(),
@@ -191,13 +215,6 @@ public class HomeActivity extends AppCompatActivity
         rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-               /* String s = arrayList.get(position).getFolder();
-                Log.e("prerna", s);
-
-                Toast.makeText(HomeActivity.this, s, Toast.LENGTH_SHORT).show();
-                Intent intent = new Intent(HomeActivity.this, PlayerActivity.class);
-                intent.putExtra("prerna", s);
-                startActivity(intent);*/
                 if (isMultiSelect)
                     multi_select(position);
 
@@ -319,6 +336,8 @@ public class HomeActivity extends AppCompatActivity
     }
 
     public void getfolders() {
+        getfavrt();
+
 
         String[] projection = {MediaStore.Video.Media.SIZE, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
@@ -351,13 +370,7 @@ public class HomeActivity extends AppCompatActivity
 // Convert the KB to MegaBytes (1 MB = 1024 KBytes)
                 long fileSizeInMB = fileSizeInKB / 1024;
 
-                if (fileSizeInMB == 0) {
-                    MBKB = String.valueOf(fileSizeInKB);
-
-                } else {
-                    MBKB = String.valueOf(fileSizeInMB);
-                }
-
+                MBKB = Helper.humanReadableByteCount(fileSizeInBytes, true);
                 String da = Helper.LongToDate(date);
                 String tt = Helper.Time(duration);
                 Log.e("prerna", String.valueOf(fileSizeInMB));
@@ -422,17 +435,37 @@ public class HomeActivity extends AppCompatActivity
 
     public void getfavrt() {
 
-      /*  ArrayList<ShowVideo> sssss = new ArrayList<>();
-        sssss = ShowVideoAdapter.favrtArraylist;
+        favrtArrayList.clear();
+        Cursor res = databaseHelper.getalldata();
 
-//        SharedPreferences prefs = getSharedPreferences("favrt", MODE_PRIVATE);
-//        String ssss = prefs.getString("name", null);
-        Log.i("restoredText", sssss + "");
+
+        StringBuffer buffer = new StringBuffer();
+        while (res.moveToNext()) {
+            buffer.append("Id :" + res.getString(0) + "\n");
+            buffer.append("Name :" + res.getString(1) + "\n");
+            buffer.append("Thumb :" + res.getString(2) + "\n");
+            buffer.append("Folder :" + res.getString(3) + "\n");
+            buffer.append("Time :" + res.getString(4) + "\n");
+            buffer.append("Resolution :" + res.getString(5) + "\n");
+            Log.i("dgfd", buffer.toString());
+            Favrt favrt = new Favrt();
+            favrt.setId(res.getString(0));
+            favrt.setName(res.getString(1));
+            favrt.setThumb(res.getString(2));
+            favrt.setFolder(res.getString(3));
+            favrt.setTime(res.getString(4));
+            favrt.setResolution(res.getString(5));
+            favrtArrayList.add(favrt);
+
+
+        }
+
         rv_showfavrt = findViewById(R.id.rv_showfavrt);
         rv_showfavrt.setLayoutManager(new LinearLayoutManager(this));
-        showVideoAdapter = new ShowVideoAdapter(sssss, multiselect_list, this);
-        rv_showfavrt.setAdapter(showVideoAdapter);
-        showVideoAdapter.notifyDataSetChanged();*/
+        favrtAdapter = new FavrtAdapter(favrtArrayList, this);
+        rv_showfavrt.setAdapter(favrtAdapter);
+        favrtAdapter.notifyDataSetChanged();
+
 
     }
 
@@ -542,10 +575,6 @@ public class HomeActivity extends AppCompatActivity
                 mActionMode.finish();
             }
 
-            //this yet to be implemented
-//            Grid_Model mImg = new Grid_Model();
-//            mImg.setImgPath("");
-//            ApkList.add(mImg);
             showVideoAdapter.notifyDataSetChanged();
 
         }
@@ -560,6 +589,76 @@ public class HomeActivity extends AppCompatActivity
     public void onNeutralClick(int from) {
 
     }
+
+    @Override
+    public void onPageScrolled(int i, float v, int i1) {
+
+    }
+
+    @Override
+    public void onPageSelected(int i) {
+        host.setCurrentTab(i);
+
+    }
+
+    @Override
+    public void onPageScrollStateChanged(int i) {
+
+    }
+
+    @Override
+    public void onTabChanged(String s) {
+        int tabnumber = 0;
+
+        if (s.equals("Device")) {
+            tabnumber = 0;
+
+            rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
+            rv_showvideo.setAdapter(showVideoAdapter);
+
+        } else if (s.equals("favourite")) {
+            tabnumber = 1;
+
+            favrtArrayList.clear();
+            Cursor res = databaseHelper.getalldata();
+
+            StringBuffer buffer = new StringBuffer();
+            while (res.moveToNext()) {
+                buffer.append("Id :" + res.getString(0) + "\n");
+                buffer.append("Name :" + res.getString(1) + "\n");
+                buffer.append("Thumb :" + res.getString(2) + "\n");
+                buffer.append("Folder :" + res.getString(3) + "\n");
+                buffer.append("Time :" + res.getString(4) + "\n");
+                buffer.append("Resolution :" + res.getString(5) + "\n");
+                Log.i("dgfd", buffer.toString());
+                Favrt favrt = new Favrt();
+                favrt.setId(res.getString(0));
+                favrt.setName(res.getString(1));
+                favrt.setThumb(res.getString(2));
+                favrt.setFolder(res.getString(3));
+                favrt.setTime(res.getString(4));
+                favrt.setResolution(res.getString(5));
+                favrtArrayList.add(favrt);
+
+
+            }
+
+            rv_showfavrt = findViewById(R.id.rv_showfavrt);
+            rv_showfavrt.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+            favrtAdapter = new FavrtAdapter(favrtArrayList, HomeActivity.this);
+            rv_showfavrt.setAdapter(favrtAdapter);
+            favrtAdapter.notifyDataSetChanged();
+
+
+        } else {
+            tabnumber = 2;
+
+        }
+        pager.setCurrentItem(tabnumber);
+
+    }
+
 
     private class DeleteFileTask extends AsyncTask<Void, Void, Integer> {
         ArrayList<ShowVideo> multiselect_list;
@@ -630,4 +729,6 @@ public class HomeActivity extends AppCompatActivity
 
 
     }
+
+
 }

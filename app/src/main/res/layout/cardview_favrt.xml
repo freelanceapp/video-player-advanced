@@ -17,11 +17,11 @@
         card_view:cardCornerRadius="8dp">
 
         <LinearLayout
+            android:id="@+id/ll_select"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/ll_select"
-
+            android:paddingBottom="5dp"
             android:weightSum="1">
 
             <LinearLayout
@@ -123,12 +123,12 @@
                     android:orientation="vertical">
 
                     <CheckBox
+                        android:id="@+id/chbxfavrt"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        android:checked="true"
                         android:buttonTint="@color/red"
-                        android:id="@+id/chbxfavrt"/>
+                        android:checked="true"
+                        android:visibility="gone" />
 
                     <ImageView
                         android:id="@+id/img_optionsfavrt"

@@ -10,6 +10,7 @@ public class Favrt {
     String date;
     String size;
     String id;
+    boolean isfavrt;
 
     public Favrt() {
     }
@@ -76,5 +77,13 @@ public class Favrt {
 
     public void setSize(String size) {
         this.size = size;
+    }
+
+    public boolean isIsfavrt() {
+        return isfavrt;
+    }
+
+    public void setIsfavrt(boolean isfavrt) {
+        this.isfavrt = isfavrt;
     }
 }

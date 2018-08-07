@@ -1,93 +1,87 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+<TabHost
+
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/tabHost"
     android:layout_width="match_parent"
-    android:orientation="vertical"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:layout_alignParentTop="true"
+    android:layout_centerHorizontal="true"
+    android:background="@drawable/tabs">
 
-
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".MainActivity">
+        android:orientation="vertical">
 
-        <TabHost
-
-            android:id="@+id/tabHost"
-            android:background="@drawable/tabs"
+        <TabWidget
+            android:id="@android:id/tabs"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_alignParentTop="true"
-            android:layout_centerHorizontal="true">
+            android:layout_height="wrap_content"
+            android:layout_marginTop="50dp">
 
-            <LinearLayout
+        </TabWidget>
+
+        <FrameLayout
+            android:id="@android:id/tabcontent"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <FrameLayout
+                android:id="@+id/tab1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <TabWidget
-                    android:layout_marginTop="50dp"
-                    android:id="@android:id/tabs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    >
-
-                </TabWidget>
-
-                <FrameLayout
-                    android:id="@android:id/tabcontent"
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_showvideo"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <LinearLayout
-                        android:id="@+id/tab1"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
+                </android.support.v7.widget.RecyclerView>
 
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/rv_showvideo"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
+            </FrameLayout>
 
-                        </android.support.v7.widget.RecyclerView>
+            <FrameLayout
+                android:id="@+id/tab2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-                    </LinearLayout>
+                <Button
+                    android:id="@+id/show"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="show"
+                    android:visibility="gone" />
 
-                    <LinearLayout
-                        android:id="@+id/tab2"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
-                        <Button
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="show"
-                            android:id="@+id/show"/>
-                        <android.support.v7.widget.RecyclerView
-                            android:id="@+id/rv_showfavrt"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
+                <android.support.v7.widget.RecyclerView
+                    android:id="@+id/rv_showfavrt"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
 
-                        </android.support.v7.widget.RecyclerView>
-                    </LinearLayout>
+                </android.support.v7.widget.RecyclerView>
+            </FrameLayout>
 
-                    <LinearLayout
-                        android:id="@+id/tab3"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
+            <FrameLayout
+                android:id="@+id/tab3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
 
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:text="Cloud" />
-                    </LinearLayout>
-                </FrameLayout>
-            </LinearLayout>
-        </TabHost>
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:text="Cloud" />
+            </FrameLayout>
+        </FrameLayout>
 
+        <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
+
+            android:id="@+id/viewpager"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content" />
     </LinearLayout>
+</TabHost>
 
-
-</LinearLayout>

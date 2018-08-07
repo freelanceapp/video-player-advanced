@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jmm.com.videoplayer.R;
+import jmm.com.videoplayer.activity.HomeActivity;
 import jmm.com.videoplayer.activity.PlayerActivity;
 import jmm.com.videoplayer.model.Favrt;
 import jmm.com.videoplayer.model.ShowVideo;
@@ -45,14 +46,14 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
     public ArrayList<ShowVideo> showVideoArrayList = new ArrayList<>();
     public ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
-    public ArrayList<Favrt> favrtArraylist = new ArrayList<>();
+    public static ArrayList<Favrt> favrtArraylist = new ArrayList<>();
     public ArrayList<?> selected_ApkList = new ArrayList<>();
 
     Activity activity;
     Context context;
     int oo;
     DatabaseHelper databaseHelper;
-    List<String> nameList = new ArrayList<>();
+    public static List<String> nameList = new ArrayList<>();
 
 
     public static ArrayList<ShowVideo> listWithoutDuplicates;
@@ -65,7 +66,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         databaseHelper = new DatabaseHelper(activity);
 
         showdata();
-
         for (int i = 0; i < favrtArraylist.size(); i++) {
             nameList.add(favrtArraylist.get(i).getName());
         }
@@ -114,6 +114,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                     Integer deletedRows = databaseHelper.deletedata(showVideo.getName());
                     if (deletedRows > 0) {
                         Toast.makeText(activity, "Data Deleted", Toast.LENGTH_LONG).show();
+
                     } else {
                         Toast.makeText(activity, "Data not Deleted", Toast.LENGTH_LONG).show();
                     }
@@ -126,12 +127,14 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                     Log.i("sdfghj", "" + insert);
 
                     if (insert == true) {
-                        Toast.makeText(activity, "Data Inserted", Toast.LENGTH_LONG).show();
-
+                        Toast.makeText(activity, "Data Inserted2", Toast.LENGTH_LONG).show();
+                        favrtArraylist.clear();
                         showdata();
+
                     } else
                         Toast.makeText(activity, "Data not Inserted", Toast.LENGTH_LONG).show();
                 }
+
 
             }
         });
@@ -329,11 +332,14 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         Cursor res = databaseHelper.getalldata();
         if (res.getCount() == 0) {
             // show message
-            Toast.makeText(activity, "Data Inserted", Toast.LENGTH_LONG).show();
+            Toast.makeText(activity, "No FAV", Toast.LENGTH_LONG).show();
             return;
         }
 
         Favrt favrt = new Favrt();
+
+        nameList.clear();
+        favrtArraylist.clear();
 
         StringBuffer buffer = new StringBuffer();
         while (res.moveToNext()) {

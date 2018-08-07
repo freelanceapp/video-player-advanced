@@ -55,7 +55,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     public Cursor getalldata() {
         SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME, null);
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+" order by ID desc ", null);
         return cursor;
     }
 
