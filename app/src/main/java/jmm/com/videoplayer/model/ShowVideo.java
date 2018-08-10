@@ -99,11 +99,11 @@ public class ShowVideo {
         this.size = size;
     }
 
-    public boolean isFavrt() {
+    public final boolean isFavrt() {
         return isFavrt;
     }
 
-    public void setFavrt(boolean favrt) {
+    public final void setFavrt(boolean favrt) {
         isFavrt = favrt;
     }
 }

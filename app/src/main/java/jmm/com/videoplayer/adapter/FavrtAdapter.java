@@ -40,10 +40,7 @@ import static android.content.Context.MODE_PRIVATE;
 public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder> /*implements Filterable*/ {
 
     ArrayList<Favrt> favrtArrayList = new ArrayList<>();
-    //    ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
     Activity activity;
-    Context context;
-    int flag = 0;
     DatabaseHelper databaseHelper;
 
     public static ArrayList<ShowVideo> listWithoutDuplicates;
@@ -80,8 +77,8 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
                 String s = favrt.getFolder();
                 String ss = favrt.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
-                intent.putExtra("prerna", s);
-                intent.putExtra("prernaa", ss);
+                intent.putExtra("folder", s);
+                intent.putExtra("name", ss);
                 activity.startActivity(intent);
             }
         });
@@ -93,58 +90,52 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
                 favrt.setIsfavrt(true);
 
                 if (favrt.isIsfavrt()) {
-                    favrtHolder.img_favrtfavrt.setImageResource(R.drawable.empty_m);
-                    favrt.setIsfavrt(false);
-
-                    Integer deletedRows = databaseHelper.deletedata(favrt.getName());
-                    if (deletedRows > 0) {
-
-
-                        AlertDialog.Builder builder1 = new AlertDialog.Builder(activity);
-                        builder1.setMessage("Are you sure to remove from favourites ?");
-                        builder1.setCancelable(false);
-
-                        builder1.setPositiveButton(
-                                "Yes",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Toast.makeText(activity, "Data removed", Toast.LENGTH_SHORT).show();
-                                        Integer deletedRows = databaseHelper.deletedata(favrt.getName());
-
-                                        favrtArrayList.remove(i);
-                                        notifyItemRemoved(i);
-                                        notifyItemRangeChanged(i, favrtArrayList.size());
-
-                                        if (deletedRows > 0) {
-
-                                        } else {
-                                        }
-                                    }
-                                });
-
-                        builder1.setNegativeButton(
-                                "No",
-                                new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        Toast.makeText(activity, "Not Deleted", Toast.LENGTH_SHORT).show();
-                                        dialog.cancel();
-                                    }
-                                });
-
-                        AlertDialog alert11 = builder1.create();
-                        alert11.show();
+//                    favrtHolder.img_favrtfavrt.setImageResource(R.drawable.empty_m);
+//                    favrt.setIsfavrt(false);
+//
+//                    Integer deletedRows = databaseHelper.deletedata(favrt.getName());
+//                    if (deletedRows > 0) {
 
 
-                    } else {
-                        Toast.makeText(activity, "Data not Deleted", Toast.LENGTH_LONG).show();
-                    }
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(activity);
+                    builder1.setMessage("Are you sure to remove from favourites ?");
+                    builder1.setCancelable(false);
+
+                    builder1.setPositiveButton(
+                            "Yes",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    Toast.makeText(activity, "Favourite removed", Toast.LENGTH_SHORT).show();
+                                    Integer deletedRows = databaseHelper.deletedata(favrt.getName());
+
+                                    favrtArrayList.remove(i);
+                                    notifyItemRemoved(i);
+                                    notifyItemRangeChanged(i, favrtArrayList.size());
+
+                                }
+                            });
+
+                    builder1.setNegativeButton(
+                            "No",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
+
+
+//                    } else {
+//                        Toast.makeText(activity, "Data not Deleted", Toast.LENGTH_LONG).show();
+//                    }
                 } else {
                     /*favrtHolder.img_favrtfavrt.setImageResource(R.drawable.fill_m);
                     favrt.setIsfavrt(true);
 
                     boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution());
 
-                    Log.i("sdfghj", "" + insert);
 
                     if (insert == true) {
                         Toast.makeText(activity, "Data Inserted", Toast.LENGTH_LONG).show();

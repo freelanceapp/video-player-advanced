@@ -63,12 +63,13 @@ import jmm.com.videoplayer.utils.RecyclerItemClickListener;
 
 
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, AlertDialogHelper.AlertDialogListener,TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+        implements NavigationView.OnNavigationItemSelectedListener, AlertDialogHelper.AlertDialogListener, TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
     private static final int REQUEST_PERMISSIONS = 100;
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
     ArrayList<ShowVideo> arrayList = new ArrayList<>();
     ArrayList<Favrt> favrtArrayList = new ArrayList<>();
+    ArrayList<Favrt> duplicatefavrtarray = new ArrayList<>();
     RecyclerView rv_showvideo, rv_showfavrt;
     ShowVideoAdapter showVideoAdapter;
     Spinner navigationSpinner;
@@ -81,8 +82,8 @@ public class HomeActivity extends AppCompatActivity
     String resolution;
     String size;
     Toolbar toolbar;
-    String a;
-    List<String> listWithoutDuplicates;
+    String selecteditem;
+    List<String> listWithoutDuplicates = new ArrayList<>();
     ProgressDialog progressDialog;
     SearchView searchView;
     Button show;
@@ -98,6 +99,8 @@ public class HomeActivity extends AppCompatActivity
     DatabaseHelper databaseHelper;
     ViewPager pager;
     TabHost host;
+    boolean isUnseleAllEnabled = false;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +116,7 @@ public class HomeActivity extends AppCompatActivity
 
         rv_showvideo = findViewById(R.id.rv_showvideo);
 
-
+        // set data on recyclerview
         rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
         showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
         rv_showvideo.setAdapter(showVideoAdapter);
@@ -123,6 +126,8 @@ public class HomeActivity extends AppCompatActivity
 
         alertDialogHelper = new AlertDialogHelper(this);
 
+
+        //tab host
         host = findViewById(R.id.tabHost);
         pager = findViewById(R.id.viewpager);
 
@@ -147,7 +152,7 @@ public class HomeActivity extends AppCompatActivity
         host.addTab(spec);
 
 
-        pager.setAdapter(new MyPagerAdapter(this));
+//        pager.setAdapter(new MyPagerAdapter(this));
         pager.setOnPageChangeListener(this);
         host.setOnTabChangedListener(this);
 
@@ -163,35 +168,31 @@ public class HomeActivity extends AppCompatActivity
                 ActivityCompat.requestPermissions(HomeActivity.this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         REQUEST_PERMISSIONS);
+
             }
         } else {
             getfolders();
         }
+
+
         navigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
-        if (listWithoutDuplicates.isEmpty()) {
 
-            Toast.makeText(this, "No Video Available", Toast.LENGTH_SHORT).show();
-        } else {
-            navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
-            toolbar.addView(navigationSpinner, 0);
+        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
+        toolbar.addView(navigationSpinner, 0);
 
-        }
 
         navigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                // your code here
-//                a = String.valueOf(navigationSpinner.getSelectedItemPosition());
 
+                selecteditem = navigationSpinner.getSelectedItem().toString();
 
-                a = navigationSpinner.getSelectedItem().toString();
-
-                if (a.equals("All")) {
+                if (selecteditem.equals("All")) {
                     arrayList.clear();
                     getfolders();
                 } else {
                     progressDialog.show();
-                    getVideoCatWise(a);
+                    getVideoCatWise(selecteditem);
 
                 }
             }
@@ -201,14 +202,6 @@ public class HomeActivity extends AppCompatActivity
                 // your code here
             }
 
-        });
-
-        show = findViewById(R.id.show);
-        show.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                getfavrt();
-            }
         });
 
 
@@ -230,7 +223,6 @@ public class HomeActivity extends AppCompatActivity
                     isMultiSelect = true;
 
                     if (mActionMode == null) {
-//                        mActionMode = startActionMode(mActionModeCallback);
                         mActionMode = startSupportActionMode(mActionModeCallback);
 
                     }
@@ -267,7 +259,7 @@ public class HomeActivity extends AppCompatActivity
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
 
-
+        //search view
         getMenuInflater().inflate(R.menu.home, menu);
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
         searchView = (SearchView) menu.findItem(R.id.search)
@@ -318,12 +310,19 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.nav_home) {
             // Handle the camera action
-            Toast.makeText(HomeActivity.this, "home", Toast.LENGTH_SHORT).show();
 
         } else if (id == R.id.nav_settings) {
             startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
         } else if (id == R.id.nav_share) {
-            startActivity(new Intent(HomeActivity.this, ShareActivity.class));
+            Intent sendIntent = new Intent();
+            sendIntent.setAction(Intent.ACTION_SEND);
+            sendIntent.putExtra(Intent.EXTRA_TEXT,
+                    "Hey check out my app");
+            sendIntent.setType("text/plain");
+            startActivity(sendIntent);
+
+
+//            startActivity(new Intent(HomeActivity.this, ShareActivity.class));
 
         } else if (id == R.id.nav_aboutus) {
             startActivity(new Intent(HomeActivity.this, AboutUsActivity.class));
@@ -335,9 +334,10 @@ public class HomeActivity extends AppCompatActivity
         return true;
     }
 
+
+    //get all folders contain video
     public void getfolders() {
         getfavrt();
-
 
         String[] projection = {MediaStore.Video.Media.SIZE, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
@@ -352,6 +352,7 @@ public class HomeActivity extends AppCompatActivity
 
                 HashSet<String> listToSet = new HashSet<String>(videoFolderNamearray);
                 listWithoutDuplicates = new ArrayList<>(listToSet);
+//                listWithoutDuplicates.addAll(listToSet);
                 Collections.sort(listWithoutDuplicates);
 
 
@@ -364,16 +365,13 @@ public class HomeActivity extends AppCompatActivity
                 resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RESOLUTION));
                 size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
 
+                //convert size in bytes
                 long fileSizeInBytes = Long.parseLong(size);
-// Convert the bytes to Kilobytes (1 KB = 1024 Bytes)
-                long fileSizeInKB = fileSizeInBytes / 1024;
-// Convert the KB to MegaBytes (1 MB = 1024 KBytes)
-                long fileSizeInMB = fileSizeInKB / 1024;
 
+                //change bytes in MBKB
                 MBKB = Helper.humanReadableByteCount(fileSizeInBytes, true);
                 String da = Helper.LongToDate(date);
                 String tt = Helper.Time(duration);
-                Log.e("prerna", String.valueOf(fileSizeInMB));
 
                 ShowVideo showVideo = new ShowVideo();
                 showVideo.setThumb(thumb);
@@ -392,9 +390,10 @@ public class HomeActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
-//        ArrayList<String> downloadedList = new ArrayList<>(videoItemHashSet);
     }
 
+
+    //get video according to folder name
     public void getVideoCatWise(String s) {
         arrayList.clear();
         String[] projection = {MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
@@ -415,17 +414,13 @@ public class HomeActivity extends AppCompatActivity
 
                     String da = Helper.LongToDate(date);
                     String tt = Helper.Time(duration);
-
-                    Log.e("aaaaaa", thumb);
                     arrayList.add(new ShowVideo(thumb, da, tt, da, "5454", name, s));
 
                 }
 
             } while (cursor.moveToPrevious());
             progressDialog.dismiss();
-
             cursor.close();
-
             showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
@@ -433,11 +428,11 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    public void getfavrt() {
 
+    //get all data from database and add in list
+    public void getfavrt() {
         favrtArrayList.clear();
         Cursor res = databaseHelper.getalldata();
-
 
         StringBuffer buffer = new StringBuffer();
         while (res.moveToNext()) {
@@ -447,7 +442,8 @@ public class HomeActivity extends AppCompatActivity
             buffer.append("Folder :" + res.getString(3) + "\n");
             buffer.append("Time :" + res.getString(4) + "\n");
             buffer.append("Resolution :" + res.getString(5) + "\n");
-            Log.i("dgfd", buffer.toString());
+            buffer.append("Date :" + res.getString(6) + "\n");
+            buffer.append("Size :" + res.getString(7) + "\n");
             Favrt favrt = new Favrt();
             favrt.setId(res.getString(0));
             favrt.setName(res.getString(1));
@@ -455,11 +451,15 @@ public class HomeActivity extends AppCompatActivity
             favrt.setFolder(res.getString(3));
             favrt.setTime(res.getString(4));
             favrt.setResolution(res.getString(5));
+            favrt.setDate(res.getString(6));
+            favrt.setSize(res.getString(7));
             favrtArrayList.add(favrt);
 
 
         }
 
+
+        //add data in recyclerview
         rv_showfavrt = findViewById(R.id.rv_showfavrt);
         rv_showfavrt.setLayoutManager(new LinearLayoutManager(this));
         favrtAdapter = new FavrtAdapter(favrtArrayList, this);
@@ -469,6 +469,8 @@ public class HomeActivity extends AppCompatActivity
 
     }
 
+
+    //multi selete item for delete
     public void multi_select(int position) {
         if (mActionMode != null) {
             if (multiselect_list.contains(arrayList.get(position)))
@@ -491,6 +493,7 @@ public class HomeActivity extends AppCompatActivity
         showVideoAdapter.selected_ApkList = multiselect_list;
         showVideoAdapter.showVideoArrayList = arrayList;
         showVideoAdapter.notifyDataSetChanged();
+        selectMenuChnage();
     }
 
     public ActionMode.Callback mActionModeCallback = new ActionMode.Callback() {
@@ -518,7 +521,10 @@ public class HomeActivity extends AppCompatActivity
 //                    alertDialogHelper.showAlertDialog("","Delete Video","DELETE","CANCEL",1,false);
                     return true;
                 case R.id.action_select:
-                    selectAll();
+                    if (arrayList.size() == multiselect_list.size() || isUnseleAllEnabled == true)
+                        unSelectAll();
+                    else
+                        selectAll();
                     return true;
 
                 default:
@@ -606,6 +612,8 @@ public class HomeActivity extends AppCompatActivity
 
     }
 
+
+    //tab click funtionality
     @Override
     public void onTabChanged(String s) {
         int tabnumber = 0;
@@ -631,7 +639,9 @@ public class HomeActivity extends AppCompatActivity
                 buffer.append("Folder :" + res.getString(3) + "\n");
                 buffer.append("Time :" + res.getString(4) + "\n");
                 buffer.append("Resolution :" + res.getString(5) + "\n");
-                Log.i("dgfd", buffer.toString());
+                buffer.append("Date :" + res.getString(6) + "\n");
+                buffer.append("Size :" + res.getString(7) + "\n");
+
                 Favrt favrt = new Favrt();
                 favrt.setId(res.getString(0));
                 favrt.setName(res.getString(1));
@@ -639,9 +649,25 @@ public class HomeActivity extends AppCompatActivity
                 favrt.setFolder(res.getString(3));
                 favrt.setTime(res.getString(4));
                 favrt.setResolution(res.getString(5));
+                favrt.setDate(res.getString(6));
+                favrt.setSize(res.getString(7));
                 favrtArrayList.add(favrt);
+            }
+                for (int j=0;j<favrtArrayList.size();j++){
+                    for (int i=0;i<arrayList.size();i++){
+
+                    Log.i("arrayList",arrayList.get(i).getName());
+                    Log.i("arrayList11",favrtArrayList.get(j).getName());
 
 
+
+                    if (arrayList.get(i).getName().equalsIgnoreCase(favrtArrayList.get(j).getName())){
+                        Toast.makeText(this,arrayList.get(i).getName()+"..."+favrtArrayList.get(j).getName(),Toast.LENGTH_LONG).show();
+                    }else {
+                        Toast.makeText(this,arrayList.get(i).getName()+"..."+favrtArrayList.get(j).getName(),Toast.LENGTH_LONG).show();
+
+                    }
+                }
             }
 
             rv_showfavrt = findViewById(R.id.rv_showfavrt);
@@ -649,7 +675,6 @@ public class HomeActivity extends AppCompatActivity
             favrtAdapter = new FavrtAdapter(favrtArrayList, HomeActivity.this);
             rv_showfavrt.setAdapter(favrtAdapter);
             favrtAdapter.notifyDataSetChanged();
-
 
         } else {
             tabnumber = 2;
@@ -660,6 +685,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
 
+    //delete multiseleted item
     private class DeleteFileTask extends AsyncTask<Void, Void, Integer> {
         ArrayList<ShowVideo> multiselect_list;
 
@@ -730,5 +756,53 @@ public class HomeActivity extends AppCompatActivity
 
     }
 
+    private void unSelectAll() {
+        if (mActionMode != null) {
+            multiselect_list.clear();
 
+            if (multiselect_list.size() >= 0)
+                mActionMode.setTitle("" + multiselect_list.size());
+            else
+                mActionMode.setTitle("");
+
+            //to change  the unselectAll  menu  to  selectAll
+            selectMenuChnage();
+            //to change  the unselectAll  menu  to  selectAll
+
+            refreshAdapter();
+
+        }
+    }
+
+    private void selectMenuChnage() {
+        if (context_menu != null) {
+            if (arrayList.size() == multiselect_list.size()) {
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_unselectAll));
+                        isUnseleAllEnabled = true;
+                    }
+                }
+            } else {
+
+                for (int i = 0; i < context_menu.size(); i++) {
+                    MenuItem item = context_menu.getItem(i);
+                    if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
+                        item.setTitle(getResources().getString(R.string.menu_selectAll));
+                        isUnseleAllEnabled = false;
+                    }
+                }
+
+            }
+
+        }
+        invalidateOptionsMenu();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        favrtAdapter.notifyDataSetChanged();
+    }
 }

@@ -17,4 +17,6 @@
     </string-array>
 
     <string name="file_provider_authority" translatable="false">jmm.com.videoplayer.provider</string>
+    <string name="menu_selectAll" >SELECT ALL</string>
+    <string name="menu_unselectAll" >UNSELECT ALL</string>
 </resources>

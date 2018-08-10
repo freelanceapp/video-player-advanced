@@ -43,6 +43,7 @@ public class DetailDialog extends Dialog implements
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.dialog_detail);
+
         btn_dialog_ok = findViewById(R.id.btn_dialog_ok);
         txt_dialog_folder = findViewById(R.id.txt_dialog_folder);
         txt_dialog_size = findViewById(R.id.txt_dialog_size);
@@ -52,11 +53,9 @@ public class DetailDialog extends Dialog implements
         txt_dialog_duration = findViewById(R.id.txt_dialog_duration);
 
 
+        //set data on dialog attributes
         txt_dialog_folder.setText(folder);
-
         txt_dialog_size.setText(size);
-
-
         txt_dialog_resolution.setText(resolution);
         txt_dialog_location.setText(location);
         txt_dialog_date.setText(date);

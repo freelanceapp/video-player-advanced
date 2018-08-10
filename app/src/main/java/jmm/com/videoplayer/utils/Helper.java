@@ -17,6 +17,8 @@ import java.util.TimeZone;
 
 public class Helper {
 
+
+    //convert date
     public static String LongToDate(String longV)
     {
         long input=Long.parseLong(longV.trim());
@@ -28,6 +30,7 @@ public class Helper {
         return sdf.format(date);
     }
 
+    //convert time
     public static String Time(String t){
         int hrs = (Integer.parseInt(t) / 3600000);
         int mns = (Integer.parseInt(t) / 60000) % 60000;
@@ -38,6 +41,7 @@ public class Helper {
 
 
 
+    //share video
     public static void ShareSingleFile(String name, Context ctx, String authority)
     {
         //share the file for  NoughtAndAll
@@ -91,6 +95,8 @@ public class Helper {
 
 
     }
+
+    //for video size convert in MBKB
     public static String humanReadableByteCount(long bytes, boolean si) {
 
         int unit = si ? 1000 : 1024;

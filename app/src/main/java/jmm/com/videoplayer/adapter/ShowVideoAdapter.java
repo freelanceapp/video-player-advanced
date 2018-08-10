@@ -48,15 +48,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     public ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
     public static ArrayList<Favrt> favrtArraylist = new ArrayList<>();
     public ArrayList<?> selected_ApkList = new ArrayList<>();
-
     Activity activity;
-    Context context;
-    int oo;
     DatabaseHelper databaseHelper;
     public static List<String> nameList = new ArrayList<>();
-
-
-    public static ArrayList<ShowVideo> listWithoutDuplicates;
 
     public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, ArrayList<?> selectedApkList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
@@ -65,6 +59,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         this.activity = activity;
         databaseHelper = new DatabaseHelper(activity);
 
+        //refresh data on start
         showdata();
         for (int i = 0; i < favrtArraylist.size(); i++) {
             nameList.add(favrtArraylist.get(i).getName());
@@ -78,8 +73,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     public ShowVideoHolder onCreateViewHolder(@NonNull ViewGroup viewGroup, int i) {
 
         View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.cardview_showvideo, viewGroup, false);
-
-
         return new ShowVideoHolder(view);
     }
 
@@ -93,16 +86,63 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         showVideoHolder.txt_resolution.setText(showVideo.getResolution());
         Glide.with(activity).load("file://" + showVideo.getThumb())
                 .into(showVideoHolder.img_thumb);
+//        Glide.with(activity).load(Uri.fromFile(new File(showVideo.getThumb()))).into(showVideoHolder.img_thumb);
+
         showVideo.setId(String.valueOf(i));
 
 
+        //setting favourite
         if (nameList.contains(showVideo.getName())) {
             showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+        }
+
+        //check the database
+        if (databaseHelper.getalldata().getCount() == 0) {
+            showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
 
         }
 
 
         showVideoHolder.img_favrt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (nameList.contains(showVideo.getName())) {
+                    databaseHelper.deletedata(showVideo.getName());
+                }else {
+
+                }
+
+
+                if (showVideo.isFavrt()) {
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
+                    showVideo.setFavrt(false);
+
+                    Integer deletedRows = databaseHelper.deletedata(showVideo.getName());
+                    if (deletedRows > 0) {
+                        Toast.makeText(activity, "Removed from Favourites", Toast.LENGTH_LONG).show();
+
+                    } else {
+                        Toast.makeText(activity, "Maarked as Favourite", Toast.LENGTH_LONG).show();
+                    }
+                } else {
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+                    showVideo.setFavrt(true);
+
+                    boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution(), showVideo.getData(), showVideo.getSize());
+
+
+                    if (insert == true) {
+                        Toast.makeText(activity, "Marked as Favourite", Toast.LENGTH_LONG).show();
+                        favrtArraylist.clear();
+                        showdata();
+
+                    } else
+                        Toast.makeText(activity, "Try Again", Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+        showVideoHolder.ll_favrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -113,32 +153,41 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
                     Integer deletedRows = databaseHelper.deletedata(showVideo.getName());
                     if (deletedRows > 0) {
-                        Toast.makeText(activity, "Data Deleted", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Removed from Favourites", Toast.LENGTH_LONG).show();
 
                     } else {
-                        Toast.makeText(activity, "Data not Deleted", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Maarked as Favourite", Toast.LENGTH_LONG).show();
                     }
                 } else {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
                     showVideo.setFavrt(true);
 
-                    boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution());
-
-                    Log.i("sdfghj", "" + insert);
+                    boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution(), showVideo.getData(), showVideo.getSize());
 
                     if (insert == true) {
-                        Toast.makeText(activity, "Data Inserted2", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Marked as Favourite", Toast.LENGTH_LONG).show();
                         favrtArraylist.clear();
                         showdata();
 
                     } else
-                        Toast.makeText(activity, "Data not Inserted", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Try Again", Toast.LENGTH_LONG).show();
                 }
 
 
             }
         });
         showVideoHolder.img_thumb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String s = showVideo.getFolder();
+                String ss = showVideo.getName();
+                Intent intent = new Intent(activity, PlayerActivity.class);
+                intent.putExtra("prerna", s);
+                intent.putExtra("prernaa", ss);
+                activity.startActivity(intent);
+            }
+        });
+        showVideoHolder.ll_playvideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String s = showVideo.getFolder();
@@ -183,11 +232,10 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                                                     boolean deleted = file.delete();
                                                     if (deleted) {
                                                         sendBroadcast(file);
+                                                        databaseHelper.deletedata(showVideo.getName());
                                                     }
-                                                    Log.i("asfd", "" + deleted);
                                                 }
 
-                                                Log.i("asfd", "" + file);
                                                 removeItem(Integer.valueOf(showVideo.getId()));
                                                 dialog.cancel();
                                             }
@@ -221,6 +269,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         });
 
 
+        //multiple select checkbox visibililty
         if (selected_ApkList.contains(showVideoArrayList.get(i))) {
             showVideoHolder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
 //            showVideoHolder.ll_select.setBackgroundColor(activity.getResources().getColor(R.color.orange));
@@ -239,6 +288,8 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         return filteredListttt.size();
     }
 
+
+    //search
     @Override
     public Filter getFilter() {
         return new Filter() {
@@ -278,7 +329,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         ImageView img_thumb, img_favrt, img_options;
         TextView txt_title, txt_duration, txt_resolution;
         CheckBox chbx;
-        LinearLayout ll_select;
+        LinearLayout ll_select, ll_playvideo, ll_favrt;
 
         public ShowVideoHolder(@NonNull View itemView) {
             super(itemView);
@@ -291,8 +342,11 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             txt_resolution = itemView.findViewById(R.id.txt_resolution);
             chbx = itemView.findViewById(R.id.chbx);
             ll_select = itemView.findViewById(R.id.ll_select);
+            ll_playvideo = itemView.findViewById(R.id.ll_playvideo);
+            ll_favrt = itemView.findViewById(R.id.ll_favrt);
 
 
+            //font style
             Typeface font = Typeface.createFromAsset(activity.getAssets(), "PoetsenOne-Regular.ttf");
             txt_title.setTypeface(font);
             txt_duration.setTypeface(font);
@@ -301,12 +355,16 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         }
     }
 
+
+    //item remove from recyclerview
     private void removeItem(int position) {
         showVideoArrayList.remove(position);
         notifyItemRemoved(position);
         notifyItemRangeChanged(position, showVideoArrayList.size());
     }
 
+
+    //delete data from device
     private void sendBroadcast(File outputFile) {
         //  https://stackoverflow.com/questions/4430888/android-file-delete-leaves-empty-placeholder-in-gallery
         //this broadcast clear the deleted images from  android file system
@@ -328,11 +386,13 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
     }
 
+
+    //get data from database
     public void showdata() {
         Cursor res = databaseHelper.getalldata();
         if (res.getCount() == 0) {
             // show message
-            Toast.makeText(activity, "No FAV", Toast.LENGTH_LONG).show();
+//            Toast.makeText(activity, "No FAV", Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -349,6 +409,8 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             buffer.append("Folder :" + res.getString(3) + "\n");
             buffer.append("Time :" + res.getString(4) + "\n");
             buffer.append("Resolution :" + res.getString(5) + "\n");
+            buffer.append("Date :" + res.getString(6) + "\n");
+            buffer.append("Size :" + res.getString(7) + "\n");
             nameList.add(res.getString(1));
 
             favrt.setId(res.getString(0));
@@ -357,13 +419,14 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             favrt.setFolder(res.getString(3));
             favrt.setTime(res.getString(4));
             favrt.setResolution(res.getString(5));
+            favrt.setDate(res.getString(6));
+            favrt.setSize(res.getString(7));
             favrtArraylist.add(favrt);
 
 
         }
         // Show all data
 //        Toast.makeText(activity, buffer.toString(), Toast.LENGTH_LONG).show();
-        Log.i("sddfghwe3rt", buffer.toString());
 
     }
 

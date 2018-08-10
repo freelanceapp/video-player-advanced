@@ -16,6 +16,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public static final String FOLDER = "folder";
     public static final String TIME = "time";
     public static final String RESOLUTION = "resolution";
+    public static final String DATE = "date";
+    public static final String SIZE = "size";
 
 
     public DatabaseHelper(Context context) {
@@ -25,7 +27,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
 
-        sqLiteDatabase.execSQL("create table " + TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME TEXT,THUMB TEXT,FOLDER TEXT, TIME TEXT,RESOLUTION TEXT)");
+        sqLiteDatabase.execSQL("create table " + TABLE_NAME + "(ID INTEGER PRIMARY KEY AUTOINCREMENT,NAME TEXT,THUMB TEXT,FOLDER TEXT, TIME TEXT,RESOLUTION TEXT,DATE TEXT,SIZE TEXT)");
 
     }
 
@@ -36,7 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(sqLiteDatabase);
     }
 
-    public boolean insertdata(String name,String thumb,String folder,String time,String resolution) {
+    public boolean insertdata(String name,String thumb,String folder,String time,String resolution,String date,String size) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(NAME, name);
@@ -44,6 +46,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         contentValues.put(FOLDER, folder);
         contentValues.put(TIME, time);
         contentValues.put(RESOLUTION, resolution);
+        contentValues.put(DATE, date);
+        contentValues.put(SIZE, size);
+
         long result = db.insert(TABLE_NAME, null, contentValues);
         if (result == -1) {
             return false;

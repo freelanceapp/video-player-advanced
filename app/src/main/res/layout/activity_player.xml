@@ -48,6 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:gravity="center"
+            android:layout_marginBottom="10dp"
             android:orientation="vertical">
 
             <TextView
@@ -60,7 +61,8 @@
                 android:id="@+id/seekBar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="100" />
+                android:max="100"
+                android:layout_marginBottom="20dp"/>
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -68,7 +70,7 @@
                 android:layout_gravity="bottom"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:weightSum="4">
+                android:weightSum="3">
 
                 <ImageView
                     android:id="@+id/btn3"
@@ -89,11 +91,10 @@
                     android:drawableTop="@drawable/play"
                     android:gravity="center"
                     android:src="@drawable/play_h"
-
                     android:text="play"
                     android:textSize="10dp" />
 
-                <ImageView
+              <!--  <ImageView
                     android:id="@+id/btn2"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -103,7 +104,7 @@
                     android:src="@drawable/pause_hw"
 
                     android:text="pause"
-                    android:textSize="10dp" />
+                    android:textSize="10dp" />-->
 
 
                 <ImageView

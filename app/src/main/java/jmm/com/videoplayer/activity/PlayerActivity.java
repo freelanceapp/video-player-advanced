@@ -15,6 +15,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+
 import jmm.com.videoplayer.R;
 
 
@@ -22,31 +23,32 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     SurfaceView videoSurface1;
     MediaPlayer player1;
-    String viewSource,viewName /*= "/storage/emulated/0/Download/wtgdggd fjgdhhdg fdufsgdfjjh vudgkjx gdujhfjiugbuf.mp4"*/;
-    ImageView btnPlay,btnPause,btnRewind,btnForward;
+    String viewSource, viewName /*= "/storage/emulated/0/Download/wtgdggd fjgdhhdg fdufsgdfjjh vudgkjx gdujhfjiugbuf.mp4"*/;
+    ImageView btnPlay, btnRewind, btnForward;
     SurfaceHolder videoHolder1;
     ImageView img_back_player;
-    TextView txt_playername,textvieww;
+    TextView txt_playername, textvieww;
     SeekBar seekBar;
+    int flag = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
 
-        btnPlay =  findViewById(R.id.btn1);
-        btnPause =  findViewById(R.id.btn2);
-        btnRewind =  findViewById(R.id.btn3);
-        btnForward =  findViewById(R.id.btn4);
-        seekBar =  findViewById(R.id.seekBar);
-        img_back_player =  findViewById(R.id.img_back_player);
-        txt_playername =  findViewById(R.id.txt_playername);
-        textvieww =  findViewById(R.id.textvieww);
+        btnPlay = findViewById(R.id.btn1);
+        btnRewind = findViewById(R.id.btn3);
+        btnForward = findViewById(R.id.btn4);
+        seekBar = findViewById(R.id.seekBar);
+        img_back_player = findViewById(R.id.img_back_player);
+        txt_playername = findViewById(R.id.txt_playername);
+        textvieww = findViewById(R.id.textvieww);
         viewSource = getIntent().getStringExtra("prerna");
         viewName = getIntent().getStringExtra("prernaa");
 
         txt_playername.setText(viewName);
 
-        videoSurface1 =  findViewById(R.id.surfaceView);
+        videoSurface1 = findViewById(R.id.surfaceView);
         videoHolder1 = videoSurface1.getHolder();
         videoHolder1.addCallback(this);
         videoHolder1.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -56,7 +58,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         img_back_player.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                startActivity(new Intent(PlayerActivity.this,HomeActivity.class));
+                startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
             }
         });
 
@@ -64,10 +66,11 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
                 Toast.makeText(PlayerActivity.this, "prog", Toast.LENGTH_SHORT).show();
-                if(player1!=null && b){
+                if (player1 != null && b) {
 
-                    player1.seekTo(i*1000);
-                }}
+                    player1.seekTo(i * 1000);
+                }
+            }
 
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
@@ -86,31 +89,29 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
 
-                try {
-                    player1.setDataSource(viewSource);
-                    player1.setDisplay(videoHolder1);
-                    player1.prepare();
-                    player1.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                if (flag == 1) {
+                    btnPlay.setImageResource(R.drawable.play_h);
+                    flag = 0;
+                    player1.pause();
 
-                } catch (IllegalArgumentException e) {
-                    e.printStackTrace();
-                } catch (IllegalStateException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                } else {
+                    btnPlay.setImageResource(R.drawable.pause_hw);
+                    flag = 1;
+                    play();
+
                 }
-                player1.start();
+
             }
         });
 
-        btnPause.setOnClickListener(new View.OnClickListener() {
+    /*    btnPause.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
                 player1.pause();
             }
-        });
+        });*/
 
         btnRewind.setOnClickListener(new View.OnClickListener() {
 
@@ -151,7 +152,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-
+        play();
     }
 
     @Override
@@ -160,5 +161,21 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     }
 
+    public void play() {
+        try {
+            player1.setDataSource(viewSource);
+            player1.setDisplay(videoHolder1);
+            player1.prepare();
+            player1.setAudioStreamType(AudioManager.STREAM_MUSIC);
+
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        player1.start();
+    }
 
 }
