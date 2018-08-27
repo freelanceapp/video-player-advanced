@@ -21,7 +21,9 @@
         <activity android:name=".activity.SettingsActivity" />
         <activity android:name=".activity.AboutUsActivity" />
         <activity android:name=".activity.ShareActivity" />
-        <activity android:name=".activity.PlayerActivity" />
+        <activity android:name=".activity.PlayerActivity"
+            android:configChanges="orientation|screenSize"
+            />
         //share videos
         <provider
             android:name="android.support.v4.content.FileProvider"

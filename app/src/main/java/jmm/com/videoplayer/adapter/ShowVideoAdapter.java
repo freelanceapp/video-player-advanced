@@ -182,8 +182,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 String s = showVideo.getFolder();
                 String ss = showVideo.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
-                intent.putExtra("prerna", s);
-                intent.putExtra("prernaa", ss);
+                intent.putExtra("source", s);
+                intent.putExtra("name", ss);
+                intent.putExtra("size",""+showVideoArrayList.size());
                 activity.startActivity(intent);
             }
         });
@@ -193,8 +194,10 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 String s = showVideo.getFolder();
                 String ss = showVideo.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
-                intent.putExtra("prerna", s);
-                intent.putExtra("prernaa", ss);
+                intent.putExtra("source", s);
+                intent.putExtra("name", ss);
+                intent.putExtra("size",showVideoArrayList.size());
+
                 activity.startActivity(intent);
             }
         });

@@ -47,22 +47,48 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:gravity="center"
             android:layout_marginBottom="10dp"
+            android:gravity="center"
             android:orientation="vertical">
 
-            <TextView
-                android:id="@+id/textvieww"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0"/>
-
-            <SeekBar
-                android:id="@+id/seekBar"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:max="100"
-                android:layout_marginBottom="20dp"/>
+                android:orientation="horizontal"
+                android:weightSum="1">
+
+                <TextView
+                    android:id="@+id/txt_starttime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_weight=".45"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textColor="@color/red" />
+
+                <SeekBar
+                    android:id="@+id/seekBar"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_weight=".1"
+                    android:gravity="center"
+                    android:max="100" />
+
+                <TextView
+                    android:id="@+id/txt_endtime"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:layout_weight=".45"
+                    android:gravity="center"
+                    android:text="0"
+                    android:textColor="@color/red" />
+
+
+            </LinearLayout>
+
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -70,7 +96,7 @@
                 android:layout_gravity="bottom"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:weightSum="3">
+                android:weightSum="4">
 
                 <ImageView
                     android:id="@+id/btn3"
@@ -90,31 +116,42 @@
                     android:layout_weight="1"
                     android:drawableTop="@drawable/play"
                     android:gravity="center"
-                    android:src="@drawable/play_h"
+                    android:src="@drawable/pause_hw"
                     android:text="play"
                     android:textSize="10dp" />
 
-              <!--  <ImageView
-                    android:id="@+id/btn2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:drawableTop="@drawable/pause"
-                    android:gravity="center"
-                    android:src="@drawable/pause_hw"
+                <!--  <ImageView
+                      android:id="@+id/btn2"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:layout_weight="1"
+                      android:drawableTop="@drawable/pause"
+                      android:gravity="center"
+                      android:src="@drawable/pause_hw"
 
-                    android:text="pause"
-                    android:textSize="10dp" />-->
+                      android:text="pause"
+                      android:textSize="10dp" />-->
 
 
                 <ImageView
-                    android:id="@+id/btn4"
+                    android:id="@+id/btn_next"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:drawableTop="@drawable/forward"
                     android:gravity="center"
                     android:src="@drawable/forward_h"
+                    android:text="forward"
+                    android:textSize="10dp" />
+
+                <ImageView
+                    android:id="@+id/img_screenorientation"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableTop="@drawable/forward"
+                    android:gravity="center"
+                    android:src="@drawable/delete"
                     android:text="forward"
                     android:textSize="10dp" />
             </LinearLayout>

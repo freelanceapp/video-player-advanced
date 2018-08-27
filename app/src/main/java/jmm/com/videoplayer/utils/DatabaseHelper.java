@@ -80,5 +80,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return sqLiteDatabase.delete(TABLE_NAME,"NAME = ? ",new String[] {name});
 
     }
+    public int getalldatacount() {
+        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+        Cursor cursor = sqLiteDatabase.rawQuery("select * from " + TABLE_NAME+" order by ID desc ", null);
+        return cursor.getCount();
+    }
 
 }

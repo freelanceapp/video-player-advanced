@@ -90,7 +90,6 @@ public class HomeActivity extends AppCompatActivity
     String MBKB;
     ArrayList<ShowVideo> multiselect_list = new ArrayList<>();
     Menu context_menu;
-    AppBarLayout appbar;
     AlertDialogHelper alertDialogHelper;
     boolean isMultiSelect = false;
     ActionMode mActionMode;
@@ -108,7 +107,6 @@ public class HomeActivity extends AppCompatActivity
         setContentView(R.layout.activity_home);
         databaseHelper = new DatabaseHelper(this);
         toolbar = findViewById(R.id.toolbar);
-        appbar = findViewById(R.id.appbar);
         tabs = findViewById(android.R.id.tabs);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
@@ -187,7 +185,7 @@ public class HomeActivity extends AppCompatActivity
 
                 selecteditem = navigationSpinner.getSelectedItem().toString();
 
-                if (selecteditem.equals("All")) {
+                if (selecteditem.equals(" All")) {
                     arrayList.clear();
                     getfolders();
                 } else {
@@ -346,7 +344,7 @@ public class HomeActivity extends AppCompatActivity
             cursor.moveToLast();
 
             do {
-                videoFolderNamearray.add("All");
+                videoFolderNamearray.add(" All");
                 videoFolderNamearray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME))));
                 videoPatharray.add((cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATA))));
 
@@ -652,23 +650,30 @@ public class HomeActivity extends AppCompatActivity
                 favrt.setDate(res.getString(6));
                 favrt.setSize(res.getString(7));
                 favrtArrayList.add(favrt);
+
             }
-                for (int j=0;j<favrtArrayList.size();j++){
-                    for (int i=0;i<arrayList.size();i++){
-
-                    Log.i("arrayList",arrayList.get(i).getName());
-                    Log.i("arrayList11",favrtArrayList.get(j).getName());
+            /*for (int j = 0; j < favrtArrayList.size(); j++) {
 
 
+                  Favrt f =  favrtArrayList.get(j);
 
-                    if (arrayList.get(i).getName().equalsIgnoreCase(favrtArrayList.get(j).getName())){
-                        Toast.makeText(this,arrayList.get(i).getName()+"..."+favrtArrayList.get(j).getName(),Toast.LENGTH_LONG).show();
-                    }else {
-                        Toast.makeText(this,arrayList.get(i).getName()+"..."+favrtArrayList.get(j).getName(),Toast.LENGTH_LONG).show();
+                  for(int i=0;i<arrayList.size();i++)
+                  {
+                      if (arrayList.get(i).getName().equalsIgnoreCase(f.getName())) {
+                          System.out.print("found");
+                      } else {
+                          System.out.print("not found");
 
-                    }
-                }
-            }
+                          databaseHelper.deletedata(f.getName());
+                          int count=databaseHelper.getalldatacount();
+                          System.out.print(""+count);
+                      }
+                  }
+
+
+
+
+            }*/
 
             rv_showfavrt = findViewById(R.id.rv_showfavrt);
             rv_showfavrt.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -753,7 +758,6 @@ public class HomeActivity extends AppCompatActivity
             sendBroadcast(intent);
         }
 
-
     }
 
     private void unSelectAll() {
@@ -768,7 +772,6 @@ public class HomeActivity extends AppCompatActivity
             //to change  the unselectAll  menu  to  selectAll
             selectMenuChnage();
             //to change  the unselectAll  menu  to  selectAll
-
             refreshAdapter();
 
         }
@@ -805,4 +808,10 @@ public class HomeActivity extends AppCompatActivity
         super.onResume();
         favrtAdapter.notifyDataSetChanged();
     }
+  /*  public static void getIntent(Activity activity, Class<?> homeActivityClass) {
+
+        Intent intent=new Intent(activity,homeActivityClass);
+        activity.startActivity(intent);
+
+    }*/
 }

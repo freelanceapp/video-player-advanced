@@ -1,7 +1,9 @@
 package jmm.com.videoplayer.utils;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -105,5 +107,17 @@ public class Helper {
         String pre = (si ? "kMGTPE" : "KMGTPE").charAt(exp-1) + (si ? "" : "i");
         return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
     }
+    public static String getScreenOrientation(Activity activity) {
+        String orientation = "";
+        int currentOrientation = activity.getResources().getConfiguration().orientation;
 
+        if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
+            orientation = "Landscape";
+        }
+
+        if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
+            orientation = "Portrait";
+        }
+        return orientation;
+    }
 }
