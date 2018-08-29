@@ -4,11 +4,13 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
@@ -51,6 +53,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     Activity activity;
     DatabaseHelper databaseHelper;
     public static List<String> nameList = new ArrayList<>();
+    int position;
 
     public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, ArrayList<?> selectedApkList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
@@ -79,8 +82,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     @Override
     public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, final int i) {
         final ShowVideo showVideo = filteredListttt.get(i);
-
-
         showVideoHolder.txt_title.setText(showVideo.getName());
         showVideoHolder.txt_duration.setText(showVideo.getTime());
         showVideoHolder.txt_resolution.setText(showVideo.getResolution());
@@ -90,6 +91,11 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         showVideo.setId(String.valueOf(i));
 
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("size",""+showVideoArrayList.size());
+        editor.apply();
 
         //setting favourite
         if (nameList.contains(showVideo.getName())) {
@@ -108,7 +114,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             public void onClick(View view) {
                 if (nameList.contains(showVideo.getName())) {
                     databaseHelper.deletedata(showVideo.getName());
-                }else {
+                } else {
 
                 }
 
@@ -184,7 +190,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);
                 intent.putExtra("name", ss);
-                intent.putExtra("size",""+showVideoArrayList.size());
+                intent.putExtra("current", ""+showVideo.getId());
                 activity.startActivity(intent);
             }
         });
@@ -196,7 +202,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);
                 intent.putExtra("name", ss);
-                intent.putExtra("size",showVideoArrayList.size());
+                intent.putExtra("current", ""+showVideo.getId());
 
                 activity.startActivity(intent);
             }

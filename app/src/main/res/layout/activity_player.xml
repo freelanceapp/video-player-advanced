@@ -96,7 +96,18 @@
                 android:layout_gravity="bottom"
                 android:gravity="center"
                 android:orientation="horizontal"
-                android:weightSum="4">
+                android:weightSum="5">
+
+                <ImageView
+                    android:id="@+id/img_mute"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableTop="@drawable/unmute"
+                    android:gravity="center"
+                    android:src="@drawable/mute"
+                    android:text="Rewind"
+                    android:textSize="10dp" />
 
                 <ImageView
                     android:id="@+id/btn3"
@@ -114,7 +125,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:drawableTop="@drawable/play"
                     android:gravity="center"
                     android:src="@drawable/pause_hw"
                     android:text="play"
@@ -151,7 +161,7 @@
                     android:layout_weight="1"
                     android:drawableTop="@drawable/forward"
                     android:gravity="center"
-                    android:src="@drawable/delete"
+                    android:src="@drawable/orientation"
                     android:text="forward"
                     android:textSize="10dp" />
             </LinearLayout>

@@ -1,13 +1,17 @@
 package jmm.com.videoplayer.activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -18,8 +22,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 import jmm.com.videoplayer.R;
+import jmm.com.videoplayer.model.ShowVideo;
 import jmm.com.videoplayer.utils.Helper;
 import jmm.com.videoplayer.utils.Utilities;
 
@@ -29,16 +35,19 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     SurfaceView videoSurface1;
     MediaPlayer mediaPlayer;
     String viewSource, viewName, viewSize/*= "/storage/emulated/0/Download/wtgdggd fjgdhhdg fdufsgdfjjh vudgkjx gdujhfjiugbuf.mp4"*/;
-    ImageView btnPlay, btnRewind, btn_next, img_screenorientation;
+    ImageView btnPlay, btnRewind, btn_next, img_screenorientation, img_mute;
     SurfaceHolder videoHolder1;
     ImageView img_back_player;
     TextView txt_playername, txt_starttime, txt_endtime;
     SeekBar seekBar;
-    int flag = 0;
+    int flag = 0, flag1 = 0;
     Utilities utils;
     Handler handler;
     int click = 0;
-
+    String current;
+    int currentindex;
+    ArrayList<ShowVideo> a = new ArrayList<>();
+    int size;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,10 +62,24 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         txt_playername = findViewById(R.id.txt_playername);
         txt_starttime = findViewById(R.id.txt_starttime);
         txt_endtime = findViewById(R.id.txt_endtime);
+        img_mute = findViewById(R.id.img_mute);
         img_screenorientation = findViewById(R.id.img_screenorientation);
         viewSource = getIntent().getStringExtra("source");
         viewName = getIntent().getStringExtra("name");
-        viewSize = getIntent().getStringExtra("size");
+        current = getIntent().getStringExtra("current");
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        viewSize= preferences.getString("size", "");
+
+        size = Integer.parseInt(viewSize);
+        currentindex = Integer.parseInt(current);
+
+        HomeActivity homeActivity=new HomeActivity();
+        a=homeActivity.arrayList;
+
+        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+
 
         txt_playername.setText(viewName);
 
@@ -70,6 +93,28 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         utils = new Utilities();
         updateProgressBar();
 
+        //for mute video
+        img_mute.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                if (flag1 == 1) {
+
+                    //unmute
+                    AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                    audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+                    img_mute.setImageResource(R.drawable.mute);
+                    flag1 = 0;
+
+                } else {
+                    //mute
+                    AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+                    audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
+                    img_mute.setImageResource(R.drawable.unmute);
+                    flag1 = 1;
+                }
+            }
+        });
         img_back_player.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -143,12 +188,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             @Override
             public void onClick(View view) {
                 Activity activity = PlayerActivity.this;
-                if(Helper.getScreenOrientation(activity) == "Landscape")
-                {
+                if (Helper.getScreenOrientation(activity) == "Landscape") {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                }
-                else if (Helper.getScreenOrientation(activity) == "Portrait")
-                {
+                } else if (Helper.getScreenOrientation(activity) == "Portrait") {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
                 }
             }
@@ -174,12 +216,25 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
             @Override
             public void onClick(View arg0) {
-                if (mediaPlayer == null) {
-                    return;
-                }
-                int pos = mediaPlayer.getCurrentPosition();
-                pos += 15000;
-                mediaPlayer.seekTo(pos);
+
+                //condition for next video...
+                currentindex++;
+
+//                if (currentindex < size) {
+//
+////                    viewSource = a.get(currentindex).getFolder();
+////
+////                    Log.i("viewsource",viewSource);
+//                    playSong(currentindex);
+//                    Toast.makeText(PlayerActivity.this, "" + currentindex+".."+size, Toast.LENGTH_SHORT).show();
+//
+//                }else if (currentindex == size){
+//                    Toast.makeText(PlayerActivity.this,"No Video Available",Toast.LENGTH_LONG).show();
+//                }else {
+//                    Toast.makeText(PlayerActivity.this,"Error",Toast.LENGTH_LONG).show();
+//
+//                }
+
             }
         });
 
@@ -202,6 +257,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         mediaPlayer.pause();
     }
 
+
+    //function to play video
     public void play() {
         try {
             mediaPlayer.setDataSource(viewSource);
@@ -219,6 +276,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         mediaPlayer.start();
     }
 
+
+    //set duration of seekbar
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
             long totalDuration = mediaPlayer.getDuration();
@@ -246,9 +305,38 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     };
 
 
+    //update time by 1 second
     public void updateProgressBar() {
         handler.postDelayed(mUpdateTimeTask, 100);
     }
+    public void playSong(int songIndex) {
+        // Play song
+        try {
+            mediaPlayer.reset();
+            mediaPlayer.setDataSource(a.get(4).getFolder());
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            mediaPlayer.setDisplay(videoHolder1);
+            // Displaying Song title
+//            String songTitle = a.get(songIndex).getName();
+//            songTitleLabel.setText(songTitle);
 
+            // Changing Button Image to pause image
+//            btnPlay.setImageResource(R.drawable.btn_pause);
+
+            // set Progress bar values
+//            songProgressBar.setProgress(0);
+//            songProgressBar.setMax(100);
+
+            // Updating progress bar
+            updateProgressBar();
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
 }
