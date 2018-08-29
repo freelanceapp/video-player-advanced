@@ -218,7 +218,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             public void onClick(View arg0) {
 
                 //condition for next video...
-//                currentindex++;
+                currentindex++;
 
 //                if (currentindex < size) {
 //
