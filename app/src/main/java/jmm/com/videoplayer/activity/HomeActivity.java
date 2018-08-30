@@ -67,7 +67,7 @@ public class HomeActivity extends AppCompatActivity
     private static final int REQUEST_PERMISSIONS = 100;
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
-    ArrayList<ShowVideo> arrayList = new ArrayList<>();
+  static   ArrayList<ShowVideo> arrayList = new ArrayList<>();
     ArrayList<Favrt> favrtArrayList = new ArrayList<>();
     ArrayList<Favrt> duplicatefavrtarray = new ArrayList<>();
     RecyclerView rv_showvideo, rv_showfavrt;

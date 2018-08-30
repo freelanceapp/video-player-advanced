@@ -35,7 +35,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     SurfaceView videoSurface1;
     MediaPlayer mediaPlayer;
     String viewSource, viewName, viewSize/*= "/storage/emulated/0/Download/wtgdggd fjgdhhdg fdufsgdfjjh vudgkjx gdujhfjiugbuf.mp4"*/;
-    ImageView btnPlay, btnRewind, btn_next, img_screenorientation, img_mute;
+    ImageView btnPlay, btn_previous, btn_next, img_screenorientation, img_mute;
     SurfaceHolder videoHolder1;
     ImageView img_back_player;
     TextView txt_playername, txt_starttime, txt_endtime;
@@ -46,7 +46,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     int click = 0;
     String current;
     int currentindex;
-    ArrayList<ShowVideo> a = new ArrayList<>();
     int size;
 
     @Override
@@ -55,7 +54,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         setContentView(R.layout.activity_player);
 
         btnPlay = findViewById(R.id.btn1);
-        btnRewind = findViewById(R.id.btn3);
+        btn_previous = findViewById(R.id.btn_previous);
         btn_next = findViewById(R.id.btn_next);
         seekBar = findViewById(R.id.seekBar);
         img_back_player = findViewById(R.id.img_back_player);
@@ -69,17 +68,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         current = getIntent().getStringExtra("current");
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        viewSize= preferences.getString("size", "");
+        viewSize = preferences.getString("size", "");
 
         size = Integer.parseInt(viewSize);
         currentindex = Integer.parseInt(current);
 
-        HomeActivity homeActivity=new HomeActivity();
-        a=homeActivity.arrayList;
-
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-
 
         txt_playername.setText(viewName);
 
@@ -176,14 +171,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-    /*    btnPause.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
-                // TODO Auto-generated method stub
-                player1.pause();
-            }
-        });*/
-
         img_screenorientation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -196,19 +183,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-        btnRewind.setOnClickListener(new View.OnClickListener() {
+        btn_previous.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
 
-                if (mediaPlayer == null) {
-                    return;
-                }
-                int pos = mediaPlayer.getCurrentPosition();
-                pos -= 5000;
-                mediaPlayer.seekTo(pos);
-
+                previous();
             }
         });
 
@@ -218,22 +199,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             public void onClick(View arg0) {
 
                 //condition for next video...
-                currentindex++;
 
-//                if (currentindex < size) {
-//
-////                    viewSource = a.get(currentindex).getFolder();
-////
-////                    Log.i("viewsource",viewSource);
-//                    playSong(currentindex);
-//                    Toast.makeText(PlayerActivity.this, "" + currentindex+".."+size, Toast.LENGTH_SHORT).show();
-//
-//                }else if (currentindex == size){
-//                    Toast.makeText(PlayerActivity.this,"No Video Available",Toast.LENGTH_LONG).show();
-//                }else {
-//                    Toast.makeText(PlayerActivity.this,"Error",Toast.LENGTH_LONG).show();
-//
-//                }
+//                mediaPlayer.release();
+                next();
 
             }
         });
@@ -261,6 +229,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     //function to play video
     public void play() {
         try {
+
             mediaPlayer.setDataSource(viewSource);
             mediaPlayer.setDisplay(videoHolder1);
             mediaPlayer.prepare();
@@ -285,6 +254,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
             // Displaying Total Duration time
             txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration));
+
             // Displaying time completed playing
             if (txt_starttime.getText().toString().equals(txt_endtime.getText().toString())) {
                 btnPlay.setImageResource(R.drawable.play_h);
@@ -309,34 +279,79 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     public void updateProgressBar() {
         handler.postDelayed(mUpdateTimeTask, 100);
     }
-    public void playSong(int songIndex) {
-        // Play song
-        try {
-            mediaPlayer.reset();
-            mediaPlayer.setDataSource(a.get(4).getFolder());
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            mediaPlayer.setDisplay(videoHolder1);
-            // Displaying Song title
-//            String songTitle = a.get(songIndex).getName();
-//            songTitleLabel.setText(songTitle);
 
-            // Changing Button Image to pause image
-//            btnPlay.setImageResource(R.drawable.btn_pause);
+    public void next() {
 
-            // set Progress bar values
-//            songProgressBar.setProgress(0);
-//            songProgressBar.setMax(100);
+        currentindex++;
+        btn_previous.setEnabled(true);
 
-            // Updating progress bar
-            updateProgressBar();
-        } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (currentindex < size) {
+
+            //reset Media Player
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                }
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            //change video url
+            viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
+            viewName = HomeActivity.arrayList.get(currentindex).getName();
+            txt_playername.setText(viewName);
+            play();
+
+        } else if (currentindex == size) {
+            btn_next.setEnabled(false);
+            Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_LONG).show();
         }
     }
 
+    public void previous() {
+        currentindex--;
+        btn_next.setEnabled(true);
+        if (currentindex > -1) {
+
+            //reset Media Player
+            try {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                }
+                mediaPlayer = new MediaPlayer();
+                mediaPlayer.start();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            //change video url
+            viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
+            viewName = HomeActivity.arrayList.get(currentindex).getName();
+            txt_playername.setText(viewName);
+            play();
+
+        } else if (currentindex == -1) {
+            btn_previous.setEnabled(false);
+            Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_LONG).show();
+
+        }
+
+    }
+
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mediaPlayer.pause();
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        play();
+    }
 }
