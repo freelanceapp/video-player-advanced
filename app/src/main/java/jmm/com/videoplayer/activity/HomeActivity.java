@@ -15,11 +15,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.support.annotation.RequiresApi;
 import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -67,7 +69,7 @@ public class HomeActivity extends AppCompatActivity
     private static final int REQUEST_PERMISSIONS = 100;
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
-  static   ArrayList<ShowVideo> arrayList = new ArrayList<>();
+    static ArrayList<ShowVideo> arrayList = new ArrayList<>();
     ArrayList<Favrt> favrtArrayList = new ArrayList<>();
     ArrayList<Favrt> duplicatefavrtarray = new ArrayList<>();
     RecyclerView rv_showvideo, rv_showfavrt;
@@ -111,7 +113,6 @@ public class HomeActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
-
         rv_showvideo = findViewById(R.id.rv_showvideo);
 
         // set data on recyclerview
@@ -123,7 +124,6 @@ public class HomeActivity extends AppCompatActivity
         progressDialog.setMessage("Wait...");
 
         alertDialogHelper = new AlertDialogHelper(this);
-
 
         //tab host
         host = findViewById(R.id.tabHost);

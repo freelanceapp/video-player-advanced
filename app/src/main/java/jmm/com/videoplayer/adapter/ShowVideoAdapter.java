@@ -80,7 +80,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     }
 
     @Override
-    public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, final int i) {
+    public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, int i) {
         final ShowVideo showVideo = filteredListttt.get(i);
         showVideoHolder.txt_title.setText(showVideo.getName());
         showVideoHolder.txt_duration.setText(showVideo.getTime());
@@ -91,15 +91,29 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         showVideo.setId(String.valueOf(i));
 
+        //settt
+        showVideoHolder.img_favrt.setTag(i);
+
+        Integer pos = (Integer) showVideoHolder.img_favrt.getTag();
+
+        if (showVideoArrayList.get(pos).isFavrt()) {
+            //showVideoArrayList.get(pos).setFavrt(false);
+            showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+        } else {
+            //showVideoArrayList.get(pos).setFavrt(true);
+            showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
+        }
+
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
         SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("size",""+showVideoArrayList.size());
+        editor.putString("size", "" + showVideoArrayList.size());
         editor.apply();
 
         //setting favourite
         if (nameList.contains(showVideo.getName())) {
             showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+            showVideoHolder.img_favrt.setTag(activity);
         }
 
         //check the database
@@ -108,17 +122,28 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         }
 
-
         showVideoHolder.img_favrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                Integer pos = (Integer) showVideoHolder.img_favrt.getTag();
+                if (showVideoArrayList.get(pos).isFavrt()) {
+                  //  showVideoArrayList.get(pos).setFavrt(false);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+
+                } else {
+                  //  showVideoArrayList.get(pos).setFavrt(true);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
+
+
+                }
+
+
                 if (nameList.contains(showVideo.getName())) {
                     databaseHelper.deletedata(showVideo.getName());
                 } else {
 
                 }
-
-
                 if (showVideo.isFavrt()) {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
                     showVideo.setFavrt(false);
@@ -133,7 +158,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 } else {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
                     showVideo.setFavrt(true);
-
                     boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution(), showVideo.getData(), showVideo.getSize());
 
 
@@ -190,7 +214,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);
                 intent.putExtra("name", ss);
-                intent.putExtra("current", ""+showVideo.getId());
+                intent.putExtra("current", "" + showVideo.getId());
                 activity.startActivity(intent);
             }
         });
@@ -202,7 +226,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);
                 intent.putExtra("name", ss);
-                intent.putExtra("current", ""+showVideo.getId());
+                intent.putExtra("current", "" + showVideo.getId());
 
                 activity.startActivity(intent);
             }

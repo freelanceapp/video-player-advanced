@@ -15,6 +15,7 @@ import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -34,7 +35,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     SurfaceView videoSurface1;
     MediaPlayer mediaPlayer;
-    String viewSource, viewName, viewSize/*= "/storage/emulated/0/Download/wtgdggd fjgdhhdg fdufsgdfjjh vudgkjx gdujhfjiugbuf.mp4"*/;
+    String viewSource, viewName, viewSize;
     ImageView btnPlay, btn_previous, btn_next, img_screenorientation, img_mute;
     SurfaceHolder videoHolder1;
     ImageView img_back_player;
@@ -43,7 +44,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     int flag = 0, flag1 = 0;
     Utilities utils;
     Handler handler;
-    int click = 0;
     String current;
     int currentindex;
     int size;
@@ -52,6 +52,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         btnPlay = findViewById(R.id.btn1);
         btn_previous = findViewById(R.id.btn_previous);
@@ -152,7 +153,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 // TODO Auto-generated method stub
 
                 if (flag == 1) {
-
                     if (txt_starttime.getText().toString().equals(txt_endtime.getText().toString())) {
                         txt_starttime.setText("0.0");
                     }
@@ -164,7 +164,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     btnPlay.setImageResource(R.drawable.play_h);
                     flag = 1;
                     mediaPlayer.pause();
-
 
                 }
 
@@ -188,7 +187,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-
+                //
                 previous();
             }
         });
@@ -198,9 +197,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             @Override
             public void onClick(View arg0) {
 
-                //condition for next video...
-
-//                mediaPlayer.release();
                 next();
 
             }
@@ -245,7 +241,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         mediaPlayer.start();
     }
 
-
     //set duration of seekbar
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
@@ -257,8 +252,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
             // Displaying time completed playing
             if (txt_starttime.getText().toString().equals(txt_endtime.getText().toString())) {
-                btnPlay.setImageResource(R.drawable.play_h);
-                flag = 1;
+
+                //autoplay next video
+                next();
+
+                // no autoplay
+//                btnPlay.setImageResource(R.drawable.play_h);
+//                flag = 1;
             } else {
                 txt_starttime.setText("" + utils.milliSecondsToTimer(currentDuration));
 
@@ -266,7 +266,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
             // Updating progress bar
             int progress = (utils.getProgressPercentage(currentDuration, totalDuration));
-            //Log.d("Progress", ""+progress);
             seekBar.setProgress(progress);
 
             // Running this thread after 100 milliseconds
@@ -284,6 +283,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
         currentindex++;
         btn_previous.setEnabled(true);
+        //condition for next video...
 
         if (currentindex < size) {
 
@@ -342,16 +342,31 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     }
 
-
     @Override
     protected void onStop() {
         super.onStop();
         mediaPlayer.pause();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
         play();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
     }
 }
