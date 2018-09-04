@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="jmm.com.videoplayer">
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -8,8 +9,17 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACTION_MANAGE_WRITE_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <protected-broadcast android:name="android.intent.action.MEDIA_MOUNTED" />
+
+
+    <uses-sdk
+        android:maxSdkVersion="26"
+        android:minSdkVersion="11"
+        android:targetSdkVersion="17" />
 
     <application
         android:allowBackup="true"
@@ -20,7 +30,6 @@
         android:theme="@style/AppTheme">
         <activity android:name=".activity.SettingsActivity" />
         <activity android:name=".activity.AboutUsActivity" />
-        <activity android:name=".activity.ShareActivity" />
         <activity android:name=".activity.PlayerActivity"
             android:configChanges="orientation|screenSize"
             />

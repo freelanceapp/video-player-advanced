@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -43,11 +44,13 @@ import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabWidget;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 
@@ -117,6 +120,8 @@ public class HomeActivity extends AppCompatActivity
 
         // set data on recyclerview
         rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+
+
         showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
         rv_showvideo.setAdapter(showVideoAdapter);
 
@@ -230,7 +235,6 @@ public class HomeActivity extends AppCompatActivity
             }
         }));
 
-
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -266,6 +270,16 @@ public class HomeActivity extends AppCompatActivity
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
+
+        //serchview textcolor
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // Call some material design APIs here
+        } else {
+            // Implement this feature without material design
+            int id = searchView.getContext().getResources().getIdentifier("android:id/search_src_text", null, null);
+            TextView textView = (TextView) searchView.findViewById(id);
+            textView.setTextColor(Color.BLACK);
+        }
         // listening to search query text change
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
@@ -315,13 +329,9 @@ public class HomeActivity extends AppCompatActivity
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.putExtra(Intent.EXTRA_TEXT,
-                    "Hey check out my app");
+                    "Google Play Store Link");
             sendIntent.setType("text/plain");
             startActivity(sendIntent);
-
-
-//            startActivity(new Intent(HomeActivity.this, ShareActivity.class));
-
         } else if (id == R.id.nav_aboutus) {
             startActivity(new Intent(HomeActivity.this, AboutUsActivity.class));
 
@@ -335,6 +345,8 @@ public class HomeActivity extends AppCompatActivity
 
     //get all folders contain video
     public void getfolders() {
+
+
         getfavrt();
 
         String[] projection = {MediaStore.Video.Media.SIZE, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
@@ -378,10 +390,14 @@ public class HomeActivity extends AppCompatActivity
                 showVideo.setFolder(url);
                 showVideo.setName(name);
 
-
                 arrayList.add(new ShowVideo(thumb, resolution, tt, da, url, name, MBKB));
             } while (cursor.moveToPrevious());
+            Collections.sort(arrayList, new Comparator<ShowVideo>() {
+                public int compare(ShowVideo o1, ShowVideo o2) {
+                    return o1.getName().compareToIgnoreCase(o2.getName());
 
+                }
+            });
             cursor.close();
             showVideoAdapter.notifyDataSetChanged();
 
@@ -412,6 +428,7 @@ public class HomeActivity extends AppCompatActivity
 
                     String da = Helper.LongToDate(date);
                     String tt = Helper.Time(duration);
+
                     arrayList.add(new ShowVideo(thumb, da, tt, da, "5454", name, s));
 
                 }
@@ -424,6 +441,7 @@ public class HomeActivity extends AppCompatActivity
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
 

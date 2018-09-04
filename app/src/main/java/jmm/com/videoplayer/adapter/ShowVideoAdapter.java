@@ -53,7 +53,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     Activity activity;
     DatabaseHelper databaseHelper;
     public static List<String> nameList = new ArrayList<>();
-    int position;
 
     public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, ArrayList<?> selectedApkList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
@@ -91,7 +90,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         showVideo.setId(String.valueOf(i));
 
-        //settt
+        //set tag
         showVideoHolder.img_favrt.setTag(i);
 
         Integer pos = (Integer) showVideoHolder.img_favrt.getTag();
@@ -113,7 +112,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         //setting favourite
         if (nameList.contains(showVideo.getName())) {
             showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
-            showVideoHolder.img_favrt.setTag(activity);
+//            showVideoHolder.img_favrt.setTag(activity);
         }
 
         //check the database
@@ -125,10 +124,11 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         showVideoHolder.img_favrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                Integer position = (Integer) showVideoHolder.img_favrt.getTag();
 
-                Integer pos = (Integer) showVideoHolder.img_favrt.getTag();
-                if (showVideoArrayList.get(pos).isFavrt()) {
+                if (showVideoArrayList.get(position).isFavrt()) {
                   //  showVideoArrayList.get(pos).setFavrt(false);
+
                     showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
 
                 } else {
@@ -176,6 +176,19 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             @Override
             public void onClick(View view) {
 
+                Integer position = (Integer) showVideoHolder.img_favrt.getTag();
+
+                if (showVideoArrayList.get(position).isFavrt()) {
+                    //  showVideoArrayList.get(pos).setFavrt(false);
+
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+
+                } else {
+                    //  showVideoArrayList.get(pos).setFavrt(true);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
+
+
+                }
 
                 if (showVideo.isFavrt()) {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);

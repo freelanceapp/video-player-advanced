@@ -8,16 +8,21 @@ import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,6 +33,7 @@ import java.util.ArrayList;
 import jmm.com.videoplayer.R;
 import jmm.com.videoplayer.model.ShowVideo;
 import jmm.com.videoplayer.utils.Helper;
+import jmm.com.videoplayer.utils.OnSwipeTouchListener;
 import jmm.com.videoplayer.utils.Utilities;
 
 
@@ -39,14 +45,17 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     ImageView btnPlay, btn_previous, btn_next, img_screenorientation, img_mute;
     SurfaceHolder videoHolder1;
     ImageView img_back_player;
-    TextView txt_playername, txt_starttime, txt_endtime;
-    SeekBar seekBar;
+    TextView txt_playername, txt_starttime, txt_endtime, txt_brightness,txt_volume;
+    SeekBar seekBar, sb_brightness,sb_volume;
     int flag = 0, flag1 = 0;
     Utilities utils;
     Handler handler;
     String current;
     int currentindex;
     int size;
+    LinearLayout ll_brightness,ll_volume;
+    int brightnessValue;
+    private AudioManager audioManager = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,16 +73,26 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         txt_endtime = findViewById(R.id.txt_endtime);
         img_mute = findViewById(R.id.img_mute);
         img_screenorientation = findViewById(R.id.img_screenorientation);
+        sb_brightness = findViewById(R.id.sb_brightness);
+        txt_brightness = findViewById(R.id.txt_brightness);
+        ll_brightness = findViewById(R.id.ll_brightness);
+        ll_volume = findViewById(R.id.ll_volume);
+        sb_volume = findViewById(R.id.sb_volume);
+        txt_volume = findViewById(R.id.txt_volume);
+
+        //get values from intent
         viewSource = getIntent().getStringExtra("source");
         viewName = getIntent().getStringExtra("name");
         current = getIntent().getStringExtra("current");
-
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         viewSize = preferences.getString("size", "");
 
+
+        //covnerting values
         size = Integer.parseInt(viewSize);
         currentindex = Integer.parseInt(current);
 
+        //audio
         AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
 
@@ -84,10 +103,97 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         videoHolder1.addCallback(this);
         videoHolder1.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 
+        //get current brightness
+        int brightness = getScreenBrightness();
+        sb_brightness.setProgress(brightness);
+        txt_brightness.setText(brightness + "%");
+
+        //audia seekbar
+        volumeControl();
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        sb_volume.setMax(audioManager
+                .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+        sb_volume.setProgress(audioManager
+                .getStreamVolume(AudioManager.STREAM_MUSIC));
+
+
+        //change video on swipe
+        videoSurface1.setOnTouchListener(new OnSwipeTouchListener(this) {
+            public void onSwipeTop() {
+                sb_brightness.setVisibility(View.INVISIBLE);
+                sb_volume.setVisibility(View.INVISIBLE);
+                txt_brightness.setVisibility(View.INVISIBLE);
+                txt_volume.setVisibility(View.INVISIBLE);
+            }
+
+            public void onSwipeRight() {
+                sb_brightness.setVisibility(View.INVISIBLE);
+                sb_volume.setVisibility(View.INVISIBLE);
+                txt_brightness.setVisibility(View.INVISIBLE);
+                txt_volume.setVisibility(View.INVISIBLE);
+                previous();
+            }
+
+            public void onSwipeLeft() {
+                sb_brightness.setVisibility(View.INVISIBLE);
+                sb_volume.setVisibility(View.INVISIBLE);
+                txt_brightness.setVisibility(View.INVISIBLE);
+                txt_volume.setVisibility(View.INVISIBLE);
+                next();
+            }
+
+            public void onSwipeBottom() {
+                sb_brightness.setVisibility(View.INVISIBLE);
+                sb_volume.setVisibility(View.INVISIBLE);
+                txt_brightness.setVisibility(View.INVISIBLE);
+                txt_volume.setVisibility(View.INVISIBLE);
+            }
+        });
+
+        ll_brightness.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                sb_brightness.setVisibility(View.VISIBLE);
+                txt_brightness.setVisibility(View.VISIBLE);
+                return false;
+            }
+        });
+        ll_volume.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                sb_volume.setVisibility(View.VISIBLE);
+                txt_volume.setVisibility(View.VISIBLE);
+                return false;
+            }
+        });
+
+
         mediaPlayer = new MediaPlayer();
         handler = new Handler();
         utils = new Utilities();
         updateProgressBar();
+
+
+
+        sb_brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
+                txt_brightness.setText(i + "%");
+                setScreenBrightness(i);
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                sb_brightness.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                sb_brightness.setVisibility(View.INVISIBLE);
+                txt_brightness.setVisibility(View.INVISIBLE);
+            }
+        });
 
         //for mute video
         img_mute.setOnClickListener(new View.OnClickListener() {
@@ -99,14 +205,14 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     //unmute
                     AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                     audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-                    img_mute.setImageResource(R.drawable.mute);
+                    img_mute.setImageResource(R.drawable.unmute);
                     flag1 = 0;
 
                 } else {
                     //mute
                     AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
                     audioManager.setStreamMute(AudioManager.STREAM_MUSIC, true);
-                    img_mute.setImageResource(R.drawable.unmute);
+                    img_mute.setImageResource(R.drawable.mute);
                     flag1 = 1;
                 }
             }
@@ -368,5 +474,65 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         super.onPause();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
+    }
+
+    public void setScreenBrightness(int brightnessValue) {
+
+        if (brightnessValue >= 0 && brightnessValue <= 100) {
+            Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightnessValue);
+        }
+    }
+
+    protected int getScreenBrightness() {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !android.provider.Settings.System.canWrite(this)) {
+            Intent intent = new Intent(android.provider.Settings.ACTION_MANAGE_WRITE_SETTINGS);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        } else {
+            brightnessValue = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 0);
+
+        }
+        return brightnessValue;
+    }
+
+    private void volumeControl()
+    {
+        try
+        {
+            audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            sb_volume.setMax(audioManager
+                    .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+            sb_volume.setProgress(audioManager
+                    .getStreamVolume(AudioManager.STREAM_MUSIC));
+
+
+            sb_volume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+            {
+                @Override
+                public void onStopTrackingTouch(SeekBar arg0)
+                {
+                    sb_volume.setVisibility(View.INVISIBLE);
+                    txt_volume.setVisibility(View.INVISIBLE);
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar arg0)
+                {
+                }
+
+                @Override
+                public void onProgressChanged(SeekBar arg0, int progress, boolean arg2)
+                {
+                    audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
+                            progress, 0);
+                    txt_volume.setText(progress+"%");
+                }
+            });
+        }
+        catch (Exception e)
+        {
+            e.printStackTrace();
+        }
     }
 }
