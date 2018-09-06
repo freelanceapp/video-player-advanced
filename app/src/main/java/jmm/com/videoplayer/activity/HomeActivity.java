@@ -1,7 +1,6 @@
 package jmm.com.videoplayer.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
@@ -14,18 +13,12 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -39,13 +32,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabWidget;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.viethoa.RecyclerViewFastScroller;
+import com.viethoa.models.AlphabetItem;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -61,9 +56,9 @@ import jmm.com.videoplayer.model.Favrt;
 import jmm.com.videoplayer.model.ShowVideo;
 import jmm.com.videoplayer.utils.AlertDialogHelper;
 import jmm.com.videoplayer.utils.CustomeSpinner;
+import jmm.com.videoplayer.utils.DataHelper;
 import jmm.com.videoplayer.utils.DatabaseHelper;
 import jmm.com.videoplayer.utils.Helper;
-import jmm.com.videoplayer.utils.MyPagerAdapter;
 import jmm.com.videoplayer.utils.RecyclerItemClickListener;
 
 
@@ -73,7 +68,7 @@ public class HomeActivity extends AppCompatActivity
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
     static ArrayList<ShowVideo> arrayList = new ArrayList<>();
-    ArrayList<Favrt> favrtArrayList = new ArrayList<>();
+    static ArrayList<Favrt> favrtArrayList = new ArrayList<>();
     ArrayList<Favrt> duplicatefavrtarray = new ArrayList<>();
     RecyclerView rv_showvideo, rv_showfavrt;
     ShowVideoAdapter showVideoAdapter;
@@ -104,7 +99,9 @@ public class HomeActivity extends AppCompatActivity
     ViewPager pager;
     TabHost host;
     boolean isUnseleAllEnabled = false;
-
+    RecyclerViewFastScroller fastScroller;
+    private List<AlphabetItem> mAlphabetItems;
+    List<String> mDataArray;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,6 +114,10 @@ public class HomeActivity extends AppCompatActivity
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         rv_showvideo = findViewById(R.id.rv_showvideo);
+        fastScroller = findViewById(R.id.fast_scroller);
+
+
+//        initialiseUI();
 
         // set data on recyclerview
         rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -124,6 +125,7 @@ public class HomeActivity extends AppCompatActivity
 
         showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
         rv_showvideo.setAdapter(showVideoAdapter);
+
 
         progressDialog = new ProgressDialog(HomeActivity.this);
         progressDialog.setMessage("Wait...");
@@ -171,10 +173,19 @@ public class HomeActivity extends AppCompatActivity
                 ActivityCompat.requestPermissions(HomeActivity.this,
                         new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
                         REQUEST_PERMISSIONS);
-
             }
         } else {
             getfolders();
+
+            /*
+            Refrence for scrolling by alphabets with recyclerview
+            https://github.com/viethoa/recyclerview-alphabet-fast-scroller-android
+             */
+
+            initialiseData();
+            //scroll with recylerview
+            fastScroller.setRecyclerView(rv_showvideo);
+            fastScroller.setUpAlphabet(mAlphabetItems);
         }
 
 
@@ -255,6 +266,11 @@ public class HomeActivity extends AppCompatActivity
         } else {
             super.onBackPressed();
         }
+
+        Intent a = new Intent(Intent.ACTION_MAIN);
+        a.addCategory(Intent.CATEGORY_HOME);
+        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        startActivity(a);
     }
 
     @Override
@@ -391,6 +407,8 @@ public class HomeActivity extends AppCompatActivity
                 showVideo.setName(name);
 
                 arrayList.add(new ShowVideo(thumb, resolution, tt, da, url, name, MBKB));
+
+
             } while (cursor.moveToPrevious());
             Collections.sort(arrayList, new Comparator<ShowVideo>() {
                 public int compare(ShowVideo o1, ShowVideo o2) {
@@ -399,6 +417,7 @@ public class HomeActivity extends AppCompatActivity
                 }
             });
             cursor.close();
+
             showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
@@ -436,6 +455,8 @@ public class HomeActivity extends AppCompatActivity
             } while (cursor.moveToPrevious());
             progressDialog.dismiss();
             cursor.close();
+
+
             showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
@@ -447,6 +468,7 @@ public class HomeActivity extends AppCompatActivity
 
     //get all data from database and add in list
     public void getfavrt() {
+
         favrtArrayList.clear();
         Cursor res = databaseHelper.getalldata();
 
@@ -826,10 +848,29 @@ public class HomeActivity extends AppCompatActivity
         super.onResume();
         favrtAdapter.notifyDataSetChanged();
     }
-  /*  public static void getIntent(Activity activity, Class<?> homeActivityClass) {
 
-        Intent intent=new Intent(activity,homeActivityClass);
-        activity.startActivity(intent);
 
-    }*/
+    //get scroll data from array list
+    public void initialiseData() {
+        //Recycler view data
+//        mDataArray = DataHelper.getAlphabetData();
+
+        //Alphabet fast scroller data
+        mAlphabetItems = new ArrayList<>();
+        List<String> strAlphabets = new ArrayList<>();
+        for (int i = 0; i < arrayList.size(); i++) {
+            String name = arrayList.get(i).getName().toUpperCase();
+//            if (name == null || name.trim().isEmpty())
+//                continue;
+
+            String word = name.substring(0, 1);
+            if (!strAlphabets.contains(word)) {
+
+                strAlphabets.add(word);
+                mAlphabetItems.add(new AlphabetItem(i, word, false));
+            }
+        }
+    }
+
+
 }

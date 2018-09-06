@@ -9,6 +9,7 @@ import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
@@ -19,6 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Filter;
 import android.widget.Filterable;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -71,14 +73,37 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
                 .into(favrtHolder.img_thumb);
 
 
+
+
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(activity);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("size", "" + favrtArrayList.size());
+        editor.apply();
+
+
         favrtHolder.img_thumb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 String s = favrt.getFolder();
                 String ss = favrt.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
-                intent.putExtra("folder", s);
+                intent.putExtra("source", s);
                 intent.putExtra("name", ss);
+                intent.putExtra("current", "" +i);
+                intent.putExtra("type", "favrt");
+                activity.startActivity(intent);
+            }
+        });
+        favrtHolder.ll_favrtplay.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String s = favrt.getFolder();
+                String ss = favrt.getName();
+                Intent intent = new Intent(activity, PlayerActivity.class);
+                intent.putExtra("source", s);
+                intent.putExtra("name", ss);
+                intent.putExtra("current", "" + i);
+                intent.putExtra("type", "favrt");
                 activity.startActivity(intent);
             }
         });
@@ -198,6 +223,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
 
         ImageView img_thumb, img_favrtfavrt;
         TextView txt_title, txt_duration, txt_resolutionfavrt;
+        LinearLayout ll_favrtplay;
 
         public FavrtHolder(@NonNull View itemView) {
             super(itemView);
@@ -207,6 +233,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
             txt_duration = itemView.findViewById(R.id.txt_durationfavrt);
             txt_resolutionfavrt = itemView.findViewById(R.id.txt_resolutionfavrt);
             img_favrtfavrt = itemView.findViewById(R.id.img_favrtfavrt);
+            ll_favrtplay = itemView.findViewById(R.id.ll_favrtplay);
 
             Typeface font = Typeface.createFromAsset(activity.getAssets(), "PoetsenOne-Regular.ttf");
             txt_title.setTypeface(font);

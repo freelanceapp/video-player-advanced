@@ -3,6 +3,8 @@
 <TabHost
 
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/tabHost"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -32,15 +34,39 @@
                 android:id="@+id/tab1"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:orientation="horizontal">
+
+                <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    tools:context=".MainActivity">
+
+                    <android.support.v7.widget.RecyclerView
+                        android:id="@+id/rv_showvideo"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"/>
+
+                    <com.viethoa.RecyclerViewFastScroller
+                        android:id="@+id/fast_scroller"
+                        android:layout_width="20dp"
+                        android:layout_height="match_parent"
+                        android:layout_alignParentEnd="true"
+                        android:layout_alignParentRight="true"/>
+                </RelativeLayout>
+               <!-- <com.viethoa.RecyclerViewFastScroller
+                    android:id="@+id/fast_scroller"
+                    android:layout_width="25dp"
+                    android:layout_height="match_parent"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true" />
 
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/rv_showvideo"
-                    android:scrollbars="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                </android.support.v7.widget.RecyclerView>
+                </android.support.v7.widget.RecyclerView>-->
 
             </FrameLayout>
 

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#d81354</color>
-    <color name="colorPrimaryDark">#e5333e</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#8E44AD</color>
+    <color name="colorPrimaryDark">#402342</color>
+    <color name="colorAccent">#8E44AD</color>
     <color name="purple">#8E44AD</color>
     <color name="lightpurp">#2d8e44ad</color>
     <color name="pink">#d81354</color>
@@ -12,4 +12,7 @@
     <color name="grey">#ebebeb</color>
     <color name="blacklight">#20000000</color>
     <color name="white">#ffffff</color>
+    <color name="alphabet_text_selected_color">#e5333e</color>
+    <color name="alphabet_background_color">#ffffff</color>
+    <color name="alphabet_background_border_color">#ffffff</color>
 </resources>

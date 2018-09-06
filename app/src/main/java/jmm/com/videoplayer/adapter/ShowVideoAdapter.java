@@ -29,6 +29,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.viethoa.RecyclerViewFastScroller;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -44,7 +45,7 @@ import jmm.com.videoplayer.utils.DatabaseHelper;
 import jmm.com.videoplayer.utils.DetailDialog;
 import jmm.com.videoplayer.utils.Helper;
 
-public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder> implements Filterable {
+public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder> implements Filterable,  RecyclerViewFastScroller.BubbleTextGetter {
 
     public ArrayList<ShowVideo> showVideoArrayList = new ArrayList<>();
     public ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
@@ -53,6 +54,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     Activity activity;
     DatabaseHelper databaseHelper;
     public static List<String> nameList = new ArrayList<>();
+
 
     public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, ArrayList<?> selectedApkList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
@@ -80,7 +82,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
     @Override
     public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, int i) {
+
         final ShowVideo showVideo = filteredListttt.get(i);
+
         showVideoHolder.txt_title.setText(showVideo.getName());
         showVideoHolder.txt_duration.setText(showVideo.getTime());
         showVideoHolder.txt_resolution.setText(showVideo.getResolution());
@@ -153,7 +157,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                         Toast.makeText(activity, "Removed from Favourites", Toast.LENGTH_LONG).show();
 
                     } else {
-                        Toast.makeText(activity, "Maarked as Favourite", Toast.LENGTH_LONG).show();
+                        Toast.makeText(activity, "Removed from Favourites", Toast.LENGTH_LONG).show();
                     }
                 } else {
                     showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
@@ -228,6 +232,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 intent.putExtra("source", s);
                 intent.putExtra("name", ss);
                 intent.putExtra("current", "" + showVideo.getId());
+                intent.putExtra("type", "all");
                 activity.startActivity(intent);
             }
         });
@@ -240,6 +245,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 intent.putExtra("source", s);
                 intent.putExtra("name", ss);
                 intent.putExtra("current", "" + showVideo.getId());
+                intent.putExtra("type", "all" );
 
                 activity.startActivity(intent);
             }
@@ -271,7 +277,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                                         "Yes",
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
-                                                Toast.makeText(activity, "Yes", Toast.LENGTH_SHORT).show();
+                                                Toast.makeText(activity, "Deleted", Toast.LENGTH_SHORT).show();
 
                                                 File file = new File(showVideo.getFolder());
                                                 if (file.exists()) {
@@ -334,7 +340,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         return filteredListttt.size();
     }
 
-
     //search
     @Override
     public Filter getFilter() {
@@ -360,13 +365,27 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 filterResults.values = filteredListttt;
                 return filterResults;
             }
-
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                 filteredListttt = (ArrayList<ShowVideo>) filterResults.values;
                 notifyDataSetChanged();
             }
         };
+    }
+
+
+    //connect recyclerview with scroll view data
+    @Override
+    public String getTextToShowInBubble(int pos) {
+        if (pos < 0 || pos >= showVideoArrayList.size())
+            return null;
+
+        String name = showVideoArrayList.get(pos).getName();
+
+        if (name == null || name.length() < 1)
+            return null;
+
+        return showVideoArrayList.get(pos).getName().substring(0, 1);
     }
 
 
@@ -390,8 +409,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             ll_select = itemView.findViewById(R.id.ll_select);
             ll_playvideo = itemView.findViewById(R.id.ll_playvideo);
             ll_favrt = itemView.findViewById(R.id.ll_favrt);
-
-
             //font style
             Typeface font = Typeface.createFromAsset(activity.getAssets(), "PoetsenOne-Regular.ttf");
             txt_title.setTypeface(font);
