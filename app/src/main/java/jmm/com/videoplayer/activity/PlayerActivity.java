@@ -52,7 +52,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     SeekBar seekBar, sb_brightness, sb_volume;
     int flag = 0, flag1 = 0;
     Utilities utils;
-    boolean touch = true;
+    boolean touch = false;
     Handler handler;
     String current, type;
     int currentindex;
@@ -347,6 +347,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
                 } else if (Helper.getScreenOrientation(activity) == "Portrait") {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                    touch=false;
                     ll_controls.setVisibility(View.GONE);
                     ll_videoname.setVisibility(View.GONE);
                 }
@@ -510,16 +511,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 viewName = HomeActivity.favrtArrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
             }
-            
+
             play();
 
         } else if (currentindex == size) {
             btn_next.setEnabled(false);
             Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_LONG).show();
         }
-
-
-
     }
 
     public void previous() {

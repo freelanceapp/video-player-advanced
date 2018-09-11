@@ -103,7 +103,7 @@ public class HomeActivity extends AppCompatActivity
     RecyclerViewFastScroller fastScroller;
     List<AlphabetItem> mAlphabetItems;
     List<String> mDataArray;
-
+    int tabnumber;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -199,8 +199,9 @@ public class HomeActivity extends AppCompatActivity
         navigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-
                 selecteditem = navigationSpinner.getSelectedItem().toString();
+                host.setCurrentTab(0);
+
 
                 if (selecteditem.equals(" All")) {
                     arrayList.clear();
@@ -211,6 +212,11 @@ public class HomeActivity extends AppCompatActivity
                     getVideoCatWise(selecteditem);
 
                 }
+
+                initialiseData();
+                //scroll with recylerview
+                fastScroller.setRecyclerView(rv_showvideo);
+                fastScroller.setUpAlphabet(mAlphabetItems);
             }
 
             @Override
@@ -418,7 +424,6 @@ public class HomeActivity extends AppCompatActivity
                 }
             });
             cursor.close();
-
             showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
@@ -657,7 +662,7 @@ public class HomeActivity extends AppCompatActivity
     //tab click funtionality
     @Override
     public void onTabChanged(String s) {
-        int tabnumber = 0;
+         tabnumber = 0;
 
         if (s.equals("Device")) {
             tabnumber = 0;
