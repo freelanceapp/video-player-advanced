@@ -18,6 +18,7 @@ import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
@@ -55,10 +56,14 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     Handler handler;
     String current, type;
     int currentindex;
-    int size, curVolume;
+    int size;
+    String curVolume;
     LinearLayout ll_brightness, ll_volume, ll_controls, ll_touch, ll_touch1, ll_videoname;
     int brightnessValue;
     private AudioManager audioManager = null;
+    long totalDuration;
+    boolean hasActiveHolder;
+    boolean pause;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +104,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         type = getIntent().getStringExtra("type");
         final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
         viewSize = preferences.getString("size", "");
-        Log.i("favrtsize", "" + viewSize);
+        curVolume = preferences.getString("volume", "");
+        txt_volume.setText(curVolume);
 
         //covnerting values
         size = Integer.parseInt(viewSize);
@@ -126,7 +132,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         sb_volume.setMax(audioManager
                 .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
-         curVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+        Log.i("volume", "" + curVolume);
         sb_volume.setProgress(audioManager
                 .getStreamVolume(AudioManager.STREAM_MUSIC));
 
@@ -263,6 +269,15 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         img_back_player.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                try {
+                    if (mediaPlayer.isPlaying()) {
+                        mediaPlayer.stop();
+                        mediaPlayer.release();
+                    }
+                    mediaPlayer = new MediaPlayer();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
             }
         });
@@ -306,14 +321,17 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     }
                     btnPlay.setImageResource(R.drawable.pause_hw);
                     flag = 0;
+                    pause = false;
+
                     play();
 
                 } else {
                     btnPlay.setImageResource(R.drawable.play_h);
                     flag = 1;
                     mediaPlayer.pause();
-
+                    pause = true;
                 }
+
 
             }
         });
@@ -340,7 +358,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             @Override
             public void onClick(View arg0) {
                 // TODO Auto-generated method stub
-                //
                 previous();
             }
         });
@@ -349,7 +366,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
             @Override
             public void onClick(View arg0) {
-
                 next();
 
             }
@@ -360,30 +376,61 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
         // TODO Auto-generated method stub
-
+//        try {
+//            if (mediaPlayer.isPlaying()) {
+//                mediaPlayer.stop();
+//                mediaPlayer.release();
+//            }
+//            mediaPlayer = new MediaPlayer();
+//            mediaPlayer.start();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        pause = false;
+        play();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
-        play();
+        mediaPlayer = new MediaPlayer();
+
+
+//        try {
+//            if (mediaPlayer.isPlaying()) {
+//                mediaPlayer.stop();
+//                mediaPlayer.release();
+//            }
+//            mediaPlayer = new MediaPlayer();
+//            mediaPlayer.start();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Override
     public void surfaceDestroyed(SurfaceHolder arg0) {
         // TODO Auto-generated method stub
-        mediaPlayer.pause();
+
+        try {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+            mediaPlayer = new MediaPlayer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 
     //function to play video
     public void play() {
-        try {
 
+        try {
             mediaPlayer.setDataSource(viewSource);
             mediaPlayer.setDisplay(videoHolder1);
             mediaPlayer.prepare();
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
         } catch (IllegalStateException e) {
@@ -391,30 +438,30 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        totalDuration = mediaPlayer.getDuration();
+        txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration - 1));
+        String end = txt_endtime.getText().toString();
+        Log.i("time", "" + end);
         mediaPlayer.start();
+
     }
 
     //set duration of seekbar
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
-            long totalDuration = mediaPlayer.getDuration();
+//            long totalDuration = mediaPlayer.getDuration();
             long currentDuration = mediaPlayer.getCurrentPosition();
 
             // Displaying Total Duration time
-            txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration));
+//            txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration));
 
             // Displaying time completed playing
             if (txt_starttime.getText().toString().equals(txt_endtime.getText().toString())) {
-
                 //autoplay next video
                 next();
-
-                // no autoplay
-//                btnPlay.setImageResource(R.drawable.play_h);
-//                flag = 1;
             } else {
                 txt_starttime.setText("" + utils.milliSecondsToTimer(currentDuration));
-
             }
 
             // Updating progress bar
@@ -434,6 +481,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     public void next() {
 
+
         currentindex++;
         btn_previous.setEnabled(true);
         //condition for next video...
@@ -451,24 +499,27 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-
             //change video url
             if (type.equals("all")) {
                 viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
-                play();
-            } else {
+
+            } else if (type.equals("favrt")) {
                 viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.favrtArrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
-                play();
             }
+            
+            play();
 
         } else if (currentindex == size) {
             btn_next.setEnabled(false);
             Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_LONG).show();
         }
+
+
+
     }
 
     public void previous() {
@@ -493,11 +544,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
+                pause = false;
                 play();
             } else {
                 viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.favrtArrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
+                pause = false;
                 play();
             }
 
@@ -513,14 +566,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     protected void onStop() {
         super.onStop();
         mediaPlayer.pause();
+        pause = true;
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-    }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        play();
     }
 
     @Override
@@ -533,8 +581,58 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onPause() {
         super.onPause();
+        mediaPlayer.pause();
+        pause = true;
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        try {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+            mediaPlayer = new MediaPlayer();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        try {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        play();
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+            audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+            img_mute.setImageResource(R.drawable.unmute);
+            return true;
+        }
+
+        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+
+            return true;
+        }
+
+        return super.onKeyDown(keyCode, event);
     }
 
     public void setScreenBrightness(int brightnessValue) {
@@ -552,7 +650,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             startActivity(intent);
         } else {
             brightnessValue = Settings.System.getInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, 0);
-
         }
         return brightnessValue;
     }
@@ -562,6 +659,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             sb_volume.setMax(audioManager
                     .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
+//            sb_volume.setMax(100);
             sb_volume.setProgress(audioManager
                     .getStreamVolume(AudioManager.STREAM_MUSIC));
 
@@ -582,6 +680,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     audioManager.setStreamVolume(AudioManager.STREAM_MUSIC,
                             progress, 0);
                     txt_volume.setText(progress + "%");
+
+                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(PlayerActivity.this);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putString("volume", "" + txt_volume.getText().toString());
+                    editor.apply();
+
                     img_mute.setImageResource(R.drawable.unmute);
 
                     if (txt_volume.getText().toString().equals("0%")) {
@@ -596,29 +700,5 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    @Override
-    public void onBackPressed() {
-        super.onBackPressed();
-        startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
-    }
-
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-            audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
-
-            img_mute.setImageResource(R.drawable.unmute);
-            return true;
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
-            return true;
-        }
-
-        return super.onKeyDown(keyCode, event);
     }
 }

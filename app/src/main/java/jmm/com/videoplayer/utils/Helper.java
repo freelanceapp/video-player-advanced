@@ -37,7 +37,14 @@ public class Helper {
         int hrs = (Integer.parseInt(t) / 3600000);
         int mns = (Integer.parseInt(t) / 60000) % 60000;
         int scs = Integer.parseInt(t) % 60000 / 1000;
-        return (hrs+":"+mns+":"+scs);
+
+        if (hrs == 0) {
+            return (mns+":"+scs);
+
+        }else {
+            return (hrs+":"+mns+":"+scs);
+
+        }
     }
 
 

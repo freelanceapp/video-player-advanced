@@ -149,6 +149,7 @@
             android:id="@+id/ll_controls"
             android:orientation="vertical">
 
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -160,7 +161,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    android:layout_weight=".45"
+                    android:layout_weight=".4"
                     android:gravity="center"
                     android:text="0"
                     android:textColor="@color/red" />
@@ -170,7 +171,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    android:layout_weight=".1"
+                    android:layout_weight=".2"
                     android:gravity="center" />
 
                 <TextView
@@ -178,11 +179,10 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_gravity="center"
-                    android:layout_weight=".45"
+                    android:layout_weight=".4"
                     android:gravity="center"
-                    android:text="0"
+                    android:text="0:00:00"
                     android:textColor="@color/red" />
-
 
             </LinearLayout>
 
@@ -204,7 +204,7 @@
                     android:gravity="center"
                     android:src="@drawable/unmute"
                     android:text="Rewind"
-                    android:textSize="10dp" />
+                    android:textSize="10sp" />
 
                 <ImageView
                     android:id="@+id/btn_previous"
@@ -215,7 +215,7 @@
                     android:gravity="center"
                     android:src="@drawable/back_h"
                     android:text="Rewind"
-                    android:textSize="10dp" />
+                    android:textSize="10sp" />
 
                 <ImageView
                     android:id="@+id/btn1"

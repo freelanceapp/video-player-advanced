@@ -69,7 +69,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             nameList.add(favrtArraylist.get(i).getName());
         }
 
-
     }
 
     @NonNull
@@ -84,16 +83,13 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     public void onBindViewHolder(@NonNull final ShowVideoHolder showVideoHolder, int i) {
 
         final ShowVideo showVideo = filteredListttt.get(i);
-
         showVideoHolder.txt_title.setText(showVideo.getName());
         showVideoHolder.txt_duration.setText(showVideo.getTime());
         showVideoHolder.txt_resolution.setText(showVideo.getResolution());
         Glide.with(activity).load("file://" + showVideo.getThumb())
                 .into(showVideoHolder.img_thumb);
 //        Glide.with(activity).load(Uri.fromFile(new File(showVideo.getThumb()))).into(showVideoHolder.img_thumb);
-
         showVideo.setId(String.valueOf(i));
-
         //set tag
         showVideoHolder.img_favrt.setTag(i);
 
@@ -246,7 +242,6 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 intent.putExtra("name", ss);
                 intent.putExtra("current", "" + showVideo.getId());
                 intent.putExtra("type", "all" );
-
                 activity.startActivity(intent);
             }
         });

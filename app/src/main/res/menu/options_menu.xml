@@ -7,7 +7,7 @@
         <item
             android:id="@+id/nav_dot_detail"
             android:icon="@drawable/homee"
-            android:title="Detail" />
+            android:title="Details" />
         <item
             android:id="@+id/nav_dot_delete"
             android:icon="@drawable/settingss"

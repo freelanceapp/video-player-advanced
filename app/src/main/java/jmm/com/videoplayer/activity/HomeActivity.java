@@ -30,6 +30,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.SearchView;
@@ -100,7 +101,7 @@ public class HomeActivity extends AppCompatActivity
     TabHost host;
     boolean isUnseleAllEnabled = false;
     RecyclerViewFastScroller fastScroller;
-    private List<AlphabetItem> mAlphabetItems;
+    List<AlphabetItem> mAlphabetItems;
     List<String> mDataArray;
 
     @Override
@@ -206,6 +207,7 @@ public class HomeActivity extends AppCompatActivity
                     getfolders();
                 } else {
                     progressDialog.show();
+                    arrayList.clear();
                     getVideoCatWise(selecteditem);
 
                 }
@@ -218,14 +220,12 @@ public class HomeActivity extends AppCompatActivity
 
         });
 
-
         rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
-                if (isMultiSelect)
+                if (isMultiSelect) {
                     multi_select(position);
-
-                else {
+                } else {
 
                     // openDocument(ApkList.get(position).getFilePath());
                 }
@@ -286,7 +286,6 @@ public class HomeActivity extends AppCompatActivity
                 .getSearchableInfo(getComponentName()));
         searchView.setMaxWidth(Integer.MAX_VALUE);
 
-
         //serchview textcolor
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             // Call some material design APIs here
@@ -302,6 +301,7 @@ public class HomeActivity extends AppCompatActivity
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
                 showVideoAdapter.getFilter().filter(query);
+                searchView.clearFocus();
                 return false;
             }
 
@@ -312,6 +312,7 @@ public class HomeActivity extends AppCompatActivity
                 return true;
             }
         });
+
         return true;
     }
 
@@ -428,7 +429,6 @@ public class HomeActivity extends AppCompatActivity
 
     //get video according to folder name
     public void getVideoCatWise(String s) {
-        arrayList.clear();
         String[] projection = {MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
 
@@ -447,17 +447,19 @@ public class HomeActivity extends AppCompatActivity
 
                     String da = Helper.LongToDate(date);
                     String tt = Helper.Time(duration);
-
-                    arrayList.add(new ShowVideo(thumb, da, tt, da, "5454", name, s));
+                    arrayList.add(new ShowVideo(thumb, da, tt, da, url, name, s));
 
                 }
 
             } while (cursor.moveToPrevious());
+            showVideoAdapter.notifyDataSetChanged();
+            initialiseData();
+            //scroll with recylerview
+            fastScroller.setRecyclerView(rv_showvideo);
+            fastScroller.setUpAlphabet(mAlphabetItems);
+
             progressDialog.dismiss();
             cursor.close();
-
-
-            showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -520,6 +522,7 @@ public class HomeActivity extends AppCompatActivity
                 mActionMode.setTitle("" + multiselect_list.size());
             } else {
                 mActionMode.setTitle("");
+                mActionMode.finish();
             }
 
             refreshAdapter();
@@ -804,11 +807,11 @@ public class HomeActivity extends AppCompatActivity
         if (mActionMode != null) {
             multiselect_list.clear();
 
-            if (multiselect_list.size() >= 0)
+            if (multiselect_list.size() >= 1)
                 mActionMode.setTitle("" + multiselect_list.size());
-            else
+            else {
                 mActionMode.setTitle("");
-
+            }
             //to change  the unselectAll  menu  to  selectAll
             selectMenuChnage();
             //to change  the unselectAll  menu  to  selectAll
@@ -824,6 +827,7 @@ public class HomeActivity extends AppCompatActivity
                     MenuItem item = context_menu.getItem(i);
                     if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
                         item.setTitle(getResources().getString(R.string.menu_unselectAll));
+
                         isUnseleAllEnabled = true;
                     }
                 }
@@ -833,6 +837,7 @@ public class HomeActivity extends AppCompatActivity
                     MenuItem item = context_menu.getItem(i);
                     if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
                         item.setTitle(getResources().getString(R.string.menu_selectAll));
+                        mActionMode.finish();
                         isUnseleAllEnabled = false;
                     }
                 }
@@ -849,6 +854,10 @@ public class HomeActivity extends AppCompatActivity
         favrtAdapter.notifyDataSetChanged();
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
 
     //get scroll data from array list
     public void initialiseData() {
