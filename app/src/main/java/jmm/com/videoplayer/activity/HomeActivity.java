@@ -16,6 +16,7 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -104,6 +105,7 @@ public class HomeActivity extends AppCompatActivity
     List<AlphabetItem> mAlphabetItems;
     List<String> mDataArray;
     int tabnumber;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -273,10 +275,16 @@ public class HomeActivity extends AppCompatActivity
             super.onBackPressed();
         }
 
-        Intent a = new Intent(Intent.ACTION_MAIN);
-        a.addCategory(Intent.CATEGORY_HOME);
-        a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        startActivity(a);
+        if (!searchView.isIconified()) {
+            searchView.onActionViewCollapsed();
+        } else {
+            Intent a = new Intent(Intent.ACTION_MAIN);
+            a.addCategory(Intent.CATEGORY_HOME);
+            a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(a);
+        }
+
+
     }
 
     @Override
@@ -306,7 +314,15 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public boolean onQueryTextSubmit(String query) {
                 // filter recycler view when query submitted
-                showVideoAdapter.getFilter().filter(query);
+                int tab = host.getCurrentTab();
+                if (tab == 0) {
+                    showVideoAdapter.getFilter().filter(query);
+                } else if (tab == 1) {
+                    favrtAdapter.getFilter().filter(query);
+                } else if (tab==2){
+                    searchView.setIconified(true);
+
+                }
                 searchView.clearFocus();
                 return false;
             }
@@ -314,7 +330,16 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public boolean onQueryTextChange(String query) {
                 // filter recycler view when text is changed
-                showVideoAdapter.getFilter().filter(query);
+                int tabb = host.getCurrentTab();
+
+                if (tabb == 0) {
+                    showVideoAdapter.getFilter().filter(query);
+                } else if (tabb == 1) {
+                    favrtAdapter.getFilter().filter(query);
+                } else if (tabb==2){
+                    searchView.setIconified(true);
+
+                }
                 return true;
             }
         });
@@ -434,7 +459,7 @@ public class HomeActivity extends AppCompatActivity
 
     //get video according to folder name
     public void getVideoCatWise(String s) {
-        String[] projection = {MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
+        String[] projection = {MediaStore.Video.Media.DURATION, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
 
         try {
@@ -449,10 +474,11 @@ public class HomeActivity extends AppCompatActivity
                     name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
                     duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                     date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATE_ADDED));
+                    resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RESOLUTION));
 
                     String da = Helper.LongToDate(date);
                     String tt = Helper.Time(duration);
-                    arrayList.add(new ShowVideo(thumb, da, tt, da, url, name, s));
+                    arrayList.add(new ShowVideo(thumb, resolution, tt, da, url, name, s));
 
                 }
 
@@ -662,7 +688,7 @@ public class HomeActivity extends AppCompatActivity
     //tab click funtionality
     @Override
     public void onTabChanged(String s) {
-         tabnumber = 0;
+        tabnumber = 0;
 
         if (s.equals("Device")) {
             tabnumber = 0;
@@ -816,6 +842,7 @@ public class HomeActivity extends AppCompatActivity
                 mActionMode.setTitle("" + multiselect_list.size());
             else {
                 mActionMode.setTitle("");
+                mActionMode.finish();
             }
             //to change  the unselectAll  menu  to  selectAll
             selectMenuChnage();
@@ -832,7 +859,6 @@ public class HomeActivity extends AppCompatActivity
                     MenuItem item = context_menu.getItem(i);
                     if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_selectAll))) {
                         item.setTitle(getResources().getString(R.string.menu_unselectAll));
-
                         isUnseleAllEnabled = true;
                     }
                 }
@@ -842,10 +868,12 @@ public class HomeActivity extends AppCompatActivity
                     MenuItem item = context_menu.getItem(i);
                     if (item.getTitle().toString().equalsIgnoreCase(getResources().getString(R.string.menu_unselectAll))) {
                         item.setTitle(getResources().getString(R.string.menu_selectAll));
-                        mActionMode.finish();
+
                         isUnseleAllEnabled = false;
                     }
                 }
+
+
 
             }
 

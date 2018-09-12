@@ -127,7 +127,7 @@
                             android:id="@+id/sb_brightness"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:max="100"
+                            android:max="255"
                             android:rotation="270"
                             android:visibility="invisible" />
 

@@ -1,5 +1,6 @@
 package jmm.com.videoplayer.activity;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.preference.PreferenceManager;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -112,7 +114,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         currentindex = Integer.parseInt(current);
 
         //audio
-        AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
 
         txt_playername.setText(viewName);
@@ -125,16 +127,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         //get current brightness
         int brightness = getScreenBrightness();
         sb_brightness.setProgress(brightness);
-        txt_brightness.setText(brightness + "%");
+        txt_brightness.setText(brightness/16 + "%");
 
         //audia seekbar
         volumeControl();
-        audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
-        sb_volume.setMax(audioManager
-                .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
-        Log.i("volume", "" + curVolume);
-        sb_volume.setProgress(audioManager
-                .getStreamVolume(AudioManager.STREAM_MUSIC));
 
         //change video on swipe
         videoSurface1.setOnTouchListener(new OnSwipeTouchListener(this) {
@@ -217,17 +213,15 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-
         mediaPlayer = new MediaPlayer();
         handler = new Handler();
         utils = new Utilities();
         updateProgressBar();
 
-
         sb_brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                txt_brightness.setText(i + "%");
+                txt_brightness.setText(i/16 + "%");
                 setScreenBrightness(i);
 
             }
@@ -332,7 +326,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     pause = true;
                 }
 
-
             }
         });
 
@@ -347,7 +340,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
                 } else if (Helper.getScreenOrientation(activity) == "Portrait") {
                     setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                    touch=false;
+                    touch = false;
                     ll_controls.setVisibility(View.GONE);
                     ll_videoname.setVisibility(View.GONE);
                 }
@@ -579,7 +572,16 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onPause() {
         super.onPause();
-        mediaPlayer.pause();
+        try {
+            if (mediaPlayer.isPlaying()) {
+                mediaPlayer.stop();
+                mediaPlayer.release();
+            }
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         pause = true;
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
@@ -615,17 +617,27 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 //        play();
     }
 
+    @TargetApi(28)
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
 
         if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
-            AudioManager audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
+
+            //high volume by device button
+            audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                    AudioManager.ADJUST_RAISE, AudioManager.FLAG_SHOW_UI);
+
             audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
             img_mute.setImageResource(R.drawable.unmute);
             return true;
         }
 
         if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+
+            //low volume by device button
+            audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
+                    AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
+
 
             return true;
         }
@@ -635,7 +647,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     public void setScreenBrightness(int brightnessValue) {
 
-        if (brightnessValue >= 0 && brightnessValue <= 100) {
+        if (brightnessValue >= 0 && brightnessValue <= 255) {
             Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightnessValue);
         }
     }
@@ -657,7 +669,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             audioManager = (AudioManager) getSystemService(Context.AUDIO_SERVICE);
             sb_volume.setMax(audioManager
                     .getStreamMaxVolume(AudioManager.STREAM_MUSIC));
-//            sb_volume.setMax(100);
             sb_volume.setProgress(audioManager
                     .getStreamVolume(AudioManager.STREAM_MUSIC));
 

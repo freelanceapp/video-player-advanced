@@ -39,17 +39,16 @@ import jmm.com.videoplayer.utils.DatabaseHelper;
 
 import static android.content.Context.MODE_PRIVATE;
 
-public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder> /*implements Filterable*/ {
+public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder> implements Filterable {
 
     ArrayList<Favrt> favrtArrayList = new ArrayList<>();
+    public ArrayList<Favrt> filteredListtttf = new ArrayList<>();
     Activity activity;
     DatabaseHelper databaseHelper;
 
-    public static ArrayList<ShowVideo> listWithoutDuplicates;
-
     public FavrtAdapter(ArrayList<Favrt> favrtArrayList, Activity activity) {
         this.favrtArrayList = favrtArrayList;
-//        this.filteredListttt = showVideoArrayList;
+        this.filteredListtttf = favrtArrayList;
         this.activity = activity;
         databaseHelper = new DatabaseHelper(activity);
     }
@@ -65,7 +64,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
     @Override
     public void onBindViewHolder(@NonNull final FavrtHolder favrtHolder, final int i) {
 
-        final Favrt favrt = favrtArrayList.get(i);
+        final Favrt favrt = filteredListtttf.get(i);
         favrtHolder.txt_title.setText(favrt.getName());
         favrtHolder.txt_duration.setText(favrt.getTime());
         favrtHolder.txt_resolutionfavrt.setText(favrt.getResolution());
@@ -179,45 +178,42 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
 
     @Override
     public int getItemCount() {
-        if (favrtArrayList == null)
+        if (filteredListtttf == null)
             return 0;
-        return favrtArrayList.size();
+        return filteredListtttf.size();
     }
 
-  /*  @Override
+    @Override
     public Filter getFilter() {
         return new Filter() {
             @Override
             protected FilterResults performFiltering(CharSequence charSequence) {
                 String charString = charSequence.toString();
                 if (charString.isEmpty()) {
-                    favrtArrayList = favrtArrayList;
+                    filteredListtttf = favrtArrayList;
                 } else {
-                    ArrayList<ShowVideo> filteredList = new ArrayList<>();
-                    for (ShowVideo row : showVideoArrayList) {
+                    ArrayList<Favrt> filteredList = new ArrayList<>();
+                    for (Favrt row : favrtArrayList) {
 
                         //condition to search for
                         if (row.getName().toLowerCase().contains(charString.toLowerCase())) {
                             filteredList.add(row);
                         }
                     }
-
-                    filteredListttt = filteredList;
+                    filteredListtttf = filteredList;
                 }
 
                 FilterResults filterResults = new FilterResults();
-                filterResults.values = filteredListttt;
+                filterResults.values = filteredListtttf;
                 return filterResults;
             }
-
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
-                filteredListttt = (ArrayList<ShowVideo>) filterResults.values;
+                filteredListtttf = (ArrayList<Favrt>) filterResults.values;
                 notifyDataSetChanged();
             }
         };
-    }*/
-
+    }
 
     public class FavrtHolder extends RecyclerView.ViewHolder {
 
