@@ -16,6 +16,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class Helper {
 
@@ -33,22 +34,28 @@ public class Helper {
     }
 
     //convert time
-    public static String Time(String t){
-        int hrs = (Integer.parseInt(t) / 3600000);
-        int mns = (Integer.parseInt(t) / 60000) % 60000;
-        int scs = Integer.parseInt(t) % 60000 / 1000;
 
-        if (hrs == 0) {
-            return (mns+":"+scs);
+    public static  String convertDuration(long duration) {
 
+        int dur = (int)duration;
+        int hrs = (dur / 3600000);
+
+        if(hrs > 0) {
+            return String.format("%02d:%02d:%02d",
+                    TimeUnit.MILLISECONDS.toHours(duration),
+                    TimeUnit.MILLISECONDS.toMinutes(duration) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration)),
+                    TimeUnit.MILLISECONDS.toSeconds(duration) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
         }else {
-            return (hrs+":"+mns+":"+scs);
-
+            return String.format("%02d:%02d",
+                    TimeUnit.MILLISECONDS.toMinutes(duration) -
+                            TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration)),
+                    TimeUnit.MILLISECONDS.toSeconds(duration) -
+                            TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration)));
         }
+
     }
-
-
-
 
     //share video
     public static void ShareSingleFile(String name, Context ctx, String authority)

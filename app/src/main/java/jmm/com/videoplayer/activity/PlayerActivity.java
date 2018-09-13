@@ -32,7 +32,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
 
 import jmm.com.videoplayer.R;
@@ -65,7 +67,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     private AudioManager audioManager = null;
     long totalDuration;
     boolean hasActiveHolder;
-    boolean pause;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,16 +100,56 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         Typeface font = Typeface.createFromAsset(getAssets(), "PoetsenOne-Regular.ttf");
         txt_playername.setTypeface(font);
 
-        //get values from intent
-        viewSource = getIntent().getStringExtra("source");
-        viewName = getIntent().getStringExtra("name");
-        current = getIntent().getStringExtra("current");
-        type = getIntent().getStringExtra("type");
-        final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        viewSize = preferences.getString("size", "");
-        curVolume = preferences.getString("volume", "");
-        txt_volume.setText(curVolume);
+        //
+        Intent intent = getIntent();
+        String action = intent.getAction();
+        String typee = intent.getType();
 
+
+        if (Intent.ACTION_VIEW.equals(action) && typee != null) {
+            if (typee.contains("video")) {
+                System.out.print("" + intent);
+
+                Toast.makeText(this, "pppppp", Toast.LENGTH_SHORT).show();
+                Uri videoUri = intent.getData();
+                System.out.print("" + videoUri);
+
+                String path = videoUri.getPath();
+                viewSource = path;
+                viewName = "prerna";
+
+
+//                current = getIntent().getStringExtra("current");
+//                type = getIntent().getStringExtra("type");
+//                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+//                viewSize = preferences.getString("size", "");
+//                curVolume = preferences.getString("volume", "");
+//                txt_volume.setText(curVolume);
+
+
+                return;
+            }
+        } else {
+            //get values from intent
+            viewSource = getIntent().getStringExtra("source");
+            viewName = getIntent().getStringExtra("name");
+            current = getIntent().getStringExtra("current");
+            type = getIntent().getStringExtra("type");
+
+
+            SharedPreferences preferences1 = PreferenceManager.getDefaultSharedPreferences(this);
+            SharedPreferences.Editor editor = preferences1.edit();
+            editor.putString("type", type);
+            editor.apply();
+
+            final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+            viewSize = preferences.getString("size", "");
+            curVolume = preferences.getString("volume", "");
+            txt_volume.setText(curVolume);
+        }
+
+
+        //
         //covnerting values
         size = Integer.parseInt(viewSize);
         currentindex = Integer.parseInt(current);
@@ -127,7 +168,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         //get current brightness
         int brightness = getScreenBrightness();
         sb_brightness.setProgress(brightness);
-        txt_brightness.setText(brightness/16 + "%");
+        txt_brightness.setText(brightness / 16 + "%");
 
         //audia seekbar
         volumeControl();
@@ -221,7 +262,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         sb_brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
-                txt_brightness.setText(i/16 + "%");
+                txt_brightness.setText(i / 16 + "%");
                 setScreenBrightness(i);
 
             }
@@ -315,7 +356,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     }
                     btnPlay.setImageResource(R.drawable.pause_hw);
                     flag = 0;
-                    pause = false;
 
                     play();
 
@@ -323,7 +363,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     btnPlay.setImageResource(R.drawable.play_h);
                     flag = 1;
                     mediaPlayer.pause();
-                    pause = true;
                 }
 
             }
@@ -380,14 +419,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
-        pause = false;
         play();
     }
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
         mediaPlayer = new MediaPlayer();
-
 
 //        try {
 //            if (mediaPlayer.isPlaying()) {
@@ -535,13 +572,11 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
-                pause = false;
                 play();
             } else {
                 viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.favrtArrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
-                pause = false;
                 play();
             }
 
@@ -557,7 +592,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     protected void onStop() {
         super.onStop();
         mediaPlayer.pause();
-        pause = true;
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     }
@@ -565,24 +599,25 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        mediaPlayer.pause();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        try {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-            }
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        pause = true;
+
+        mediaPlayer.pause();
+//        try {
+//            if (mediaPlayer.isPlaying()) {
+//                mediaPlayer.stop();
+//                mediaPlayer.release();
+//            }
+//            mediaPlayer = new MediaPlayer();
+//            mediaPlayer.start();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -604,17 +639,17 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onResume() {
         super.onResume();
-        try {
-            if (mediaPlayer.isPlaying()) {
-                mediaPlayer.stop();
-                mediaPlayer.release();
-            }
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.start();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        play();
+//        try {
+//            if (mediaPlayer.isPlaying()) {
+//                mediaPlayer.stop();
+//                mediaPlayer.release();
+//            }
+//            mediaPlayer = new MediaPlayer();
+//            mediaPlayer.start();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        play();
     }
 
     @TargetApi(28)

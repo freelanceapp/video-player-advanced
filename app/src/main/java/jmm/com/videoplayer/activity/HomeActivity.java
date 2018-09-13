@@ -1,10 +1,12 @@
 package jmm.com.videoplayer.activity;
 
 import android.Manifest;
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Color;
@@ -13,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
@@ -27,6 +30,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.view.ActionMode;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -105,6 +109,12 @@ public class HomeActivity extends AppCompatActivity
     List<AlphabetItem> mAlphabetItems;
     List<String> mDataArray;
     int tabnumber;
+    String type = "all";
+    String checkscreen;
+    SharedPreferences preferences;
+    int lastFirstVisiblePosition;
+
+    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,9 +128,6 @@ public class HomeActivity extends AppCompatActivity
 
         rv_showvideo = findViewById(R.id.rv_showvideo);
         fastScroller = findViewById(R.id.fast_scroller);
-
-
-//        initialiseUI();
 
         // set data on recyclerview
         rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
@@ -202,8 +209,27 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
                 selecteditem = navigationSpinner.getSelectedItem().toString();
-                host.setCurrentTab(0);
 
+
+                //condition for which tab open in what senario
+                if (!selecteditem.equals("...@#$%")) {
+                    host.setCurrentTab(0);
+                    if (type.equals("favrt")) {
+                        type = "favrt";
+
+                    } else {
+                        type = "";
+                    }
+                }
+                if (type.equals("all")) {
+                    host.setCurrentTab(0);
+                } else if (type.equals("favrt")) {
+                    host.setCurrentTab(1);
+                    type = "";
+                } else {
+                    host.setCurrentTab(0);
+
+                }
 
                 if (selecteditem.equals(" All")) {
                     arrayList.clear();
@@ -231,10 +257,14 @@ public class HomeActivity extends AppCompatActivity
         rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
             @Override
             public void onClick(View view, int position) {
+
+                InputMethodManager imm = (InputMethodManager) getSystemService(Activity.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+
                 if (isMultiSelect) {
                     multi_select(position);
                 } else {
-
                     // openDocument(ApkList.get(position).getFilePath());
                 }
             }
@@ -282,9 +312,31 @@ public class HomeActivity extends AppCompatActivity
             a.addCategory(Intent.CATEGORY_HOME);
             a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
             startActivity(a);
+
+
         }
 
 
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        SharedPreferences preferences1 = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences1.edit();
+        editor.putString("type", "all");
+        editor.apply();
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        SharedPreferences preferences1 = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor editor = preferences1.edit();
+        editor.putString("type", "all");
+        editor.apply();
     }
 
     @Override
@@ -319,7 +371,7 @@ public class HomeActivity extends AppCompatActivity
                     showVideoAdapter.getFilter().filter(query);
                 } else if (tab == 1) {
                     favrtAdapter.getFilter().filter(query);
-                } else if (tab==2){
+                } else if (tab == 2) {
                     searchView.setIconified(true);
 
                 }
@@ -336,7 +388,7 @@ public class HomeActivity extends AppCompatActivity
                     showVideoAdapter.getFilter().filter(query);
                 } else if (tabb == 1) {
                     favrtAdapter.getFilter().filter(query);
-                } else if (tabb==2){
+                } else if (tabb == 2) {
                     searchView.setIconified(true);
 
                 }
@@ -394,7 +446,6 @@ public class HomeActivity extends AppCompatActivity
     //get all folders contain video
     public void getfolders() {
 
-
         getfavrt();
 
         String[] projection = {MediaStore.Video.Media.SIZE, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
@@ -429,7 +480,8 @@ public class HomeActivity extends AppCompatActivity
                 //change bytes in MBKB
                 MBKB = Helper.humanReadableByteCount(fileSizeInBytes, true);
                 String da = Helper.LongToDate(date);
-                String tt = Helper.Time(duration);
+                String tt = Helper.convertDuration(Long.parseLong(duration));
+                Log.i("duration", duration);
 
                 ShowVideo showVideo = new ShowVideo();
                 showVideo.setThumb(thumb);
@@ -477,7 +529,7 @@ public class HomeActivity extends AppCompatActivity
                     resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RESOLUTION));
 
                     String da = Helper.LongToDate(date);
-                    String tt = Helper.Time(duration);
+                    String tt = Helper.convertDuration(Long.parseLong(duration));
                     arrayList.add(new ShowVideo(thumb, resolution, tt, da, url, name, s));
 
                 }
@@ -676,7 +728,6 @@ public class HomeActivity extends AppCompatActivity
     @Override
     public void onPageSelected(int i) {
         host.setCurrentTab(i);
-
     }
 
     @Override
@@ -873,8 +924,6 @@ public class HomeActivity extends AppCompatActivity
                     }
                 }
 
-
-
             }
 
         }
@@ -884,12 +933,27 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        favrtAdapter.notifyDataSetChanged();
+
+        ((LinearLayoutManager) rv_showvideo.getLayoutManager()).scrollToPosition(lastFirstVisiblePosition);
+
+        //back from play screen focus on recent tab
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        type = preferences.getString("type", "");
+
+        if (type.equals("all")) {
+            host.setCurrentTab(0);
+        } else if (type.equals("favrt")) {
+            host.setCurrentTab(1);
+        } else {
+            host.setCurrentTab(0);
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        lastFirstVisiblePosition = ((LinearLayoutManager) rv_showvideo.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+
     }
 
     //get scroll data from array list
@@ -913,6 +977,8 @@ public class HomeActivity extends AppCompatActivity
             }
         }
     }
+
+
 
 
 }
