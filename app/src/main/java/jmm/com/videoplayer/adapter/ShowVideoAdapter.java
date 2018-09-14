@@ -16,6 +16,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -45,7 +46,7 @@ import jmm.com.videoplayer.utils.DatabaseHelper;
 import jmm.com.videoplayer.utils.DetailDialog;
 import jmm.com.videoplayer.utils.Helper;
 
-public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder> implements Filterable,  RecyclerViewFastScroller.BubbleTextGetter {
+public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder> implements Filterable, RecyclerViewFastScroller.BubbleTextGetter {
 
     public ArrayList<ShowVideo> showVideoArrayList = new ArrayList<>();
     public ArrayList<ShowVideo> filteredListttt = new ArrayList<>();
@@ -127,12 +128,12 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 Integer position = (Integer) showVideoHolder.img_favrt.getTag();
 
                 if (showVideoArrayList.get(position).isFavrt()) {
-                  //  showVideoArrayList.get(pos).setFavrt(false);
+                    //  showVideoArrayList.get(pos).setFavrt(false);
 
                     showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
 
                 } else {
-                  //  showVideoArrayList.get(pos).setFavrt(true);
+                    //  showVideoArrayList.get(pos).setFavrt(true);
                     showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
 
 
@@ -241,7 +242,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 intent.putExtra("source", s);
                 intent.putExtra("name", ss);
                 intent.putExtra("current", "" + showVideo.getId());
-                intent.putExtra("type", "all" );
+                intent.putExtra("type", "all");
                 activity.startActivity(intent);
             }
         });
@@ -350,16 +351,31 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
                         //condition to search for
                         if (row.getName().toLowerCase().contains(charString.toLowerCase())) {
+
+                            Toast toast = Toast.makeText(activity, "No Video Found", Toast.LENGTH_SHORT);
+                            toast.cancel();
+
                             filteredList.add(row);
                         }
                     }
                     filteredListttt = filteredList;
+
                 }
+
+                int size = filteredListttt.size();
+                if (size == 0) {
+                    Toast toast = Toast.makeText(activity, "No Video Found", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
+                }
+
+
 
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredListttt;
                 return filterResults;
             }
+
             @Override
             protected void publishResults(CharSequence charSequence, FilterResults filterResults) {
                 filteredListttt = (ArrayList<ShowVideo>) filterResults.values;

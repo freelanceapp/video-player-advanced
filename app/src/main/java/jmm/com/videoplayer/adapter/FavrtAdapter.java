@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -197,10 +198,20 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
 
                         //condition to search for
                         if (row.getName().toLowerCase().contains(charString.toLowerCase())) {
+                            Toast toast = Toast.makeText(activity, "No Video Found", Toast.LENGTH_SHORT);
+                            toast.cancel();
+
                             filteredList.add(row);
                         }
                     }
                     filteredListtttf = filteredList;
+                }
+
+                int size = filteredListtttf.size();
+                if (size == 0) {
+                    Toast toast = Toast.makeText(activity, "No Video Found", Toast.LENGTH_SHORT);
+                    toast.setGravity(Gravity.CENTER, 0, 0);
+                    toast.show();
                 }
 
                 FilterResults filterResults = new FilterResults();

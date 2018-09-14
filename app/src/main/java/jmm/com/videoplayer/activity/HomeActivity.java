@@ -109,12 +109,9 @@ public class HomeActivity extends AppCompatActivity
     List<AlphabetItem> mAlphabetItems;
     List<String> mDataArray;
     int tabnumber;
-    String type = "all";
-    String checkscreen;
+    String type;
     SharedPreferences preferences;
     int lastFirstVisiblePosition;
-
-    LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -135,6 +132,8 @@ public class HomeActivity extends AppCompatActivity
 
         showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
         rv_showvideo.setAdapter(showVideoAdapter);
+
+        rv_showvideo.smoothScrollToPosition(lastFirstVisiblePosition);
 
 
         progressDialog = new ProgressDialog(HomeActivity.this);
@@ -228,7 +227,6 @@ public class HomeActivity extends AppCompatActivity
                     type = "";
                 } else {
                     host.setCurrentTab(0);
-
                 }
 
                 if (selecteditem.equals(" All")) {
@@ -322,22 +320,18 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        SharedPreferences preferences1 = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = preferences1.edit();
-        editor.putString("type", "all");
-        editor.apply();
+
+//        SharedPreferences.Editor editor = preferences.edit();
+//        editor.putString("type", "all");
+//        editor.apply();
 
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-
-        SharedPreferences preferences1 = PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor editor = preferences1.edit();
-        editor.putString("type", "all");
-        editor.apply();
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -368,12 +362,14 @@ public class HomeActivity extends AppCompatActivity
                 // filter recycler view when query submitted
                 int tab = host.getCurrentTab();
                 if (tab == 0) {
+
                     showVideoAdapter.getFilter().filter(query);
+
+
                 } else if (tab == 1) {
                     favrtAdapter.getFilter().filter(query);
                 } else if (tab == 2) {
                     searchView.setIconified(true);
-
                 }
                 searchView.clearFocus();
                 return false;
@@ -747,6 +743,9 @@ public class HomeActivity extends AppCompatActivity
             rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
             showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
             rv_showvideo.setAdapter(showVideoAdapter);
+//            ((LinearLayoutManager) rv_showvideo.getLayoutManager()).scrollToPositionWithOffset(7,0);
+//            rv_showvideo.smoothScrollToPosition(lastFirstVisiblePosition);
+
 
         } else if (s.equals("favourite")) {
             tabnumber = 1;
@@ -933,9 +932,6 @@ public class HomeActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-
-        ((LinearLayoutManager) rv_showvideo.getLayoutManager()).scrollToPosition(lastFirstVisiblePosition);
-
         //back from play screen focus on recent tab
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         type = preferences.getString("type", "");
@@ -953,6 +949,16 @@ public class HomeActivity extends AppCompatActivity
     protected void onPause() {
         super.onPause();
         lastFirstVisiblePosition = ((LinearLayoutManager) rv_showvideo.getLayoutManager()).findFirstCompletelyVisibleItemPosition();
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        type = preferences.getString("type", "");
+
+        if (type.equals("all")) {
+            host.setCurrentTab(0);
+        } else if (type.equals("favrt")) {
+            host.setCurrentTab(1);
+        } else {
+            host.setCurrentTab(0);
+        }
 
     }
 
@@ -977,8 +983,6 @@ public class HomeActivity extends AppCompatActivity
             }
         }
     }
-
-
 
 
 }
