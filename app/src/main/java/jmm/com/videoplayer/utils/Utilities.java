@@ -24,7 +24,8 @@ public class Utilities {
         if(seconds < 10){
             secondsString = "0" + seconds;
         }else{
-            secondsString = "" + seconds;}
+            secondsString = "" + (seconds);
+        }
 
         finalTimerString = finalTimerString + minutes + ":" + secondsString;
 

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -17,10 +18,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
+import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.design.widget.NavigationView;
@@ -38,6 +42,7 @@ import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TabHost;
@@ -76,7 +81,7 @@ public class HomeActivity extends AppCompatActivity
     static ArrayList<ShowVideo> arrayList = new ArrayList<>();
     static ArrayList<Favrt> favrtArrayList = new ArrayList<>();
     ArrayList<Favrt> duplicatefavrtarray = new ArrayList<>();
-    RecyclerView rv_showvideo, rv_showfavrt;
+    public static RecyclerView rv_showvideo, rv_showfavrt;
     ShowVideoAdapter showVideoAdapter;
     Spinner navigationSpinner;
     String url;
@@ -105,18 +110,28 @@ public class HomeActivity extends AppCompatActivity
     ViewPager pager;
     TabHost host;
     boolean isUnseleAllEnabled = false;
-    RecyclerViewFastScroller fastScroller;
+    public static RecyclerViewFastScroller fastScroller;
     List<AlphabetItem> mAlphabetItems;
     List<String> mDataArray;
     int tabnumber;
     String type;
     SharedPreferences preferences;
     int lastFirstVisiblePosition;
+    public static LinearLayout ll_novideo;
+
+
+    //for permission
+    String[] permissionsRequired = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE};
+    private static final int PERMISSION_CALLBACK_CONSTANT = 100;
+    private static final int REQUEST_PERMISSION_SETTING = 101;
+    private SharedPreferences permissionStatus;
+    private boolean sentToSettings = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
+
         databaseHelper = new DatabaseHelper(this);
         toolbar = findViewById(R.id.toolbar);
         tabs = findViewById(android.R.id.tabs);
@@ -124,6 +139,7 @@ public class HomeActivity extends AppCompatActivity
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         rv_showvideo = findViewById(R.id.rv_showvideo);
+        ll_novideo = findViewById(R.id.ll_novideo);
         fastScroller = findViewById(R.id.fast_scroller);
 
         // set data on recyclerview
@@ -171,7 +187,7 @@ public class HomeActivity extends AppCompatActivity
         host.setOnTabChangedListener(this);
 
 
-        if ((ContextCompat.checkSelfPermission(getApplicationContext(),
+      /*  if ((ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getApplicationContext(),
                 Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
             if ((ActivityCompat.shouldShowRequestPermissionRationale(HomeActivity.this,
@@ -186,11 +202,92 @@ public class HomeActivity extends AppCompatActivity
         } else {
             getfolders();
 
-            /*
+            *//*
             Refrence for scrolling by alphabets with recyclerview
             https://github.com/viethoa/recyclerview-alphabet-fast-scroller-android
-             */
+             *//*
 
+            initialiseData();
+            //scroll with recylerview
+            fastScroller.setRecyclerView(rv_showvideo);
+            fastScroller.setUpAlphabet(mAlphabetItems);
+        }*/
+
+
+        navigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
+
+
+
+        permissionStatus = getSharedPreferences("permissionStatus", MODE_PRIVATE);
+        if (ActivityCompat.checkSelfPermission(this, permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, permissionsRequired[2]) != PackageManager.PERMISSION_GRANTED
+                ) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[0])
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[1])
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[2])
+                    ) {
+                //Show Information about why you need the permission
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Need Multiple Permissions");
+                builder.setMessage("This app needs Contacts and Location permissions.");
+
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        ActivityCompat.requestPermissions(HomeActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+
+            } else if (permissionStatus.getBoolean(permissionsRequired[0], false)) {
+                //Previously Permission Request was cancelled with 'Dont Ask Again',
+                // Redirect to Settings after showing Information about why you need the permission
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Need Multiple Permissions");
+                builder.setMessage("This app needs Storage and settings permissions.");
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        sentToSettings = true;
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                        intent.setData(uri);
+                        startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+                        Toast.makeText(getBaseContext(), "Go to Permissions to Grant Storage and settings permissions.", Toast.LENGTH_LONG).show();
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            } else {
+                //just request the permission
+                ActivityCompat.requestPermissions(this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+            }
+
+
+            SharedPreferences.Editor editor = permissionStatus.edit();
+            editor.putBoolean(permissionsRequired[0], false);
+            editor.commit();
+        } else {
+            //You already have the permission, just go ahead.
+//            Toast.makeText(ctx, "you already have permission", Toast.LENGTH_SHORT).show();
+
+            getfolders();
             initialiseData();
             //scroll with recylerview
             fastScroller.setRecyclerView(rv_showvideo);
@@ -198,10 +295,10 @@ public class HomeActivity extends AppCompatActivity
         }
 
 
-        navigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
 
-        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
-        toolbar.addView(navigationSpinner, 0);
+
+//        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
+//        toolbar.addView(navigationSpinner, 0);
 
 
         navigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -296,6 +393,7 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onBackPressed() {
+
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -318,12 +416,76 @@ public class HomeActivity extends AppCompatActivity
     }
 
     @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_PERMISSION_SETTING) {
+            if (ActivityCompat.checkSelfPermission(this, permissionsRequired[0]) == PackageManager.PERMISSION_GRANTED) {
+                //Got Permission
+                getfolders();
+                initialiseData();
+                //scroll with recylerview
+                fastScroller.setRecyclerView(rv_showvideo);
+                fastScroller.setUpAlphabet(mAlphabetItems);            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_CALLBACK_CONSTANT) {
+            //check if all permissions are granted
+            boolean allgranted = false;
+            for (int i = 0; i < grantResults.length; i++) {
+                if (grantResults[i] == PackageManager.PERMISSION_GRANTED) {
+                    allgranted = true;
+                } else {
+                    allgranted = false;
+                    break;
+                }
+            }
+
+            if (allgranted) {
+                getfolders();
+                initialiseData();
+                //scroll with recylerview
+                fastScroller.setRecyclerView(rv_showvideo);
+                fastScroller.setUpAlphabet(mAlphabetItems);
+
+            } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[0])
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[1])
+            || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[2])
+            ) {
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Need Permissions");
+                builder.setMessage(this.getString(R.string.app_name) + " app needs storage permission.");
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        ActivityCompat.requestPermissions(HomeActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            } else {
+                Toast.makeText(this, "Unable to get Permission", Toast.LENGTH_LONG).show();
+            }
+        }
+
+
+    }
+
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
-
-//        SharedPreferences.Editor editor = preferences.edit();
-//        editor.putString("type", "all");
-//        editor.apply();
 
     }
 
@@ -461,6 +623,8 @@ public class HomeActivity extends AppCompatActivity
                 Collections.sort(listWithoutDuplicates);
 
 
+
+
                 foldername = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
                 url = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
                 thumb = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Thumbnails.DATA));
@@ -497,6 +661,10 @@ public class HomeActivity extends AppCompatActivity
                 }
             });
             cursor.close();
+
+            navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
+            toolbar.addView(navigationSpinner, 0);
+
             showVideoAdapter.notifyDataSetChanged();
 
         } catch (Exception e) {
@@ -507,7 +675,7 @@ public class HomeActivity extends AppCompatActivity
 
     //get video according to folder name
     public void getVideoCatWise(String s) {
-        String[] projection = {MediaStore.Video.Media.DURATION, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
+        String[] projection = {MediaStore.Video.Media.SIZE, MediaStore.Video.Media.DURATION, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
 
         try {
@@ -523,10 +691,16 @@ public class HomeActivity extends AppCompatActivity
                     duration = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
                     date = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.VideoColumns.DATE_ADDED));
                     resolution = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.RESOLUTION));
+                    size = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE));
 
+                    //convert size in bytes
+                    long fileSizeInBytes = Long.parseLong(size);
+
+                    //change bytes in MBKB
+                    MBKB = Helper.humanReadableByteCount(fileSizeInBytes, true);
                     String da = Helper.LongToDate(date);
                     String tt = Helper.convertDuration(Long.parseLong(duration));
-                    arrayList.add(new ShowVideo(thumb, resolution, tt, da, url, name, s));
+                    arrayList.add(new ShowVideo(thumb, resolution, tt, da, url, name, MBKB));
 
                 }
 
@@ -982,6 +1156,22 @@ public class HomeActivity extends AppCompatActivity
                 mAlphabetItems.add(new AlphabetItem(i, word, false));
             }
         }
+    }
+
+    public static void setBlanklayout() {
+
+        ll_novideo.setVisibility(View.VISIBLE);
+        rv_showvideo.setVisibility(View.GONE);
+        fastScroller.setVisibility(View.GONE);
+
+    }
+
+    public static void removesetBlanklayout() {
+
+        ll_novideo.setVisibility(View.GONE);
+        rv_showvideo.setVisibility(View.VISIBLE);
+        fastScroller.setVisibility(View.VISIBLE);
+
     }
 
 

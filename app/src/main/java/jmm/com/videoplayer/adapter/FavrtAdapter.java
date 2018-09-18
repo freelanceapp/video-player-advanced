@@ -46,7 +46,8 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
     public ArrayList<Favrt> filteredListtttf = new ArrayList<>();
     Activity activity;
     DatabaseHelper databaseHelper;
-
+    public static int size=0;
+    Toast toast;
     public FavrtAdapter(ArrayList<Favrt> favrtArrayList, Activity activity) {
         this.favrtArrayList = favrtArrayList;
         this.filteredListtttf = favrtArrayList;
@@ -91,6 +92,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
                 intent.putExtra("name", ss);
                 intent.putExtra("current", "" +i);
                 intent.putExtra("type", "favrt");
+                size=favrtArrayList.size();
                 activity.startActivity(intent);
             }
         });
@@ -104,6 +106,8 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
                 intent.putExtra("name", ss);
                 intent.putExtra("current", "" + i);
                 intent.putExtra("type", "favrt");
+                size=favrtArrayList.size();
+
                 activity.startActivity(intent);
             }
         });
@@ -130,7 +134,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
                             "Yes",
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
-                                    Toast.makeText(activity, "Favourite removed", Toast.LENGTH_SHORT).show();
+//                                    Toast.makeText(activity, "Favourite removed", Toast.LENGTH_SHORT).show();
                                     Integer deletedRows = databaseHelper.deletedata(favrt.getName());
 
                                     favrtArrayList.remove(i);
@@ -198,8 +202,6 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
 
                         //condition to search for
                         if (row.getName().toLowerCase().contains(charString.toLowerCase())) {
-                            Toast toast = Toast.makeText(activity, "No Video Found", Toast.LENGTH_SHORT);
-                            toast.cancel();
 
                             filteredList.add(row);
                         }
@@ -209,9 +211,10 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
 
                 int size = filteredListtttf.size();
                 if (size == 0) {
-                    Toast toast = Toast.makeText(activity, "No Video Found", Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.CENTER, 0, 0);
                     toast.show();
+                }else {
+                    toast.cancel();
                 }
 
                 FilterResults filterResults = new FilterResults();

@@ -7,6 +7,7 @@
     android:layout_marginRight="5dp"
     android:orientation="vertical">
 
+
     <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/card_view"
         android:layout_width="match_parent"
@@ -17,10 +18,10 @@
         card_view:cardCornerRadius="8dp">
 
         <LinearLayout
+            android:id="@+id/ll_select"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:id="@+id/ll_select"
 
             android:weightSum="1">
 
@@ -61,10 +62,10 @@
                 android:weightSum="1">
 
                 <LinearLayout
+                    android:id="@+id/ll_playvideo"
                     android:layout_width="match_parent"
                     android:layout_height="110dp"
                     android:layout_weight=".2"
-                    android:id="@+id/ll_playvideo"
                     android:orientation="vertical"
                     android:weightSum="1">
 
@@ -79,9 +80,9 @@
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
+                        android:layout_gravity="center"
                         android:layout_marginBottom="5dp"
                         android:layout_weight=".7"
-                        android:layout_gravity="center"
                         android:gravity="center"
                         android:orientation="horizontal"
                         android:weightSum="1">
@@ -90,30 +91,28 @@
                             android:id="@+id/txt_duration"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_weight=".5"
                             android:layout_gravity="center"
+                            android:layout_weight=".5"
                             android:gravity="center|left"
-                            android:textSize="12dp"
-                             />
+                            android:textSize="12dp" />
 
                         <TextView
                             android:id="@+id/txt_resolution"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
-                            android:layout_weight=".5"
                             android:layout_gravity="center"
+                            android:layout_weight=".5"
                             android:gravity="center"
-                            android:textSize="12dp"
-                            />
+                            android:textSize="12dp" />
                     </LinearLayout>
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/ll_favrt"
                     android:layout_width="match_parent"
                     android:layout_height="110dp"
                     android:layout_gravity="center"
                     android:layout_weight=".4"
-                    android:id="@+id/ll_favrt"
                     android:gravity="center"
                     android:orientation="vertical">
 
@@ -132,12 +131,12 @@
                     android:orientation="vertical">
 
                     <CheckBox
+                        android:id="@+id/chbx"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:visibility="gone"
-                        android:checked="true"
                         android:buttonTint="@color/red"
-                        android:id="@+id/chbx"/>
+                        android:checked="true"
+                        android:visibility="gone" />
 
                     <ImageView
                         android:id="@+id/img_options"

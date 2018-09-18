@@ -42,14 +42,31 @@
                     android:layout_height="match_parent"
                     tools:context=".MainActivity">
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/ll_novideo"
+                        android:visibility="gone"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="25dp"
+                            android:text="NO VIDEO FOUND" />
+
+                    </LinearLayout>
+
                     <android.support.v7.widget.RecyclerView
                         android:id="@+id/rv_showvideo"
                         android:layout_width="match_parent"
+                        android:visibility="visible"
                         android:layout_height="match_parent"/>
 
                     <com.viethoa.RecyclerViewFastScroller
                         android:id="@+id/fast_scroller"
                         android:layout_width="20dp"
+                        android:visibility="visible"
                         android:layout_height="match_parent"
                         android:layout_alignParentEnd="true"
                         android:layout_alignParentRight="true"/>

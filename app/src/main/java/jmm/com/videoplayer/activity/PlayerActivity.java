@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.graphics.Typeface;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
@@ -17,6 +18,8 @@ import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -35,9 +38,12 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 
 import jmm.com.videoplayer.R;
+import jmm.com.videoplayer.adapter.FavrtAdapter;
+import jmm.com.videoplayer.adapter.ShowVideoAdapter;
 import jmm.com.videoplayer.model.ShowVideo;
 import jmm.com.videoplayer.utils.Helper;
 import jmm.com.videoplayer.utils.OnSwipeTouchListener;
@@ -67,12 +73,19 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     private AudioManager audioManager = null;
     long totalDuration;
     boolean hasActiveHolder;
+    SharedPreferences preferences;
+    int outsideAppFlag = 0;
+    String durationoutside;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+        mediaPlayer = new MediaPlayer();
+        handler = new Handler();
+        utils = new Utilities();
 
         btnPlay = findViewById(R.id.btn1);
         btn_previous = findViewById(R.id.btn_previous);
@@ -100,7 +113,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         Typeface font = Typeface.createFromAsset(getAssets(), "PoetsenOne-Regular.ttf");
         txt_playername.setTypeface(font);
 
-        //
+        //play video from outside the application
         Intent intent = getIntent();
         String action = intent.getAction();
         String typee = intent.getType();
@@ -108,29 +121,30 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
         if (Intent.ACTION_VIEW.equals(action) && typee != null) {
             if (typee.contains("video")) {
-                System.out.print("" + intent);
 
-                Toast.makeText(this, "pppppp", Toast.LENGTH_SHORT).show();
+                btn_next.setEnabled(false);
+                btn_previous.setEnabled(false);
+                outsideAppFlag = 1;
                 Uri videoUri = intent.getData();
-                System.out.print("" + videoUri);
+                String[] proj = {MediaStore.Video.Media.DATA, MediaStore.Video.Media.DURATION, MediaStore.Video.Media.DISPLAY_NAME};
+                Cursor cursor = this.getContentResolver().query(videoUri, proj, null, null, null);
+                int column_index = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA);
+                int column_index1 = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION);
+                int column_index2 = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DISPLAY_NAME);
+                cursor.moveToNext();
+                String path = cursor.getString(column_index);
+                durationoutside = cursor.getString(column_index1);
+                String name = cursor.getString(column_index2);
 
-                String path = videoUri.getPath();
                 viewSource = path;
-                viewName = "prerna";
+                viewName = name;
+                viewSize = "1";
+                current = "0";
 
-
-//                current = getIntent().getStringExtra("current");
-//                type = getIntent().getStringExtra("type");
-//                final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-//                viewSize = preferences.getString("size", "");
-//                curVolume = preferences.getString("volume", "");
-//                txt_volume.setText(curVolume);
-
-
-                return;
             }
         } else {
             //get values from intent
+            outsideAppFlag = 0;
             viewSource = getIntent().getStringExtra("source");
             viewName = getIntent().getStringExtra("name");
             current = getIntent().getStringExtra("current");
@@ -143,9 +157,17 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             editor.apply();
 
             final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-            viewSize = preferences.getString("size", "");
+//            viewSize = preferences.getString("size", "");
             curVolume = preferences.getString("volume", "");
             txt_volume.setText(curVolume);
+
+            //size of arraylist for forward video
+            if (type.equals("all")) {
+                viewSize = String.valueOf(ShowVideoAdapter.size);
+            } else {
+                viewSize = String.valueOf(FavrtAdapter.size);
+
+            }
         }
 
 
@@ -254,9 +276,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-        mediaPlayer = new MediaPlayer();
-        handler = new Handler();
-        utils = new Utilities();
+
         updateProgressBar();
 
         sb_brightness.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -409,48 +429,58 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     public void surfaceChanged(SurfaceHolder arg0, int arg1, int arg2, int arg3) {
         // TODO Auto-generated method stub
-//        try {
-//            if (mediaPlayer.isPlaying()) {
-//                mediaPlayer.stop();
-//                mediaPlayer.release();
-//            }
-//            mediaPlayer = new MediaPlayer();
-//            mediaPlayer.start();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-        play();
-    }
-
-    @Override
-    public void surfaceCreated(SurfaceHolder holder) {
-        mediaPlayer = new MediaPlayer();
-
-//        try {
-//            if (mediaPlayer.isPlaying()) {
-//                mediaPlayer.stop();
-//                mediaPlayer.release();
-//            }
-//            mediaPlayer = new MediaPlayer();
-//            mediaPlayer.start();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder arg0) {
-        // TODO Auto-generated method stub
-
-        try {
+/*        try {
             if (mediaPlayer.isPlaying()) {
                 mediaPlayer.stop();
                 mediaPlayer.release();
             }
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.start();
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
+
+        PrintMSg("surfaceChanged executed");
+        play();
+
+    }
+
+    @Override
+    public void surfaceCreated(SurfaceHolder holder) {
+
+//        try {
+//            if (mediaPlayer.isPlaying()) {
+//                mediaPlayer.stop();
+//                mediaPlayer.release();
+//            }
+//            mediaPlayer = new MediaPlayer();
+//            mediaPlayer.start();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        mediaPlayer.setDisplay(videoHolder1);
+        PrintMSg("surface created executed");
+        System.out.print("in surface created");
+
+
+    }
+
+    @Override
+    public void surfaceDestroyed(SurfaceHolder arg0) {
+        // TODO Auto-generated method stub
+        mediaPlayer.pause();
+//        try {
+//            if (mediaPlayer.isPlaying()) {
+//                mediaPlayer.stop();
+//                mediaPlayer.release();
+//            }
+//            mediaPlayer = new MediaPlayer();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+
+        PrintMSg("surface destroyed executed");
+        System.out.print("in surface destroyed");
     }
 
 
@@ -458,6 +488,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     public void play() {
 
         try {
+
             mediaPlayer.setDataSource(viewSource);
             mediaPlayer.setDisplay(videoHolder1);
             mediaPlayer.prepare();
@@ -470,10 +501,15 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             e.printStackTrace();
         }
 
-        totalDuration = mediaPlayer.getDuration();
-        txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration - 1));
-        String end = txt_endtime.getText().toString();
-        Log.i("time", "" + end);
+
+        if (outsideAppFlag == 1) {
+            totalDuration = Long.parseLong(durationoutside);
+
+        } else {
+            totalDuration = mediaPlayer.getDuration();
+
+        }
+        txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration));
         mediaPlayer.start();
 
     }
@@ -482,7 +518,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     private Runnable mUpdateTimeTask = new Runnable() {
         public void run() {
 //            long totalDuration = mediaPlayer.getDuration();
-            long currentDuration = mediaPlayer.getCurrentPosition();
+            long currentDuration = (mediaPlayer.getCurrentPosition());
+            Log.i("time", "" + currentDuration);
 
             // Displaying Total Duration time
 //            txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration));
@@ -492,7 +529,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 //autoplay next video
                 next();
             } else {
-                txt_starttime.setText("" + utils.milliSecondsToTimer(currentDuration));
+                txt_starttime.setText("" + utils.milliSecondsToTimer(currentDuration + 1));
             }
 
             // Updating progress bar
@@ -511,8 +548,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     }
 
     public void next() {
-
-
         currentindex++;
         btn_previous.setEnabled(true);
         //condition for next video...
@@ -531,22 +566,27 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 e.printStackTrace();
             }
             //change video url
-            if (type.equals("all")) {
+            if (type.equals("all")&& outsideAppFlag==0) {
                 viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
 
-            } else if (type.equals("favrt")) {
+
+            } else if (type.equals("favrt")&&outsideAppFlag==0) {
                 viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder();
                 viewName = HomeActivity.favrtArrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
+
             }
 
             play();
 
         } else if (currentindex == size) {
             btn_next.setEnabled(false);
-            Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_LONG).show();
+            Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_SHORT).show();
+        } else if (currentindex > size) {
+            Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_SHORT).show();
+            currentindex--;
         }
     }
 
@@ -582,7 +622,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
         } else if (currentindex == -1) {
             btn_previous.setEnabled(false);
-            Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_LONG).show();
+            Toast.makeText(PlayerActivity.this, "No Video Available", Toast.LENGTH_SHORT).show();
 
         }
 
@@ -591,33 +631,27 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onStop() {
         super.onStop();
-        mediaPlayer.pause();
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+        PrintMSg("Onstop executed");
 
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        mediaPlayer.pause();
-        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+    protected void onStart() {
+        super.onStart();
+        PrintMSg("onstart executed");
     }
+
+    private void PrintMSg(String msg) {
+        System.out.print("" + msg);
+    }
+
 
     @Override
     protected void onPause() {
         super.onPause();
 
         mediaPlayer.pause();
-//        try {
-//            if (mediaPlayer.isPlaying()) {
-//                mediaPlayer.stop();
-//                mediaPlayer.release();
-//            }
-//            mediaPlayer = new MediaPlayer();
-//            mediaPlayer.start();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -630,26 +664,63 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 mediaPlayer.release();
             }
             mediaPlayer = new MediaPlayer();
+            mediaPlayer.start();
         } catch (Exception e) {
             e.printStackTrace();
         }
-        startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
+
+        if (outsideAppFlag==1){
+            Intent a = new Intent(Intent.ACTION_MAIN);
+            a.addCategory(Intent.CATEGORY_HOME);
+            a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            startActivity(a);
+
+        }else{
+            startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
+
+        }
+    }
+
+
+    @Override
+    protected void onRestart() {
+       // play();
+        super.onRestart();
+        PrintMSg("OnRestatt executed");
     }
 
     @Override
     protected void onResume() {
+
         super.onResume();
-//        try {
-//            if (mediaPlayer.isPlaying()) {
-//                mediaPlayer.stop();
-//                mediaPlayer.release();
-//            }
-//            mediaPlayer = new MediaPlayer();
-//            mediaPlayer.start();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
         play();
+        PrintMSg("OnResume executed");
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+
+//        Toast.makeText(this, "resume", Toast.LENGTH_SHORT).show();
+        PhoneStateListener phoneStateListener = new PhoneStateListener() {
+            @Override
+            public void onCallStateChanged(int state, String incomingNumber) {
+                if (state == TelephonyManager.CALL_STATE_RINGING) {
+                    //Incoming call: Pause music
+                    mediaPlayer.pause();
+                } else if (state == TelephonyManager.CALL_STATE_IDLE) {
+                    //Not in call: Play music
+                    play();
+
+                } else if (state == TelephonyManager.CALL_STATE_OFFHOOK) {
+                    //A call is dialing, active or on hold
+                    mediaPlayer.pause();
+
+                }
+                super.onCallStateChanged(state, incomingNumber);
+            }
+        };
+        TelephonyManager mgr = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+        if (mgr != null) {
+            mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
+        }
+
     }
 
     @TargetApi(28)
@@ -672,7 +743,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             //low volume by device button
             audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                     AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
-
 
             return true;
         }
@@ -725,7 +795,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                             progress, 0);
                     txt_volume.setText(progress + "%");
 
-                    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(PlayerActivity.this);
+                    preferences = PreferenceManager.getDefaultSharedPreferences(PlayerActivity.this);
                     SharedPreferences.Editor editor = preferences.edit();
                     editor.putString("volume", "" + txt_volume.getText().toString());
                     editor.apply();
