@@ -270,7 +270,8 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                                         "Yes",
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
-//                                                Toast.makeText(activity, "Deleted", Toast.LENGTH_SHORT).show();
+//                                                Toast.makeText(activity, "Deleted",
+// Toast.LENGTH_SHORT).show();
 
                                                 File file = new File(showVideo.getFolder());
                                                 if (file.exists()) {
@@ -282,6 +283,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                                                 }
 
                                                 removeItem(Integer.valueOf(showVideo.getId()));
+                                                HomeActivity.initialiseData();
+                                                HomeActivity.fastScroller.setUpAlphabet(HomeActivity.mAlphabetItems);
+
                                                 dialog.cancel();
                                             }
                                         });
@@ -345,32 +349,13 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 } else {
                     ArrayList<ShowVideo> filteredList = new ArrayList<>();
                     for (ShowVideo row : showVideoArrayList) {
-
                         //condition to search for
                         if (row.getName().toLowerCase().contains(charString.toLowerCase())) {
-                            toast.cancel();
                             filteredList.add(row);
                         }
                     }
                     filteredListttt = filteredList;
-
                 }
-
-                int size = filteredListttt.size();
-                if (size == 0) {
-
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-//                    HomeActivity.setBlanklayout();
-                    Log.i("toast", "when size is 0");
-                } else {
-
-                    toast.cancel();
-//                    HomeActivity.removesetBlanklayout();
-
-
-                }
-
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredListttt;
                 return filterResults;

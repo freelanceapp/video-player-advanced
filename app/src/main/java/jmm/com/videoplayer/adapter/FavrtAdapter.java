@@ -208,15 +208,6 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
                     }
                     filteredListtttf = filteredList;
                 }
-
-                int size = filteredListtttf.size();
-                if (size == 0) {
-                    toast.setGravity(Gravity.CENTER, 0, 0);
-                    toast.show();
-                }else {
-                    toast.cancel();
-                }
-
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredListtttf;
                 return filterResults;

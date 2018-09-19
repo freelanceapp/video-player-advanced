@@ -8,18 +8,18 @@
             android:id="@+id/nav_home"
             android:icon="@drawable/homee"
             android:title="Home" />
-        <item
+       <!-- <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/settingss"
-            android:title="Settings" />
+            android:title="Settings" />-->
         <item
             android:id="@+id/nav_share"
             android:icon="@drawable/sharee"
             android:title="Share App" />
-        <item
+        <!--<item
             android:id="@+id/nav_aboutus"
             android:icon="@drawable/aboutus"
-            android:title="About Us" />
+            android:title="About Us" />-->
     </group>
 
 

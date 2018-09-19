@@ -39,6 +39,7 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -111,7 +112,7 @@ public class HomeActivity extends AppCompatActivity
     TabHost host;
     boolean isUnseleAllEnabled = false;
     public static RecyclerViewFastScroller fastScroller;
-    List<AlphabetItem> mAlphabetItems;
+    public static List<AlphabetItem> mAlphabetItems;
     List<String> mDataArray;
     int tabnumber;
     String type;
@@ -134,22 +135,12 @@ public class HomeActivity extends AppCompatActivity
 
         databaseHelper = new DatabaseHelper(this);
         toolbar = findViewById(R.id.toolbar);
-        tabs = findViewById(android.R.id.tabs);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayShowTitleEnabled(false);
 
         rv_showvideo = findViewById(R.id.rv_showvideo);
         ll_novideo = findViewById(R.id.ll_novideo);
         fastScroller = findViewById(R.id.fast_scroller);
-
-        // set data on recyclerview
-        rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-
-
-        showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
-        rv_showvideo.setAdapter(showVideoAdapter);
-
-        rv_showvideo.smoothScrollToPosition(lastFirstVisiblePosition);
 
 
         progressDialog = new ProgressDialog(HomeActivity.this);
@@ -160,6 +151,13 @@ public class HomeActivity extends AppCompatActivity
         //tab host
         host = findViewById(R.id.tabHost);
         pager = findViewById(R.id.viewpager);
+        tabs = findViewById(android.R.id.tabs);
+
+        // set data on recyclerview
+        rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+        showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
+        rv_showvideo.setAdapter(showVideoAdapter);
+
 
         host.setup();
         //Tab 1
@@ -175,130 +173,26 @@ public class HomeActivity extends AppCompatActivity
         host.addTab(spec);
 
 
-        //Tab 3
+     /*   //Tab 3
         spec = host.newTabSpec("Cloud");
         spec.setContent(R.id.tab3);
         spec.setIndicator("Cloud");
         host.addTab(spec);
-
+*/
 
 //        pager.setAdapter(new MyPagerAdapter(this));
         pager.setOnPageChangeListener(this);
         host.setOnTabChangedListener(this);
 
 
-      /*  if ((ContextCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(getApplicationContext(),
-                Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)) {
-            if ((ActivityCompat.shouldShowRequestPermissionRationale(HomeActivity.this,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE)) && (ActivityCompat.shouldShowRequestPermissionRationale(HomeActivity.this,
-                    Manifest.permission.READ_EXTERNAL_STORAGE))) {
-
-            } else {
-                ActivityCompat.requestPermissions(HomeActivity.this,
-                        new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},
-                        REQUEST_PERMISSIONS);
-            }
-        } else {
-            getfolders();
-
-            *//*
-            Refrence for scrolling by alphabets with recyclerview
-            https://github.com/viethoa/recyclerview-alphabet-fast-scroller-android
-             *//*
-
-            initialiseData();
-            //scroll with recylerview
-            fastScroller.setRecyclerView(rv_showvideo);
-            fastScroller.setUpAlphabet(mAlphabetItems);
-        }*/
-
+        //navigation sppiner working
 
         navigationSpinner = new Spinner(getSupportActionBar().getThemedContext());
 
+        getPermissions();
 
-
-        permissionStatus = getSharedPreferences("permissionStatus", MODE_PRIVATE);
-        if (ActivityCompat.checkSelfPermission(this, permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED
-                || ActivityCompat.checkSelfPermission(this, permissionsRequired[2]) != PackageManager.PERMISSION_GRANTED
-                ) {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[0])
-                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[1])
-                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[2])
-                    ) {
-                //Show Information about why you need the permission
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Need Multiple Permissions");
-                builder.setMessage("This app needs Contacts and Location permissions.");
-
-                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        ActivityCompat.requestPermissions(HomeActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
-
-            } else if (permissionStatus.getBoolean(permissionsRequired[0], false)) {
-                //Previously Permission Request was cancelled with 'Dont Ask Again',
-                // Redirect to Settings after showing Information about why you need the permission
-                AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Need Multiple Permissions");
-                builder.setMessage("This app needs Storage and settings permissions.");
-                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                        sentToSettings = true;
-                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                        Uri uri = Uri.fromParts("package", getPackageName(), null);
-                        intent.setData(uri);
-                        startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
-                        Toast.makeText(getBaseContext(), "Go to Permissions to Grant Storage and settings permissions.", Toast.LENGTH_LONG).show();
-                    }
-                });
-                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.cancel();
-                    }
-                });
-                builder.show();
-            } else {
-                //just request the permission
-                ActivityCompat.requestPermissions(this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
-            }
-
-
-            SharedPreferences.Editor editor = permissionStatus.edit();
-            editor.putBoolean(permissionsRequired[0], false);
-            editor.commit();
-        } else {
-            //You already have the permission, just go ahead.
-//            Toast.makeText(ctx, "you already have permission", Toast.LENGTH_SHORT).show();
-
-            getfolders();
-            initialiseData();
-            //scroll with recylerview
-            fastScroller.setRecyclerView(rv_showvideo);
-            fastScroller.setUpAlphabet(mAlphabetItems);
-        }
-
-
-
-
-//        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
-//        toolbar.addView(navigationSpinner, 0);
+        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
+        toolbar.addView(navigationSpinner, 0);
 
 
         navigationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
@@ -348,6 +242,11 @@ public class HomeActivity extends AppCompatActivity
             }
 
         });
+
+
+        //        navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
+//        toolbar.addView(navigationSpinner, 0);
+
 
         rv_showvideo.addOnItemTouchListener(new RecyclerItemClickListener(this, rv_showvideo, new RecyclerItemClickListener.ClickListener() {
             @Override
@@ -423,10 +322,11 @@ public class HomeActivity extends AppCompatActivity
             if (ActivityCompat.checkSelfPermission(this, permissionsRequired[0]) == PackageManager.PERMISSION_GRANTED) {
                 //Got Permission
                 getfolders();
-                initialiseData();
+               /* initialiseData();
                 //scroll with recylerview
                 fastScroller.setRecyclerView(rv_showvideo);
-                fastScroller.setUpAlphabet(mAlphabetItems);            }
+                fastScroller.setUpAlphabet(mAlphabetItems);     */
+            }
         }
     }
 
@@ -447,15 +347,15 @@ public class HomeActivity extends AppCompatActivity
 
             if (allgranted) {
                 getfolders();
-                initialiseData();
+              /*  initialiseData();
                 //scroll with recylerview
                 fastScroller.setRecyclerView(rv_showvideo);
-                fastScroller.setUpAlphabet(mAlphabetItems);
+                fastScroller.setUpAlphabet(mAlphabetItems);*/
 
             } else if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[0])
                     || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[1])
-            || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[2])
-            ) {
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[2])
+                    ) {
 
                 AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("Need Permissions");
@@ -524,15 +424,12 @@ public class HomeActivity extends AppCompatActivity
                 // filter recycler view when query submitted
                 int tab = host.getCurrentTab();
                 if (tab == 0) {
-
                     showVideoAdapter.getFilter().filter(query);
-
-
                 } else if (tab == 1) {
                     favrtAdapter.getFilter().filter(query);
-                } else if (tab == 2) {
+                } /*else if (tab == 2) {
                     searchView.setIconified(true);
-                }
+                }*/
                 searchView.clearFocus();
                 return false;
             }
@@ -546,10 +443,10 @@ public class HomeActivity extends AppCompatActivity
                     showVideoAdapter.getFilter().filter(query);
                 } else if (tabb == 1) {
                     favrtAdapter.getFilter().filter(query);
-                } else if (tabb == 2) {
+                }/* else if (tabb == 2) {
                     searchView.setIconified(true);
 
-                }
+                }*/
                 return true;
             }
         });
@@ -581,19 +478,19 @@ public class HomeActivity extends AppCompatActivity
         if (id == R.id.nav_home) {
             // Handle the camera action
 
-        } else if (id == R.id.nav_settings) {
+        }/* else if (id == R.id.nav_settings) {
             startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
-        } else if (id == R.id.nav_share) {
+        } */else if (id == R.id.nav_share) {
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.putExtra(Intent.EXTRA_TEXT,
                     "Google Play Store Link");
             sendIntent.setType("text/plain");
             startActivity(sendIntent);
-        } else if (id == R.id.nav_aboutus) {
+        } /*else if (id == R.id.nav_aboutus) {
             startActivity(new Intent(HomeActivity.this, AboutUsActivity.class));
 
-        }
+        }*/
 
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
@@ -605,6 +502,7 @@ public class HomeActivity extends AppCompatActivity
     public void getfolders() {
 
         getfavrt();
+
 
         String[] projection = {MediaStore.Video.Media.SIZE, MediaStore.Video.Media.RESOLUTION, MediaStore.Video.Media.DURATION, MediaStore.Video.Thumbnails.DATA, MediaStore.Video.VideoColumns.DATE_ADDED, MediaStore.Video.Media._ID, MediaStore.Video.VideoColumns.DATA, MediaStore.Video.Media.DISPLAY_NAME, MediaStore.Video.Media.BUCKET_DISPLAY_NAME};
         Cursor cursor = this.getContentResolver().query(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, projection, null, null, null);
@@ -621,8 +519,6 @@ public class HomeActivity extends AppCompatActivity
                 listWithoutDuplicates = new ArrayList<>(listToSet);
 //                listWithoutDuplicates.addAll(listToSet);
                 Collections.sort(listWithoutDuplicates);
-
-
 
 
                 foldername = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.BUCKET_DISPLAY_NAME));
@@ -662,10 +558,14 @@ public class HomeActivity extends AppCompatActivity
             });
             cursor.close();
 
-            navigationSpinner.setAdapter(new CustomeSpinner(this, R.layout.custom_spinner, listWithoutDuplicates));
-            toolbar.addView(navigationSpinner, 0);
-
             showVideoAdapter.notifyDataSetChanged();
+
+
+            //for scrollbar data
+            initialiseData();
+            //scroll with recylerview
+            fastScroller.setRecyclerView(rv_showvideo);
+            fastScroller.setUpAlphabet(mAlphabetItems);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -777,9 +677,7 @@ public class HomeActivity extends AppCompatActivity
                 mActionMode.setTitle("");
                 mActionMode.finish();
             }
-
             refreshAdapter();
-
         }
     }
 
@@ -844,9 +742,9 @@ public class HomeActivity extends AppCompatActivity
                     multiselect_list.add(arrayList.get(i));
                 }
             }
-            if (multiselect_list.size() > 0)
+            if (multiselect_list.size() > 0) {
                 mActionMode.setTitle("" + multiselect_list.size());
-            else
+            } else
                 mActionMode.setTitle("");
 
             refreshAdapter();
@@ -918,7 +816,7 @@ public class HomeActivity extends AppCompatActivity
             showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
             rv_showvideo.setAdapter(showVideoAdapter);
 //            ((LinearLayoutManager) rv_showvideo.getLayoutManager()).scrollToPositionWithOffset(7,0);
-//            rv_showvideo.smoothScrollToPosition(lastFirstVisiblePosition);
+            rv_showvideo.smoothScrollToPosition(7);
 
 
         } else if (s.equals("favourite")) {
@@ -979,10 +877,10 @@ public class HomeActivity extends AppCompatActivity
             rv_showfavrt.setAdapter(favrtAdapter);
             favrtAdapter.notifyDataSetChanged();
 
-        } else {
+        } /*else {
             tabnumber = 2;
 
-        }
+        }*/
         pager.setCurrentItem(tabnumber);
 
     }
@@ -1062,9 +960,10 @@ public class HomeActivity extends AppCompatActivity
         if (mActionMode != null) {
             multiselect_list.clear();
 
-            if (multiselect_list.size() >= 1)
+            if (multiselect_list.size() >= 1) {
                 mActionMode.setTitle("" + multiselect_list.size());
-            else {
+
+            } else {
                 mActionMode.setTitle("");
                 mActionMode.finish();
             }
@@ -1100,6 +999,7 @@ public class HomeActivity extends AppCompatActivity
             }
 
         }
+        Helper.hideKeyboard(HomeActivity.this);
         invalidateOptionsMenu();
     }
 
@@ -1137,7 +1037,7 @@ public class HomeActivity extends AppCompatActivity
     }
 
     //get scroll data from array list
-    public void initialiseData() {
+    public static void initialiseData() {
         //Recycler view data
 //        mDataArray = DataHelper.getAlphabetData();
 
@@ -1158,21 +1058,78 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-    public static void setBlanklayout() {
+    public void getPermissions() {
+        permissionStatus = getSharedPreferences("permissionStatus", MODE_PRIVATE);
+        if (ActivityCompat.checkSelfPermission(this, permissionsRequired[0]) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, permissionsRequired[1]) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, permissionsRequired[2]) != PackageManager.PERMISSION_GRANTED
+                ) {
 
-        ll_novideo.setVisibility(View.VISIBLE);
-        rv_showvideo.setVisibility(View.GONE);
-        fastScroller.setVisibility(View.GONE);
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[0])
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[1])
+                    || ActivityCompat.shouldShowRequestPermissionRationale(this, permissionsRequired[2])
+                    ) {
+                //Show Information about why you need the permission
 
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Need Multiple Permissions");
+                builder.setMessage("This app needs Contacts and Location permissions.");
+
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        ActivityCompat.requestPermissions(HomeActivity.this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+
+            } else if (permissionStatus.getBoolean(permissionsRequired[0], false)) {
+                //Previously Permission Request was cancelled with 'Dont Ask Again',
+                // Redirect to Settings after showing Information about why you need the permission
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("Need Multiple Permissions");
+                builder.setMessage("This app needs Storage and settings permissions.");
+                builder.setPositiveButton("Grant", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                        sentToSettings = true;
+                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                        Uri uri = Uri.fromParts("package", getPackageName(), null);
+                        intent.setData(uri);
+                        startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
+                        Toast.makeText(getBaseContext(), "Go to Permissions to Grant Storage and settings permissions.", Toast.LENGTH_LONG).show();
+                    }
+                });
+                builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            } else {
+                //just request the permission
+                ActivityCompat.requestPermissions(this, permissionsRequired, PERMISSION_CALLBACK_CONSTANT);
+            }
+
+
+            SharedPreferences.Editor editor = permissionStatus.edit();
+            editor.putBoolean(permissionsRequired[0], false);
+            editor.commit();
+        } else {
+            //You already have the permission, just go ahead.
+            getfolders();
+        }
     }
 
-    public static void removesetBlanklayout() {
-
-        ll_novideo.setVisibility(View.GONE);
-        rv_showvideo.setVisibility(View.VISIBLE);
-        fastScroller.setVisibility(View.VISIBLE);
-
-    }
 
 
 }
