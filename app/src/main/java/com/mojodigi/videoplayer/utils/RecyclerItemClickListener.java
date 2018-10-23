@@ -1,4 +1,4 @@
-package jmm.com.videoplayer.utils;
+package com.mojodigi.videoplayer.utils;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;

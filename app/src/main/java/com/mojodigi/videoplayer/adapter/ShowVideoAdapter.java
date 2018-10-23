@@ -1,12 +1,10 @@
-package jmm.com.videoplayer.adapter;
+package com.mojodigi.videoplayer.adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
-import android.graphics.Typeface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -15,8 +13,6 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.PopupMenu;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -30,21 +26,20 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.mojodigi.videoplayer.activity.HomeActivity;
 import com.viethoa.RecyclerViewFastScroller;
 
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
-import jmm.com.videoplayer.R;
-import jmm.com.videoplayer.activity.HomeActivity;
-import jmm.com.videoplayer.activity.PlayerActivity;
-import jmm.com.videoplayer.model.Favrt;
-import jmm.com.videoplayer.model.ShowVideo;
-import jmm.com.videoplayer.utils.DatabaseHelper;
-import jmm.com.videoplayer.utils.DetailDialog;
-import jmm.com.videoplayer.utils.Helper;
+import com.mojodigi.videoplayer.R;
+import com.mojodigi.videoplayer.activity.PlayerActivity;
+import com.mojodigi.videoplayer.model.Favrt;
+import com.mojodigi.videoplayer.model.ShowVideo;
+import com.mojodigi.videoplayer.utils.DatabaseHelper;
+import com.mojodigi.videoplayer.utils.DetailDialog;
+import com.mojodigi.videoplayer.utils.Helper;
 
 public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.ShowVideoHolder> implements Filterable, RecyclerViewFastScroller.BubbleTextGetter {
 
@@ -100,7 +95,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         if (showVideoArrayList.get(pos).isFavrt()) {
             //showVideoArrayList.get(pos).setFavrt(false);
-            showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
+            showVideoHolder.img_favrt.setImageResource(R.drawable.blueheartfill);
         } else {
             //showVideoArrayList.get(pos).setFavrt(true);
             showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
@@ -114,7 +109,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         //setting favourite
         if (nameList.contains(showVideo.getName())) {
-            showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
+            showVideoHolder.img_favrt.setImageResource(R.drawable.blueheartfill);
 //            showVideoHolder.img_favrt.setTag(activity);
         }
 
@@ -132,7 +127,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 if (showVideoArrayList.get(position).isFavrt()) {
                     //  showVideoArrayList.get(pos).setFavrt(false);
 
-                    showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.blueheartfill);
 
                 } else {
                     //  showVideoArrayList.get(pos).setFavrt(true);
@@ -157,7 +152,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 //                        Toast.makeText(activity, "Removed from Favourites", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.blueheartfill);
                     showVideo.setFavrt(true);
                     boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution(), showVideo.getData(), showVideo.getSize());
 
@@ -173,7 +168,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
             }
         });
-        showVideoHolder.ll_favrt.setOnClickListener(new View.OnClickListener() {
+      /*  showVideoHolder.ll_favrt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
@@ -212,10 +207,14 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
 
             }
-        });
+        });*/
+
+
         showVideoHolder.img_thumb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+
 
                 String s = showVideo.getFolder().trim();
                 String ss = showVideo.getName();
@@ -229,6 +228,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 activity.startActivity(intent);
             }
         });
+
         showVideoHolder.ll_playvideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -271,8 +271,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                                         "Yes",
                                         new DialogInterface.OnClickListener() {
                                             public void onClick(DialogInterface dialog, int id) {
-//                                                Toast.makeText(activity, "Deleted",
-// Toast.LENGTH_SHORT).show();
+
 
                                                 File file = new File(showVideo.getFolder().trim());
                                                 if (file.exists()) {
@@ -321,10 +320,12 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         //multiple select checkbox visibililty
         if (selected_ApkList.contains(showVideoArrayList.get(i))) {
-            showVideoHolder.chbx.setVisibility(View.VISIBLE);  // for time being checkbox not shown   layout backgroud being changed
+            showVideoHolder.chbx.setVisibility(View.VISIBLE);
+            // for time being checkbox not shown   layout backgroud being changed
 //            showVideoHolder.ll_select.setBackgroundColor(activity.getResources().getColor(R.color.orange));
         } else {
-            showVideoHolder.chbx.setVisibility(View.INVISIBLE); // for time being checkbox not shown   layout backgroud being changed
+            showVideoHolder.chbx.setVisibility(View.GONE);
+            // for time being checkbox not shown   layout backgroud being changed
 //            showVideoHolder.ll_select.setBackgroundColor(activity.getResources().getColor(R.color.grey));
         }
 
@@ -356,6 +357,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                         }
                     }
                     filteredListttt = filteredList;
+
                 }
                 FilterResults filterResults = new FilterResults();
                 filterResults.values = filteredListttt;
@@ -387,7 +389,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
     public class ShowVideoHolder extends RecyclerView.ViewHolder {
 
-        ImageView img_thumb, img_favrt, img_options;
+        ImageView img_thumb, img_favrt, img_options, img_imgthumb;
         TextView txt_title, txt_duration, txt_resolution;
         CheckBox chbx;
         LinearLayout ll_select, ll_playvideo, ll_favrt;
@@ -404,12 +406,16 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
             chbx = itemView.findViewById(R.id.chbx);
             ll_select = itemView.findViewById(R.id.ll_select);
             ll_playvideo = itemView.findViewById(R.id.ll_playvideo);
-            ll_favrt = itemView.findViewById(R.id.ll_favrt);
+//            ll_favrt = itemView.findViewById(R.id.ll_favrt);
+//            img_imgthumb = itemView.findViewById(R.id.img_imgthumb);
+
             //font style
-            Typeface font = Typeface.createFromAsset(activity.getAssets(), "PoetsenOne-Regular.ttf");
-            txt_title.setTypeface(font);
-            txt_duration.setTypeface(font);
-            txt_resolution.setTypeface(font);
+//            Typeface font = Typeface.createFromAsset(activity.getAssets(), "corbel.ttf");
+            txt_title.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
+            txt_duration.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
+            txt_resolution.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
+
+
 
         }
     }

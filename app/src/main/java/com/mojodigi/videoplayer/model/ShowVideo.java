@@ -1,4 +1,4 @@
-package jmm.com.videoplayer.model;
+package com.mojodigi.videoplayer.model;
 
 public class ShowVideo {
 

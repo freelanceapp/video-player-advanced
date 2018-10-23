@@ -1,4 +1,4 @@
-package jmm.com.videoplayer;
+package com.mojodigi.videoplayer;
 
 import org.junit.Test;
 

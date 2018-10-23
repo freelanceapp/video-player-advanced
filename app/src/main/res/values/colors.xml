@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#8E44AD</color>
-    <color name="colorPrimaryDark">#402342</color>
-    <color name="colorAccent">#8E44AD</color>
-    <color name="purple">#8E44AD</color>
+    <color name="colorPrimary">#2995e2</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#2995e2</color>
+    <color name="purple">#2995e2</color>
+    <!-- <color name="colorPrimary">#d40c5a</color>
+    <color name="colorPrimaryDark">#000000</color>
+    <color name="colorAccent">#d40c5a</color>
+    <color name="purple">#d40c5a</color>-->
     <color name="lightpurp">#2d8e44ad</color>
     <color name="pink">#d81354</color>
     <color name="red">#e5333e</color>
     <color name="redlight">#32e5333e</color>
     <color name="orange">#f76f15</color>
-    <color name="grey">#ebebeb</color>
-    <color name="blacklight">#20000000</color>
+    <color name="grey">#00000000</color>
+    <color name="blacklight">#00000000</color>
+    <color name="data">#7e000000</color>
     <color name="white">#ffffff</color>
-    <color name="alphabet_text_selected_color">#e5333e</color>
+    <color name="whitetrans">#67ffffff</color>
+    <color name="whitetranss">#7effffff</color>
+    <color name="alphabet_text_selected_color">#2995e2</color>
     <color name="alphabet_background_color">#ffffff</color>
     <color name="alphabet_background_border_color">#ffffff</color>
 </resources>

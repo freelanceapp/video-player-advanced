@@ -1,4 +1,4 @@
-package jmm.com.videoplayer.utils;
+package com.mojodigi.videoplayer.utils;
 
 import android.app.Activity;
 import android.app.Dialog;
@@ -8,7 +8,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
 
-import jmm.com.videoplayer.R;
+import com.mojodigi.videoplayer.R;
 
 public class DetailDialog extends Dialog implements
         android.view.View.OnClickListener {

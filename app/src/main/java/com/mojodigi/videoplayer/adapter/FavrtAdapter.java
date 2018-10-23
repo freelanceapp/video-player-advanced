@@ -1,20 +1,13 @@
-package jmm.com.videoplayer.adapter;
+package com.mojodigi.videoplayer.adapter;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Typeface;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,18 +20,13 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
-import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 
-import jmm.com.videoplayer.R;
-import jmm.com.videoplayer.activity.HomeActivity;
-import jmm.com.videoplayer.activity.PlayerActivity;
-import jmm.com.videoplayer.model.Favrt;
-import jmm.com.videoplayer.model.ShowVideo;
-import jmm.com.videoplayer.utils.DatabaseHelper;
-
-import static android.content.Context.MODE_PRIVATE;
+import com.mojodigi.videoplayer.R;
+import com.mojodigi.videoplayer.activity.PlayerActivity;
+import com.mojodigi.videoplayer.model.Favrt;
+import com.mojodigi.videoplayer.utils.DatabaseHelper;
+import com.mojodigi.videoplayer.utils.Helper;
 
 public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder> implements Filterable {
 
@@ -85,6 +73,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
         favrtHolder.img_thumb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 String s = favrt.getFolder().trim();
                 String ss = favrt.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
@@ -236,10 +225,10 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
             img_favrtfavrt = itemView.findViewById(R.id.img_favrtfavrt);
             ll_favrtplay = itemView.findViewById(R.id.ll_favrtplay);
 
-            Typeface font = Typeface.createFromAsset(activity.getAssets(), "PoetsenOne-Regular.ttf");
-            txt_title.setTypeface(font);
-            txt_duration.setTypeface(font);
-            txt_resolutionfavrt.setTypeface(font);
+//            Typeface font = Typeface.createFromAsset(activity.getAssets(), "corbel.ttf");
+            txt_title.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
+            txt_duration.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
+            txt_resolutionfavrt.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
 
 
         }

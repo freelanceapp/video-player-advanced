@@ -1,4 +1,4 @@
-package jmm.com.videoplayer;
+package com.mojodigi.videoplayer;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("jmm.com.videoplayer", appContext.getPackageName());
+        assertEquals("com.mojodigi.videoplayer", appContext.getPackageName());
     }
 }

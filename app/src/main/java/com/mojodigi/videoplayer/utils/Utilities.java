@@ -1,4 +1,4 @@
-package jmm.com.videoplayer.utils;
+package com.mojodigi.videoplayer.utils;
 
 public class Utilities {
 

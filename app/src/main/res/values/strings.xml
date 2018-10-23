@@ -5,7 +5,7 @@
     <string name="nav_header_title">Android Studio</string>
     <string name="nav_header_subtitle">android.studio@android.com</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings"></string>
+    <string name="action_settings">Search</string>
 
     <string-array name="category">
         <item>Top News</item>
@@ -16,7 +16,22 @@
         <item>Movies</item>
     </string-array>
 
-    <string name="file_provider_authority" translatable="false">jmm.com.videoplayer.provider</string>
-    <string name="menu_selectAll" >SELECT ALL</string>
-    <string name="menu_unselectAll" >UNSELECT ALL</string>
+    <string name="file_provider_authority" translatable="false">com.mojodigi.videoplayer.provider</string>
+    <string name="menu_selectAll">SELECT ALL</string>
+    <string name="menu_unselectAll">UNSELECT ALL</string>
+
+
+    <!-- demo app ids -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <string name="banner_add_id">ca-app-pub-3940256099942544/6300978111</string>
+    <!-- demo app ids -->
+
+
+    <!--actual  app id -->
+
+    <!--<string name="admob_app_id">ca-app-pub-5603925957932903~9934699880</string>-->
+    <!--<string name="banner_add_id">ca-app-pub-5603925957932903/7008497103</string>-->
+
+    <!--actualapp id -->
+
 </resources>

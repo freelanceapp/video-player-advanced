@@ -1,4 +1,4 @@
-package jmm.com.videoplayer.utils;
+package com.mojodigi.videoplayer.utils;
 
 import android.content.Context;
 import android.graphics.Typeface;
@@ -12,7 +12,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.List;
 
-import jmm.com.videoplayer.R;
+import com.mojodigi.videoplayer.R;
 
 public class CustomeSpinner extends ArrayAdapter<String> {
     private List<String> objects;
@@ -36,8 +36,8 @@ public class CustomeSpinner extends ArrayAdapter<String> {
     private View getCustomView(final int position, View convertView, ViewGroup parent) {
         View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_spinner, parent, false);
         final TextView label =  row.findViewById(R.id.tv_spinnervalue);
-        Typeface font = Typeface.createFromAsset(getContext().getAssets(), "PoetsenOne-Regular.ttf");
-        label.setTypeface(font);
+//        Typeface font = Typeface.createFromAsset(getContext().getAssets(), "corbel.ttf");
+        label.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(getContext()));
 
 
         label.setText(objects.get(position));

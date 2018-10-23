@@ -8,7 +8,9 @@
         <item name="colorAccent">@color/colorAccent</item>
         <item name="windowActionModeOverlay">true</item>
         <item name="android:actionModeBackground">@color/colorPrimary</item>
-        <item name="colorControlActivated">#e5333e</item>
+        <item name="colorControlActivated">@color/colorPrimary</item>
+
+        <!--<item name="colorControlActivated">#e5333e</item>-->
 
     </style>
 
@@ -24,7 +26,5 @@
     <style name="HeaderBar">
         <item name="android:background">#303F9F</item>
     </style>
-
-
 
 </resources>
