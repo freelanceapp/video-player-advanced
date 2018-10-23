@@ -100,7 +100,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         if (showVideoArrayList.get(pos).isFavrt()) {
             //showVideoArrayList.get(pos).setFavrt(false);
-            showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+            showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
         } else {
             //showVideoArrayList.get(pos).setFavrt(true);
             showVideoHolder.img_favrt.setImageResource(R.drawable.empty_m);
@@ -114,7 +114,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
         //setting favourite
         if (nameList.contains(showVideo.getName())) {
-            showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+            showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
 //            showVideoHolder.img_favrt.setTag(activity);
         }
 
@@ -132,7 +132,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                 if (showVideoArrayList.get(position).isFavrt()) {
                     //  showVideoArrayList.get(pos).setFavrt(false);
 
-                    showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
 
                 } else {
                     //  showVideoArrayList.get(pos).setFavrt(true);
@@ -157,7 +157,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 //                        Toast.makeText(activity, "Removed from Favourites", Toast.LENGTH_SHORT).show();
                     }
                 } else {
-                    showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
                     showVideo.setFavrt(true);
                     boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution(), showVideo.getData(), showVideo.getSize());
 
@@ -181,7 +181,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
                 if (showVideoArrayList.get(position).isFavrt()) {
                     //  showVideoArrayList.get(pos).setFavrt(false);
-                    showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
 
                 } else {
                     //  showVideoArrayList.get(pos).setFavrt(true);
@@ -198,7 +198,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                     } else {
                     }
                 } else {
-                    showVideoHolder.img_favrt.setImageResource(R.drawable.fill_m);
+                    showVideoHolder.img_favrt.setImageResource(R.drawable.pinkheartfill);
                     showVideo.setFavrt(true);
                     boolean insert = databaseHelper.insertdata(showVideo.getName(), showVideo.getThumb(), showVideo.getFolder(), showVideo.getTime(), showVideo.getResolution(), showVideo.getData(), showVideo.getSize());
 
@@ -216,7 +216,8 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         showVideoHolder.img_thumb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s = showVideo.getFolder();
+
+                String s = showVideo.getFolder().trim();
                 String ss = showVideo.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);
@@ -231,7 +232,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
         showVideoHolder.ll_playvideo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s = showVideo.getFolder();
+                String s = showVideo.getFolder().trim();
                 String ss = showVideo.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);
@@ -273,7 +274,7 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 //                                                Toast.makeText(activity, "Deleted",
 // Toast.LENGTH_SHORT).show();
 
-                                                File file = new File(showVideo.getFolder());
+                                                File file = new File(showVideo.getFolder().trim());
                                                 if (file.exists()) {
                                                     boolean deleted = file.delete();
                                                     if (deleted) {

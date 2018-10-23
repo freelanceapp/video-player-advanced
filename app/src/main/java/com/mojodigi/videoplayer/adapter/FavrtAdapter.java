@@ -85,7 +85,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
         favrtHolder.img_thumb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s = favrt.getFolder();
+                String s = favrt.getFolder().trim();
                 String ss = favrt.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);
@@ -99,7 +99,7 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
         favrtHolder.ll_favrtplay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String s = favrt.getFolder();
+                String s = favrt.getFolder().trim();
                 String ss = favrt.getName();
                 Intent intent = new Intent(activity, PlayerActivity.class);
                 intent.putExtra("source", s);

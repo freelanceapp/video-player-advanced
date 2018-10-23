@@ -35,6 +35,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdView;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -45,6 +47,7 @@ import jmm.com.videoplayer.R;
 import jmm.com.videoplayer.adapter.FavrtAdapter;
 import jmm.com.videoplayer.adapter.ShowVideoAdapter;
 import jmm.com.videoplayer.model.ShowVideo;
+import jmm.com.videoplayer.utils.AddMobUtils;
 import jmm.com.videoplayer.utils.Helper;
 import jmm.com.videoplayer.utils.OnSwipeTouchListener;
 import jmm.com.videoplayer.utils.Utilities;
@@ -76,13 +79,15 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     SharedPreferences preferences;
     int outsideAppFlag = 0;
     String durationoutside;
+    private int fromOutside;
+    private AdView mAdView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-
+        mAdView = (AdView) findViewById(R.id.adView);
         mediaPlayer = new MediaPlayer();
         handler = new Handler();
         utils = new Utilities();
@@ -332,7 +337,16 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
+                if (outsideAppFlag == 1) {
+                    Intent a = new Intent(Intent.ACTION_MAIN);
+                    a.addCategory(Intent.CATEGORY_DEFAULT);
+                    a.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(a);
+
+                } else {
+                    startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
+
+                }
             }
         });
 
@@ -442,8 +456,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         }*/
 
         PrintMSg("surfaceChanged executed");
-
-        play();
+        //  play();    //T
 
     }
 
@@ -460,7 +473,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 //        } catch (Exception e) {
 //            e.printStackTrace();
 //        }
+
         mediaPlayer.setDisplay(surfaceHolder);
+        play();
+
         PrintMSg("surface created executed");
         System.out.print("in surface created");
 
@@ -480,6 +496,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 //            e.printStackTrace();
 //        }
 
+
         PrintMSg("surface destroyed executed");
         System.out.print("in surface destroyed");
     }
@@ -489,12 +506,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     public void play() {
 
         try {
-
             mediaPlayer.setDataSource(viewSource);
             mediaPlayer.setDisplay(surfaceHolder);
             mediaPlayer.prepare();
-
-
             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
@@ -562,7 +576,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             // Displaying time completed playing
             if (txt_starttime.getText().toString().equals(txt_endtime.getText().toString())) {
                 //autoplay next video
-                next();
+                if (currentindex == (size - 1)) {
+                    startActivity(new Intent(PlayerActivity.this, HomeActivity.class));
+                    finish();
+                    return;
+                } else {
+                    next();
+                }
             } else {
                 txt_starttime.setText("" + utils.milliSecondsToTimer(currentDuration + 1));
             }
@@ -591,13 +611,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             //change video url
 
             if (type.equals("all") && outsideAppFlag == 0) {
-                viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
+                viewSource = HomeActivity.arrayList.get(currentindex).getFolder().trim();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
 
 
             } else if (type.equals("favrt") && outsideAppFlag == 0) {
-                viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder();
+                viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder().trim();
                 viewName = HomeActivity.favrtArrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
 
@@ -620,7 +640,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 play();
 
             } else {
-                viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
+                viewSource = HomeActivity.arrayList.get(currentindex).getFolder().trim();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
                 txt_endtime.setText("" + utils.milliSecondsToTimer(totalDuration));
@@ -646,12 +666,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
             //change video url
             if (type.equals("all")) {
-                viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
+                viewSource = HomeActivity.arrayList.get(currentindex).getFolder().trim();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
 
             } else {
-                viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder();
+                viewSource = HomeActivity.favrtArrayList.get(currentindex).getFolder().trim();
                 viewName = HomeActivity.favrtArrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
 
@@ -672,7 +692,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 }
                 play();
             } else {
-                viewSource = HomeActivity.arrayList.get(currentindex).getFolder();
+                viewSource = HomeActivity.arrayList.get(currentindex).getFolder().trim();
                 viewName = HomeActivity.arrayList.get(currentindex).getName();
                 txt_playername.setText(viewName);
 
@@ -690,6 +710,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onStop() {
         super.onStop();
+
+
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         PrintMSg("Onstop executed");
 
@@ -698,6 +720,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onStart() {
         super.onStart();
+
         PrintMSg("onstart executed");
     }
 
@@ -705,12 +728,20 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         System.out.print("" + msg);
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        PrintMSg("ondestroy");
+    }
 
     @Override
     protected void onPause() {
+
         super.onPause();
 
         mediaPlayer.pause();
+
         getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
     }
 
@@ -745,6 +776,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     protected void onRestart() {
         // play();
         super.onRestart();
+//         mediaPlayer.setDisplay(surfaceHolder);  T
+
+        fromOutside = 1;
         PrintMSg("OnRestatt executed");
     }
 
@@ -752,7 +786,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     protected void onResume() {
 
         super.onResume();
-        play();
+        AddMobUtils adutil = new AddMobUtils();
+        adutil.displayBannerAdd(mAdView);
+
+        //  play();
         PrintMSg("OnResume executed");
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
@@ -779,6 +816,11 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         if (mgr != null) {
             mgr.listen(phoneStateListener, PhoneStateListener.LISTEN_CALL_STATE);
         }
+        //T
+        else {
+            play();
+        }
+        //T
 
     }
 
