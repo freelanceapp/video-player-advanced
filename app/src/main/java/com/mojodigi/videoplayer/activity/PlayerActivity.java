@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.preference.PreferenceManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
@@ -1364,13 +1365,34 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     @Override
     protected void onPause() {
 
-        if (mediaPlayer.isPlaying()) {
+        PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        boolean screenOn;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT_WATCH) {
+            screenOn = pm.isInteractive();
+        } else {
+            screenOn = pm.isScreenOn();
+        }
+
+        if (screenOn) {
+            // Screen is still on, so do your thing here
+            mediaPlayer.stop();
+
+        }else {
+
+            mediaPlayer.pause();
+
+        }
+        postion = mediaPlayer.getCurrentPosition();
+
+
+
+      /*  if (mediaPlayer.isPlaying()) {
             // The location to save the currently playing
             postion = mediaPlayer.getCurrentPosition();
-            mediaPlayer.stop();
         } else
             postion = mediaPlayer.getCurrentPosition();
-
+*/
         super.onPause();
 
 
