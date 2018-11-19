@@ -411,9 +411,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
 
             //font style
 //            Typeface font = Typeface.createFromAsset(activity.getAssets(), "corbel.ttf");
-            txt_title.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
-            txt_duration.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
-            txt_resolution.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
+            txt_title.setTypeface(Helper.typeFace_corbel(activity));
+            txt_duration.setTypeface(Helper.typeFace_corbel(activity));
+            txt_resolution.setTypeface(Helper.typeFace_corbel(activity));
 
 
 

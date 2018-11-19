@@ -153,7 +153,7 @@ public class Helper {
 
     }
 
-    public static Typeface typeFace_adobe_caslonpro_Regular(Context ctx) {
+    public static Typeface typeFace_corbel(Context ctx) {
         return Typeface.createFromAsset(ctx.getAssets(), "corbel.ttf");
     }
 

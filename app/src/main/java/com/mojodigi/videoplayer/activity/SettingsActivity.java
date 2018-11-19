@@ -47,10 +47,10 @@ public class SettingsActivity extends AppCompatActivity {
         radioGroup = findViewById(R.id.radioGroup);
         btn_settingsave = findViewById(R.id.btn_settingsave);
 
-        txt_settinghead.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(this));
-        radio_playall.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(this));
-        radio_random.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(this));
-        radio_loop.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(this));
+        txt_settinghead.setTypeface(Helper.typeFace_corbel(this));
+        radio_playall.setTypeface(Helper.typeFace_corbel(this));
+        radio_random.setTypeface(Helper.typeFace_corbel(this));
+        radio_loop.setTypeface(Helper.typeFace_corbel(this));
 /*
 
         preferences = PreferenceManager.getDefaultSharedPreferences(SettingsActivity.this);

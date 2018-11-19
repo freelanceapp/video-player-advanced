@@ -151,13 +151,13 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         mainview = findViewById(R.id.mainview);
 
 
-        txt_playername.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(this));
+        txt_playername.setTypeface(Helper.typeFace_corbel(this));
         txt_volume.setTypeface(Helper.typeFace_FFF(this));
         txt_brightness.setTypeface(Helper.typeFace_FFF(this));
 
         //set font style
 //        Typeface font = Typeface.createFromAsset(getAssets(), "PoetsenOne-Regular.ttf");
-        txt_playername.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(this));
+        txt_playername.setTypeface(Helper.typeFace_corbel(this));
 
 //play type
         playtype = myPreference.getPlaytype(MyPreference.PREFS_NAME);

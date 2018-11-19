@@ -226,9 +226,9 @@ public class FavrtAdapter extends RecyclerView.Adapter<FavrtAdapter.FavrtHolder>
             ll_favrtplay = itemView.findViewById(R.id.ll_favrtplay);
 
 //            Typeface font = Typeface.createFromAsset(activity.getAssets(), "corbel.ttf");
-            txt_title.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
-            txt_duration.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
-            txt_resolutionfavrt.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(activity));
+            txt_title.setTypeface(Helper.typeFace_corbel(activity));
+            txt_duration.setTypeface(Helper.typeFace_corbel(activity));
+            txt_resolutionfavrt.setTypeface(Helper.typeFace_corbel(activity));
 
 
         }

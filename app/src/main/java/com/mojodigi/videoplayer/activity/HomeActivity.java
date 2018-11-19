@@ -185,7 +185,7 @@ public class HomeActivity extends AppCompatActivity
         for (int i = 0; i < host.getTabWidget().getChildCount(); i++) {
 //            Typeface tf = Typeface.createFromAsset(getAssets(), "corbel.ttf");
             final TextView tv = (TextView) host.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
-            tv.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(this));
+            tv.setTypeface(Helper.typeFace_corbel(this));
             tv.setTextColor(getResources().getColor(R.color.colorPrimary));
            /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 host.getTabWidget().getChildAt(i).setBackgroundColor(getResources().getColor(R.color.white));

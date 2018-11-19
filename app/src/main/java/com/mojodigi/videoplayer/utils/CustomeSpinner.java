@@ -37,7 +37,7 @@ public class CustomeSpinner extends ArrayAdapter<String> {
         View row = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_spinner, parent, false);
         final TextView label =  row.findViewById(R.id.tv_spinnervalue);
 //        Typeface font = Typeface.createFromAsset(getContext().getAssets(), "corbel.ttf");
-        label.setTypeface(Helper.typeFace_adobe_caslonpro_Regular(getContext()));
+        label.setTypeface(Helper.typeFace_corbel(getContext()));
 
 
         label.setText(objects.get(position));
