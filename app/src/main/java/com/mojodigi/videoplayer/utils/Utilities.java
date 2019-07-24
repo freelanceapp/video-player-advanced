@@ -1,5 +1,8 @@
 package com.mojodigi.videoplayer.utils;
 
+import android.content.Context;
+import android.widget.Toast;
+
 public class Utilities {
 
     /**
@@ -65,4 +68,19 @@ public class Utilities {
         // return current duration in milliseconds
         return currentDuration * 1000;
     }
+
+    public  static String getString(Context mContext, int resourceKey)
+    {
+        try {
+            return mContext.getResources().getString(resourceKey);
+        }catch (Exception e)
+        {
+            // in case invalid key  is passed;
+            return "Resource key not found";
+        }
+    }
+    public static void dispToast(Context ctx, int resourceId) {
+        Toast.makeText(ctx, ctx.getResources().getString(resourceId), Toast.LENGTH_SHORT).show();
+    }
+
 }

@@ -24,6 +24,8 @@ import java.util.concurrent.TimeUnit;
 public class Helper {
 
 
+
+
    public static boolean isPaused=false;
     //convert date
     public static String LongToDate(String longV) {
@@ -159,5 +161,18 @@ public class Helper {
 
     public static Typeface typeFace_FFF(Context ctx) {
         return Typeface.createFromAsset(ctx.getAssets(), "FFF_Tusj.ttf");
+    }
+
+
+    public static String appendUrl(String jsonUrl)
+    {
+
+        //  as  per discussion with  gyan  on 15-05-2019;
+
+        String appendStr1="https://m.khulasa-news.com/";
+        String appendStr2="/eng";
+
+        return  appendStr1+jsonUrl+appendStr2;
+
     }
 }

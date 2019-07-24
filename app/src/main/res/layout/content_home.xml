@@ -12,7 +12,7 @@
     android:layout_height="match_parent"
     android:layout_alignParentTop="true"
     android:layout_centerHorizontal="true"
-    android:layout_above="@+id/adView_home"
+    android:layout_above="@+id/addhoster"
     android:background="@drawable/tabs">
 
         <LinearLayout
@@ -56,7 +56,7 @@
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
                                 android:textSize="25dp"
-                                android:text="NO VIDEO FOUND" />
+                                android:text="@string/vdo_not_found" />
 
                         </LinearLayout>
 
@@ -103,18 +103,22 @@
                     </android.support.v7.widget.RecyclerView>
                 </FrameLayout>
 
-                <!--   <FrameLayout
+
+                   <FrameLayout
                        android:id="@+id/tab3"
                        android:layout_width="match_parent"
                        android:layout_height="match_parent"
                        android:visibility="gone"
                        android:orientation="vertical">
 
-                       <TextView
+                       <android.support.v7.widget.RecyclerView
+                           android:id="@+id/videoRecycler"
                            android:layout_width="match_parent"
-                           android:layout_height="match_parent"
-                           android:text="Cloud" />
-                   </FrameLayout>-->
+                           android:layout_height="wrap_content"
+                           android:scrollbars="vertical" />
+
+                   </FrameLayout>
+
             </FrameLayout>
 
             <android.support.v4.view.ViewPager xmlns:android="http://schemas.android.com/apk/res/android"
@@ -130,14 +134,41 @@
 
 </TabHost>
 
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView_home"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+    <RelativeLayout
+        android:id="@+id/addhoster"
         android:layout_alignParentBottom="true"
-        android:visibility="gone"
-        ads:adSize="SMART_BANNER"
-        ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/adView_home"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            ads:adSize="SMART_BANNER"
+            ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
+
+        <!--in this  dynamically added  google AdView will be displayed-->
+
+        <RelativeLayout
+
+            android:id="@+id/adMobView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </RelativeLayout>
+        <RelativeLayout
+            android:id="@+id/smaaToAddContainer"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </RelativeLayout>
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/banner_container"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            />
+
+    </RelativeLayout>
 
 </RelativeLayout>
 

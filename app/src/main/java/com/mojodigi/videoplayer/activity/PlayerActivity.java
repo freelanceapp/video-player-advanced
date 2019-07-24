@@ -12,6 +12,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.database.Cursor;
+import android.graphics.Camera;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -43,6 +44,7 @@ import android.view.animation.AnimationUtils;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -52,18 +54,26 @@ import com.google.android.gms.ads.AdView;
 import java.io.IOException;
 import java.util.Random;
 
+import com.mojodigi.videoplayer.AddsUtility.AddConstants;
+import com.mojodigi.videoplayer.AddsUtility.AddMobUtils;
+import com.mojodigi.videoplayer.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.videoplayer.R;
 import com.mojodigi.videoplayer.adapter.FavrtAdapter;
 import com.mojodigi.videoplayer.adapter.ShowVideoAdapter;
-import com.mojodigi.videoplayer.utils.AddMobUtils;
+
 import com.mojodigi.videoplayer.utils.Helper;
 import com.mojodigi.videoplayer.utils.IncommingCallReceiver;
 import com.mojodigi.videoplayer.utils.MyPreference;
 import com.mojodigi.videoplayer.utils.OnSwipeTouchListener;
 import com.mojodigi.videoplayer.utils.Utilities;
+import com.smaato.soma.AdDownloaderInterface;
+import com.smaato.soma.AdListenerInterface;
+import com.smaato.soma.BannerView;
+import com.smaato.soma.ErrorCode;
+import com.smaato.soma.ReceivedBannerInterface;
 
 
-public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
+public class PlayerActivity extends Activity implements SurfaceHolder.Callback  ,AdListenerInterface {
 
     SurfaceView surfaceView;
     MediaPlayer mediaPlayer;
@@ -92,7 +102,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     int outsideAppFlag = 0;
     String durationoutside;
     public int fromOutside;
-    private AdView mAdView;
+
     int touchcount = 0;
     String playtype;
     Random rn = new Random();
@@ -107,6 +117,15 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     private int postion;
     boolean ispaused;
     int volume_level;
+    boolean focus;
+
+    private AdView mAdView;
+    SharedPreferenceUtil addprefs;
+    View adContainer;
+    RelativeLayout smaaToAddContainer;
+    //smaatoAddBanerView
+    BannerView smaaTobannerView;
+    private  Context mContex;
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -114,8 +133,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_player);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
-        mAdView = findViewById(R.id.adView);
 
+        mContex=PlayerActivity.this;
         mediaPlayer = new MediaPlayer();
         handler = new Handler();
         utils = new Utilities();
@@ -154,6 +173,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         txt_playername.setTypeface(Helper.typeFace_corbel(this));
         txt_volume.setTypeface(Helper.typeFace_FFF(this));
         txt_brightness.setTypeface(Helper.typeFace_FFF(this));
+
 
         //set font style
 //        Typeface font = Typeface.createFromAsset(getAssets(), "PoetsenOne-Regular.ttf");
@@ -231,9 +251,9 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
         //get current brightness
         brightness = getScreenBrightness();
-        sb_brightness.setProgress(brightness);
-//        txt_brightness.setText((int) (brightness / (float) 2.5) + "%");
-        txt_brightness.setText(brightness + "%");
+        sb_brightness.setProgress((int) (brightness / (float) 2.5));
+        txt_brightness.setText((int) (brightness / (float) 2.5) + "%");
+//        txt_brightness.setText(brightness + "%");
 
         //get current volume
         volume_level = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -241,6 +261,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
         //audia seekbar
         volumeControl();
+
+
 
         //change video on swipe
         surfaceView.setOnTouchListener(new OnSwipeTouchListener(this) {
@@ -344,7 +366,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             }
         });
 
-
         ll_touch.setOnTouchListener(new View.OnTouchListener() {
 
             private GestureDetector gestureDetector = new GestureDetector(PlayerActivity.this, new GestureDetector.SimpleOnGestureListener() {
@@ -404,8 +425,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                         new Handler().postDelayed(new Runnable() {
                             @Override
                             public void run() {
-                                ll_controls.setVisibility(View.GONE);
-                                ll_videoname.setVisibility(View.GONE);
+
+                                    ll_controls.setVisibility(View.GONE);
+                                    ll_videoname.setVisibility(View.GONE);
+
 
                             }
                         }, 5000);
@@ -456,7 +479,6 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             private GestureDetector gestureDetector = new GestureDetector(PlayerActivity.this, new GestureDetector.SimpleOnGestureListener() {
                 @Override
                 public boolean onDoubleTap(MotionEvent e) {
-                    Log.d("TEST", "onDoubleTap");
 
                   /*  if (touchcount == 0) {
                         ll_controls.setVisibility(View.GONE);
@@ -540,6 +562,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     }*/
                     return super.onSingleTapConfirmed(e);
                 }
+
             });
 
             @Override
@@ -602,7 +625,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 sb_brightness.setProgress(i);
                 brightness = i;
                 txt_brightness.setText(i + "%");
-                setScreenBrightness(i);
+                setScreenBrightness(i * 3);
 
             }
 
@@ -651,12 +674,23 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                     snackbar.show();
                 }
 
-                sb_brightness.setMax(250);
+
+               /* sb_brightness.setMax(250);
                 sb_brightness.setProgress(brightness + 25);
                 txt_brightness.setText((int) (brightness / (float) 2.5) + "%");
+                setScreenBrightness(brightness); */
+
+
+                sb_brightness.setMax(100);
+                sb_brightness.setProgress(brightness + 10);
+                txt_brightness.setText(brightness + "%");
                 setScreenBrightness(brightness);
             }
         });
+
+
+
+
         img_bright_minus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -674,8 +708,12 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
                 }
 
 
-                sb_brightness.setProgress(brightness - 25);
+             /*   sb_brightness.setProgress(brightness - 25);
                 txt_brightness.setText((int) (brightness / (float) 2.5) + "%");
+                setScreenBrightness(brightness);*/
+                sb_brightness.setProgress(brightness - 5);
+                txt_brightness.setText(brightness + "%");
+
                 setScreenBrightness(brightness);
             }
         });
@@ -878,6 +916,57 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
             }
         });
+
+
+
+
+
+
+
+        //  banner add
+        //add netwrk varibales
+
+        mAdView = (AdView) findViewById(R.id.adView);
+        adContainer = findViewById(R.id.adMobView);
+        smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaTobannerView = new BannerView((this).getApplication());
+        smaaTobannerView.addAdListener(this);
+        addprefs = new SharedPreferenceUtil(mContex);
+
+        AddMobUtils adutil = new AddMobUtils();
+
+        if(AddConstants.checkIsOnline(mContex) && adContainer !=null && addprefs !=null)
+        {
+            String AddPrioverId=addprefs.getStringValue(AddConstants.ADD_PROVIDER_ID, AddConstants.NOT_FOUND);
+            if(AddPrioverId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId))
+                adutil.displayServerBannerAdd(addprefs,adContainer , mContex);
+            else if(AddPrioverId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+            {
+                try {
+                    int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                    int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                    adutil.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                }catch (Exception e)
+                {
+                    String string = e.getMessage();
+                    System.out.print(""+string);
+                }
+            }
+              else if(AddPrioverId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+            {
+                adutil.dispFacebookBannerAdd(mContex,addprefs , PlayerActivity.this);
+
+            }
+
+
+        }
+        else {
+            adutil.displayLocalBannerAdd(mAdView);
+        }
+
+
+        //  banner add
+
 
 
     }
@@ -1378,7 +1467,7 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             // Screen is still on, so do your thing here
             mediaPlayer.stop();
 
-        }else {
+        } else {
 
             mediaPlayer.pause();
 
@@ -1425,8 +1514,8 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
         IncommingCallReceiver.ActivityInstance(this);
 
         //adds
-        AddMobUtils adutil = new AddMobUtils();
-        adutil.displayBannerAdd(mAdView);
+//        AddMobUtils adutil = new AddMobUtils();
+//        adutil.displayBannerAdd(mAdView);
 
         //for screen on when video playing
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
@@ -1493,6 +1582,10 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
 
             audioManager.setStreamMute(AudioManager.STREAM_MUSIC, false);
+            volume_level = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            volume = volume_level;
+
+
             img_mute.setImageResource(R.drawable.unmute);
             return true;
         }
@@ -1503,6 +1596,11 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
             audioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC,
                     AudioManager.ADJUST_LOWER, AudioManager.FLAG_SHOW_UI);
 
+
+            volume_level = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            volume = volume_level;
+
+
             return true;
         }
 
@@ -1511,10 +1609,22 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
 
     public void setScreenBrightness(int brightnessValue) {
 
-        if (brightnessValue >= 0 && brightnessValue <= 250) {
-            Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightnessValue);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
 
+            if(Settings.System.canWrite(mContex)) {
+                if (brightnessValue >= 0 && brightnessValue <= 250) {
+                    Settings.System.putInt(getContentResolver(), Settings.System.SCREEN_BRIGHTNESS, brightnessValue);
+
+                }
+            }
+            else {
+                      // call for write seetings  permission  if required;
+
+            }
         }
+
+
+
     }
 
     protected int getScreenBrightness() {
@@ -1603,4 +1713,17 @@ public class PlayerActivity extends Activity implements SurfaceHolder.Callback {
     }
 
 
+    @Override
+    public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
+
+        if(receivedBannerInterface.getErrorCode() != ErrorCode.NO_ERROR){
+            //Toast.makeText(getBaseContext(), receivedBanner.getErrorMessage(), Toast.LENGTH_SHORT).show();
+            Log.d("SmaatoErrorMsg", ""+receivedBannerInterface.getErrorMessage());
+            if(receivedBannerInterface.getErrorMessage().equalsIgnoreCase(AddConstants.NO_ADDS))
+            {
+                smaaToAddContainer.setVisibility(View.GONE);
+            }
+        }
+
+    }
 }

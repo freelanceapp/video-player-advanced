@@ -11,8 +11,8 @@
         android:id="@+id/ll_videoname"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:visibility="gone"
         android:background="@color/colorPrimaryDark"
+        android:visibility="gone"
         android:weightSum="1">
 
         <ImageView
@@ -37,360 +37,393 @@
 
     </LinearLayout>
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
-
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_above="@+id/adView"
-
-            android:orientation="vertical">
-
-            <FrameLayout
-                android:id="@+id/videoSurfaceContainer1"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_margin="0dp"
-                android:layout_weight=".1"
-                android:background="@android:color/black">
-
-                <RelativeLayout
-                    android:layout_width="match_parent"
-
-                    android:layout_height="match_parent"
-                    android:layout_gravity="center">
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:gravity="center">
-
-                        <SurfaceView
-                            android:id="@+id/surfaceView"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent" />
-                    </LinearLayout>
-
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:weightSum="4">
-
-                        <LinearLayout
-                            android:id="@+id/ll_volume"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:focusable="true"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:weightSum="1">
-
-                            <!--  <TextView
-                                  android:id="@+id/txt_volume"
-                                  android:layout_width="match_parent"
-                                  android:layout_height="wrap_content"
-                                  android:text="0%"
-                                  android:textColor="@color/colorPrimary"
-                                  android:textSize="18dp"
-                                  android:visibility="invisible" />-->
-
-                            <ImageView
-                                android:id="@+id/img_volume_plus"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center"
-                                android:layout_weight=".4"
-                                android:alpha="0.0"
-                                android:background="@android:color/black"
-                                android:visibility="invisible" />
-
-                            <SeekBar
-                                android:id="@+id/sb_volume"
-                                android:layout_width="250dp"
-                                android:layout_height="match_parent"
-                                android:rotation="270"
-                                android:layout_weight=".2"
-                                android:progressDrawable="@drawable/seekbar"
-                                android:thumb="@drawable/seek_thumb"
-                                android:visibility="invisible"/>
-
-                            <ImageView
-                                android:id="@+id/img_volume_minus"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center"
-                                android:layout_weight=".4"
-                                android:alpha="0.0"
-                                android:background="@android:color/black"
-                                android:visibility="invisible" />
-
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/ll_touch"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:gravity="center"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/txt_volume"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="0%"
-                                android:textColor="@color/whitetranss"
-                                android:textSize="25dp"
-                                android:visibility="invisible" />
-
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/ll_touch1"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center|right"
-                            android:layout_weight="1"
-                            android:gravity="center|right"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/txt_brightness"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:layout_gravity="center|right"
-                                android:gravity="center|right"
-                                android:text="0%"
-                                android:textColor="@color/whitetranss"
-                                android:textSize="25dp"
-                                android:visibility="invisible" />
-
-                        </LinearLayout>
-
-                        <LinearLayout
-                            android:id="@+id/ll_brightness"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent"
-                            android:layout_gravity="center"
-                            android:layout_weight="1"
-                            android:focusable="true"
-                            android:gravity="center"
-                            android:orientation="vertical"
-                            android:weightSum="1">
-
-                            <!--  <TextView
-                                  android:id="@+id/txt_brightness"
-                                  android:layout_width="match_parent"
-                                  android:layout_height="wrap_content"
-                                  android:gravity="center"
-                                  android:text="0%"
-                                  android:textColor="@color/colorPrimary"
-                                  android:textSize="18dp"
-                                  android:visibility="invisible" />-->
-
-                            <ImageView
-                                android:id="@+id/img_bright_plus"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center"
-                                android:layout_weight=".4"
-                                android:alpha="0.0"
-                                android:background="@android:color/black"
-                                android:visibility="invisible" />
-
-                         <!--   <SeekBar
-                                android:id="@+id/sb_brightness"
-                                android:layout_width="250dp"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center"
-                                android:layout_weight=".2"
-                                android:max="250"
-                                android:progressDrawable="@drawable/seek_bar"
-                                android:rotation="270"
-                                android:thumb="@drawable/thumb_image"
-                                android:visibility="invisible" />-->
-                            <SeekBar
-                                android:id="@+id/sb_brightness"
-                                android:layout_width="250dp"
-                                android:layout_height="match_parent"
-                                android:rotation="270"
-                                android:layout_weight=".2"
-                                android:progressDrawable="@drawable/seekbar"
-                                android:thumb="@drawable/seek_thumb"
-                                android:visibility="invisible"
-                                />
-
-
-                            <ImageView
-                                android:id="@+id/img_bright_minus"
-                                android:layout_width="match_parent"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="center|top"
-                                android:layout_weight=".4"
-                                android:alpha="0.0"
-                                android:background="@android:color/black"
-                                android:visibility="invisible" />
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                </RelativeLayout>
-                <ImageView
-                    android:id="@+id/img_pauseimage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/singleclickpause"
-                    android:adjustViewBounds="true"
-                    android:visibility="invisible"
-                    android:layout_gravity="center"/>
-            </FrameLayout>
+            android:layout_weight="1">
 
             <LinearLayout
-                android:id="@+id/ll_controls"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="1dp"
-                android:gravity="center"
-                android:focusableInTouchMode="true"
-                android:visibility="gone"
+                android:layout_height="match_parent"
+                android:layout_above="@+id/addhoster"
+
                 android:orientation="vertical">
 
-
-                <LinearLayout
-                    android:id="@+id/ll_controls1"
+                <FrameLayout
+                    android:id="@+id/videoSurfaceContainer1"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:weightSum="1">
+                    android:layout_height="match_parent"
+                    android:layout_margin="0dp"
+                    android:layout_weight=".1"
+                    tools:context="com.damavandi.zoomablesurfaceview.MainActivity"
+                    android:background="@android:color/black">
 
-                    <TextView
-                        android:id="@+id/txt_starttime"
+                    <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:layout_weight=".4"
-                        android:gravity="center"
-                        android:text="0"
-                        android:textColor="@color/colorPrimary" />
 
-                    <SeekBar
-                        android:id="@+id/seekBar"
-                        android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:paddingTop="5dp"
-                        android:paddingBottom="5dp"
-                        android:layout_weight=".2"
-                        android:gravity="center" />
+                        android:layout_gravity="center">
 
-                    <TextView
-                        android:id="@+id/txt_endtime"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_gravity="center"
-                        android:layout_weight=".4"
-                        android:gravity="center"
-                        android:text="0:00:00"
-                        android:textColor="@color/colorPrimary" />
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="vertical"
+                            android:gravity="center">
+                            <SurfaceView
+                                android:id="@+id/surfaceView"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" />
+                        </LinearLayout>
 
-                </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:weightSum="4">
+
+                            <LinearLayout
+                                android:id="@+id/ll_volume"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:focusable="true"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:weightSum="1">
+
+                                <!--  <TextView
+                                      android:id="@+id/txt_volume"
+                                      android:layout_width="match_parent"
+                                      android:layout_height="wrap_content"
+                                      android:text="0%"
+                                      android:textColor="@color/colorPrimary"
+                                      android:textSize="18dp"
+                                      android:visibility="invisible" />-->
+
+                                <ImageView
+                                    android:id="@+id/img_volume_plus"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center"
+                                    android:layout_weight=".4"
+                                    android:alpha="0.0"
+                                    android:background="@android:color/black"
+                                    android:visibility="invisible" />
+
+                                <SeekBar
+                                    android:id="@+id/sb_volume"
+                                    android:layout_width="260dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight=".2"
+                                    android:progressDrawable="@drawable/seekbar"
+                                    android:rotation="270"
+                                    android:thumb="@drawable/seek_thumb"
+                                    android:visibility="invisible" />
+
+                                <ImageView
+                                    android:id="@+id/img_volume_minus"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center"
+                                    android:layout_weight=".4"
+                                    android:alpha="0.0"
+                                    android:background="@android:color/black"
+                                    android:visibility="invisible" />
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/ll_touch"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/txt_volume"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:text="0%"
+                                    android:textColor="@color/whitetranss"
+                                    android:textSize="25dp"
+                                    android:visibility="invisible" />
+
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/ll_touch1"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center|right"
+                                android:layout_weight="1"
+                                android:gravity="center|right"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    android:id="@+id/txt_brightness"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_gravity="center|right"
+                                    android:gravity="center|right"
+                                    android:text="0%"
+                                    android:textColor="@color/whitetranss"
+                                    android:textSize="25dp"
+                                    android:visibility="invisible" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/ll_brightness"
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_gravity="center"
+                                android:layout_weight="1"
+                                android:focusable="true"
+                                android:gravity="center"
+                                android:orientation="vertical"
+                                android:weightSum="1">
+
+                                <!--  <TextView
+                                      android:id="@+id/txt_brightness"
+                                      android:layout_width="match_parent"
+                                      android:layout_height="wrap_content"
+                                      android:gravity="center"
+                                      android:text="0%"
+                                      android:textColor="@color/colorPrimary"
+                                      android:textSize="18dp"
+                                      android:visibility="invisible" />-->
+
+                                <ImageView
+                                    android:id="@+id/img_bright_plus"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center"
+                                    android:layout_weight=".4"
+                                    android:alpha="0.0"
+                                    android:background="@android:color/black"
+                                    android:visibility="invisible" />
+
+                                <!--   <SeekBar
+                                       android:id="@+id/sb_brightness"
+                                       android:layout_width="250dp"
+                                       android:layout_height="match_parent"
+                                       android:layout_gravity="center"
+                                       android:layout_weight=".2"
+                                       android:max="250"
+                                       android:progressDrawable="@drawable/seek_bar"
+                                       android:rotation="270"
+                                       android:thumb="@drawable/thumb_image"
+                                       android:visibility="invisible" />-->
+                                <SeekBar
+                                    android:id="@+id/sb_brightness"
+                                    android:layout_width="260dp"
+                                    android:layout_height="match_parent"
+                                    android:layout_weight=".2"
+                                    android:progressDrawable="@drawable/seekbar"
+                                    android:rotation="270"
+                                    android:thumb="@drawable/seek_thumb"
+                                    android:visibility="invisible" />
+
+
+                                <ImageView
+                                    android:id="@+id/img_bright_minus"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:layout_gravity="center|top"
+                                    android:layout_weight=".4"
+                                    android:alpha="0.0"
+                                    android:background="@android:color/black"
+                                    android:visibility="invisible" />
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                    </RelativeLayout>
+
+                    <ImageView
+                        android:id="@+id/img_pauseimage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:adjustViewBounds="true"
+                        android:src="@drawable/singleclickpause"
+                        android:visibility="invisible" />
+                </FrameLayout>
+
+
 
 
                 <LinearLayout
-                    android:id="@+id/ll_controls2"
+                    android:id="@+id/ll_controls"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
-                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="1dp"
+                    android:focusableInTouchMode="true"
                     android:gravity="center"
-                    android:orientation="horizontal"
-                    android:weightSum="5">
+                    android:orientation="vertical"
+                    android:visibility="gone">
 
-                    <ImageView
-                        android:id="@+id/img_mute"
+
+                    <LinearLayout
+                        android:id="@+id/ll_controls1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:src="@drawable/unmute"
-                        android:text="Rewind"
-                        android:textSize="10sp" />
+                        android:orientation="horizontal"
+                        android:weightSum="1">
 
-                    <ImageView
-                        android:id="@+id/btn_previous"
+                        <TextView
+                            android:id="@+id/txt_starttime"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:layout_weight=".4"
+                            android:gravity="center"
+                            android:text="0"
+                            android:textColor="@color/colorPrimary" />
+
+                        <SeekBar
+                            android:id="@+id/seekBar"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:layout_weight=".2"
+                            android:gravity="center"
+                            android:paddingBottom="5dp"
+                            android:paddingTop="5dp" />
+
+                        <TextView
+                            android:id="@+id/txt_endtime"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_gravity="center"
+                            android:layout_weight=".4"
+                            android:gravity="center"
+                            android:text="0:00:00"
+                            android:textColor="@color/colorPrimary" />
+
+                    </LinearLayout>
+
+
+                    <LinearLayout
+                        android:id="@+id/ll_controls2"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_weight="1"
+                        android:layout_gravity="bottom"
+                        android:layout_marginTop="10dp"
                         android:gravity="center"
-                        android:src="@drawable/previous"
-                        android:text="Rewind"
-                        android:textSize="10sp" />
+                        android:orientation="horizontal"
+                        android:weightSum="5">
 
-                    <ImageView
-                        android:id="@+id/btn1"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:src="@drawable/pause"
-                        android:text="play"
-                        android:textSize="10dp" />
+                        <ImageView
+                            android:id="@+id/img_mute"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:src="@drawable/unmute"
+                            android:text="Rewind"
+                            android:textSize="10sp" />
 
-                    <!--  <ImageView
-                          android:id="@+id/btn2"
-                          android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:layout_weight="1"
-                          android:drawableTop="@drawable/pause"
-                          android:gravity="center"
-                          android:src="@drawable/pause_hw"
+                        <ImageView
+                            android:id="@+id/btn_previous"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:src="@drawable/previous"
+                            android:text="Rewind"
+                            android:textSize="10sp" />
 
-                          android:text="pause"
-                          android:textSize="10dp" />-->
+                        <ImageView
+                            android:id="@+id/btn1"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:src="@drawable/pause"
+                            android:text="play"
+                            android:textSize="10dp" />
+
+                        <!--  <ImageView
+                              android:id="@+id/btn2"
+                              android:layout_width="match_parent"
+                              android:layout_height="wrap_content"
+                              android:layout_weight="1"
+                              android:drawableTop="@drawable/pause"
+                              android:gravity="center"
+                              android:src="@drawable/pause_hw"
+
+                              android:text="pause"
+                              android:textSize="10dp" />-->
 
 
-                    <ImageView
-                        android:id="@+id/btn_next"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:src="@drawable/forward"
-                        android:text="forward"
-                        android:textSize="10dp" />
+                        <ImageView
+                            android:id="@+id/btn_next"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:src="@drawable/forward"
+                            android:text="forward"
+                            android:textSize="10dp" />
 
-                    <ImageView
-                        android:id="@+id/img_screenorientation"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:gravity="center"
-                        android:src="@drawable/orientation"
-                        android:text="forward"
-                        android:textSize="10dp" />
+                        <ImageView
+                            android:id="@+id/img_screenorientation"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:gravity="center"
+                            android:src="@drawable/orientation"
+                            android:text="forward"
+                            android:textSize="10dp" />
+                    </LinearLayout>
                 </LinearLayout>
             </LinearLayout>
-        </LinearLayout>
 
-        <com.google.android.gms.ads.AdView
-            android:id="@+id/adView"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:visibility="gone"
-            ads:adSize="SMART_BANNER"
-            ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
-    </RelativeLayout>
+            <RelativeLayout
+                android:id="@+id/addhoster"
+                android:layout_alignParentBottom="true"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <com.google.android.gms.ads.AdView
+                    android:id="@+id/adView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"
+                    ads:adSize="SMART_BANNER"
+                    ads:adUnitId="@string/banner_add_id"></com.google.android.gms.ads.AdView>
 
+                <!--in this  dynamically added  google AdView will be displayed-->
+
+                <RelativeLayout
+
+                    android:id="@+id/adMobView"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                </RelativeLayout>
+                <RelativeLayout
+                    android:id="@+id/smaaToAddContainer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content">
+                </RelativeLayout>
+                <LinearLayout
+                    android:visibility="gone"
+                    android:id="@+id/banner_container"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    />
+
+            </RelativeLayout>
+
+
+
+        </RelativeLayout>
 </LinearLayout>
 

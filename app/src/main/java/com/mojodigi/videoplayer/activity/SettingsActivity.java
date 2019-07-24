@@ -1,10 +1,12 @@
 package com.mojodigi.videoplayer.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -14,9 +16,13 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.mojodigi.videoplayer.AddsUtility.AddConstants;
+import com.mojodigi.videoplayer.AddsUtility.AddMobUtils;
+import com.mojodigi.videoplayer.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.videoplayer.R;
 import com.mojodigi.videoplayer.utils.Helper;
 import com.mojodigi.videoplayer.utils.MyPreference;
+import com.smaato.soma.interstitial.Interstitial;
 
 import javax.sql.StatementEvent;
 
@@ -32,6 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
     String type1;
     SharedPreferences preferences;
     SharedPreferences.Editor editor;
+    static SettingsActivity instance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,6 +67,8 @@ public class SettingsActivity extends AppCompatActivity {
 */
 
         final String type = myPreference.getPlaytype(MyPreference.PREFS_NAME);
+        Log.i("playtypeeee",type);
+
         if (type.equalsIgnoreCase("Serial")) {
             radio_playall.setChecked(true);
             type1=type;
@@ -106,9 +115,23 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 myPreference.setplaytype(MyPreference.PREFS_NAME, type1);
+                Log.i("playtype",type1);
                 finish();
             }
         });
 
     }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+
+
+    }
+
+
+
+
+
 }

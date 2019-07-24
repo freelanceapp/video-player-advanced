@@ -3,6 +3,9 @@ package com.mojodigi.videoplayer.Application;
 import android.app.Application;
 
 import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.FirebaseApp;
+import com.mojodigi.videoplayer.AddsUtility.AddConstants;
+import com.mojodigi.videoplayer.AddsUtility.SharedPreferenceUtil;
 import com.mojodigi.videoplayer.Analytics.AnalyticsTrackers;
 import com.mojodigi.videoplayer.Analytics.AnalyticsTrackers;
 import com.google.android.gms.analytics.GoogleAnalytics;
@@ -10,8 +13,11 @@ import com.google.android.gms.analytics.HitBuilders;
 import com.google.android.gms.analytics.StandardExceptionParser;
 import com.google.android.gms.analytics.Tracker;
 import com.mojodigi.videoplayer.R;
+import com.yandex.metrica.YandexMetrica;
+import com.yandex.metrica.YandexMetricaConfig;
 
-public class MyApplication extends Application {
+
+public class MyApplication extends android.support.multidex.MultiDexApplication {
     public static final String TAG = MyApplication.class
             .getSimpleName();
 
@@ -23,10 +29,33 @@ public class MyApplication extends Application {
         mInstance = this;
 
         // MobileAds.initialize(this, "ca-app-pub-8509384168493764~9766841905"); //demo app id
-        MobileAds.initialize(this, getResources().getString(R.string.admob_app_id)); //actual app id
+       // MobileAds.initialize(this, getResources().getString(R.string.admob_app_id)); //actual app id
+
+
+
+
+
+        SharedPreferenceUtil addPref=new SharedPreferenceUtil(getApplicationContext());
+        String appId=addPref.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND);
+        if(appId !=null && !appId.equalsIgnoreCase(AddConstants.NOT_FOUND) )
+            MobileAds.initialize(this, appId); //actual app id
 
         AnalyticsTrackers.initialize(this);
         AnalyticsTrackers.getInstance().get(AnalyticsTrackers.Target.APP);
+
+        //App mertrica sdk
+
+        // Creating an extended library configuration.
+        YandexMetricaConfig config = YandexMetricaConfig.newConfigBuilder("f63517ee-cea4-44af-a7bc-991b2bc54f08").build();
+        // Initializing the AppMetrica SDK.
+        YandexMetrica.activate(getApplicationContext(), config);
+        // Automatic tracking of user activity.
+        YandexMetrica.enableActivityAutoTracking(this);
+
+        // Automatic tracking user activity.
+        YandexMetrica.enableActivityAutoTracking(this);
+        //App mertrica sdk
+
     }
 
     public static synchronized MyApplication getInstance() {

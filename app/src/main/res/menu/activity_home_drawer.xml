@@ -7,19 +7,21 @@
         <item
             android:id="@+id/nav_home"
             android:icon="@drawable/homee"
-            android:title="Home" />
+            android:title="@string/home" />
         <item
             android:id="@+id/nav_settings"
             android:icon="@drawable/settingss"
-            android:title="Settings" />
-       <!-- <item
-            android:id="@+id/nav_share"
-            android:icon="@drawable/sharee"
-            android:title="Share App" />-->
+            android:title="@string/settings" />
+         <item
+            android:id="@+id/nav_privacy_policy"
+            android:icon="@drawable/privacy_policy"
+            android:title="@string/privacy_policy" />
+
         <!--<item
             android:id="@+id/nav_aboutus"
             android:icon="@drawable/aboutus"
             android:title="About Us" />-->
+
     </group>
 
 

@@ -19,7 +19,7 @@
   -->
 
 
-    <bool name="ga_autoActivityTracking">false</bool>
+    <bool name="ga_autoActivityTracking">true</bool>
 
     <!--  The property id associated with this analytics tracker -->
 
@@ -34,9 +34,9 @@
 
     <!-- will report any crash if happens-->
 
-     <bool name="ga_reportUncaughtExceptions">false</bool>
+     <bool name="ga_reportUncaughtExceptions">true</bool>
 
-    <screenName name="com.mojodigi.videoplayer.activity.HomeActivity">Home Screen</screenName>
+     <screenName name="com.mojodigi.videoplayer.activity.HomeActivity">Home Screen</screenName>
      <screenName name="com.mojodigi.videoplayer.activity.PlayerActivity">PlayerActivity</screenName>
 
 

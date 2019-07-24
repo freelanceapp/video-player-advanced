@@ -22,4 +22,6 @@
     <color name="alphabet_text_selected_color">#2995e2</color>
     <color name="alphabet_background_color">#ffffff</color>
     <color name="alphabet_background_border_color">#ffffff</color>
+
+    <color name="actionbar_wood">#ffb3aa86</color>
 </resources>

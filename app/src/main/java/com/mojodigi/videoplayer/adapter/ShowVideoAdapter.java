@@ -1,8 +1,10 @@
 package com.mojodigi.videoplayer.adapter;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.MutableContextWrapper;
 import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.net.Uri;
@@ -27,9 +29,11 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.mojodigi.videoplayer.activity.HomeActivity;
+import com.mojodigi.videoplayer.utils.Utilities;
 import com.viethoa.RecyclerViewFastScroller;
 
 import java.io.File;
+import java.math.MathContext;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -52,13 +56,15 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
     public static List<String> nameList = new ArrayList<>();
     public static int size = 0;
     Toast toast;
+    Context mContext;
 
-    public ShowVideoAdapter(ArrayList<ShowVideo> showVideoArrayList, ArrayList<?> selectedApkList, Activity activity) {
+    public ShowVideoAdapter(Context mContext,ArrayList<ShowVideo> showVideoArrayList, ArrayList<?> selectedApkList, Activity activity) {
         this.showVideoArrayList = showVideoArrayList;
         this.filteredListttt = showVideoArrayList;
         this.selected_ApkList = selectedApkList;
         this.activity = activity;
         databaseHelper = new DatabaseHelper(activity);
+        this.mContext= mContext;
 
         //refresh data on start
         showdata();
@@ -163,7 +169,9 @@ public class ShowVideoAdapter extends RecyclerView.Adapter<ShowVideoAdapter.Show
                         showdata();
 
                     } else
-                        Toast.makeText(activity, "Try Again", Toast.LENGTH_SHORT).show();
+
+                    Utilities.dispToast(mContext, R.string.try_again);
+
                 }
 
             }

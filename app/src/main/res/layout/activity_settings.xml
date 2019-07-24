@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center|left"
             android:maxLength="40"
-            android:text="Settings"
+            android:text="@string/settings"
             android:textColor="@android:color/white"
             android:textSize="18dp" />
     </LinearLayout>
@@ -50,7 +50,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:checked="false"
-                android:text="  Play All"
+                android:text="@string/play_all"
                 android:textSize="20dp" />
 
             <RadioButton
@@ -59,7 +59,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:checked="false"
-                android:text="   Random"
+                android:text="@string/random"
                 android:textSize="20dp" />
 
             <RadioButton
@@ -68,7 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:checked="false"
-                android:text="   Loop"
+                android:text="@string/loop"
                 android:textSize="20dp" />
         </RadioGroup>
 
@@ -77,7 +77,7 @@
             android:layout_width="200dp"
             android:layout_height="40dp"
             android:background="@drawable/blueroundcorner"
-            android:text="SAVE"
+            android:text="@string/save"
             android:textColor="@color/white"
             android:textSize="18dp"
             android:layout_gravity="center"

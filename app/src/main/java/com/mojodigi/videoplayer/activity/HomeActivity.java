@@ -2,13 +2,20 @@ package com.mojodigi.videoplayer.activity;
 
 import android.Manifest;
 import android.app.Activity;
+
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.app.SearchManager;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.graphics.Color;
 import android.net.Uri;
@@ -21,6 +28,7 @@ import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Person;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
@@ -34,6 +42,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.support.v7.view.ActionMode;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -43,6 +52,7 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.TabHost;
@@ -51,10 +61,31 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.ads.AdView;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
+import com.mojodigi.videoplayer.AddsUtility.AddConstants;
+import com.mojodigi.videoplayer.AddsUtility.AddMobUtils;
+import com.mojodigi.videoplayer.AddsUtility.JsonParser;
+import com.mojodigi.videoplayer.AddsUtility.OkhttpMethods;
+import com.mojodigi.videoplayer.AddsUtility.SharedPreferenceUtil;
+import com.mojodigi.videoplayer.adapter.VideoAdapter;
+import com.mojodigi.videoplayer.interfaces.VideoListener;
+import com.mojodigi.videoplayer.model.VideoDataModel;
+import com.mojodigi.videoplayer.utils.MyPreference;
+import com.mojodigi.videoplayer.utils.Utilities;
+import com.smaato.soma.AdDownloaderInterface;
+import com.smaato.soma.AdListenerInterface;
+import com.smaato.soma.BannerView;
+import com.smaato.soma.ErrorCode;
+import com.smaato.soma.ReceivedBannerInterface;
 import com.viethoa.RecyclerViewFastScroller;
 import com.viethoa.models.AlphabetItem;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -67,23 +98,27 @@ import com.mojodigi.videoplayer.adapter.FavrtAdapter;
 import com.mojodigi.videoplayer.adapter.ShowVideoAdapter;
 import com.mojodigi.videoplayer.model.Favrt;
 import com.mojodigi.videoplayer.model.ShowVideo;
-import com.mojodigi.videoplayer.utils.AddMobUtils;
+
 import com.mojodigi.videoplayer.utils.AlertDialogHelper;
 import com.mojodigi.videoplayer.utils.CustomeSpinner;
 import com.mojodigi.videoplayer.utils.DatabaseHelper;
 import com.mojodigi.videoplayer.utils.Helper;
 import com.mojodigi.videoplayer.utils.RecyclerItemClickListener;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, AlertDialogHelper.AlertDialogListener, TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener {
+        implements NavigationView.OnNavigationItemSelectedListener, AlertDialogHelper.AlertDialogListener, TabHost.OnTabChangeListener, ViewPager.OnPageChangeListener,AdListenerInterface,VideoListener {
     private static final int REQUEST_PERMISSIONS = 100;
     List<String> videoFolderNamearray = new ArrayList<>();
     ArrayList<String> videoPatharray = new ArrayList<>();
     static ArrayList<ShowVideo> arrayList = new ArrayList<>();
     static ArrayList<Favrt> favrtArrayList = new ArrayList<>();
     ArrayList<Favrt> duplicatefavrtarray = new ArrayList<>();
-    public static RecyclerView rv_showvideo, rv_showfavrt;
+    public static RecyclerView rv_showvideo, rv_showfavrt,videoRecycler;
     ShowVideoAdapter showVideoAdapter;
     Spinner navigationSpinner;
     String url;
@@ -124,23 +159,71 @@ public class HomeActivity extends AppCompatActivity
     SharedPreferences.Editor editor;
     public static int orientation;
 
+
+
+    //add push notification
+    private String fcm_Token ="" ;
+    public   String deviceID ="";
+    public   String nameOfDevice ="";
+    public   String appVersionName ="";
+    int max_execute ;
+
     //for permission
     String[] permissionsRequired = new String[]{Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_PHONE_STATE};
     private static final int PERMISSION_CALLBACK_CONSTANT = 100;
     private static final int REQUEST_PERMISSION_SETTING = 101;
     private SharedPreferences permissionStatus;
     private boolean sentToSettings = false;
-    private AdView mAdView;
+
     boolean fisrttimeapp = true;
 
+
+    // dynamicAddsVariables
+    private AdView mAdView;
+    //smaatoAddBanerView
+    BannerView smaaTobannerView;
+    SharedPreferenceUtil addprefs;
+    BroadcastReceiver internetChangerReceiver;
+    View adContainer;
+    RelativeLayout smaaToAddContainer;
+    private Context mContext;
+    // dynamicAddsVariables
+
+
+    private VideoAdapter videoAdapter;
+    private ArrayList<VideoDataModel> videoList;
+    private VideoListener videoListener ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
-        mAdView = (AdView) findViewById(R.id.adView_home);
+        mContext=HomeActivity.this;
+       //
 
+
+        //
+
+        try {
+            NavigationView mNavigationView = (NavigationView) findViewById(R.id.nav_view);
+            View header = mNavigationView.getHeaderView(0);
+            TextView mNameTextView = (TextView) header.findViewById(R.id.textView);
+
+            // get app version
+            PackageInfo packageInfo=getPackageManager().getPackageInfo(getPackageName(), 0);
+                String versionName=packageInfo.versionName;
+            // get app version
+
+            mNameTextView.setText(Utilities.getString(mContext, R.string.appversion)+versionName);
+
+
+
+
+        }catch (Exception e)
+        {
+
+        }
 
         databaseHelper = new DatabaseHelper(this);
         toolbar = findViewById(R.id.toolbar);
@@ -157,6 +240,14 @@ public class HomeActivity extends AppCompatActivity
 
         alertDialogHelper = new AlertDialogHelper(this);
 
+        //Latest video var
+
+
+        getLatestVideos();
+
+
+        //Latest video var
+
         //tab host
         host = findViewById(R.id.tabHost);
         pager = findViewById(R.id.viewpager);
@@ -165,21 +256,28 @@ public class HomeActivity extends AppCompatActivity
         final NavigationView navigationView = findViewById(R.id.nav_view);
         // set data on recyclerview
         rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
+        showVideoAdapter = new ShowVideoAdapter(mContext,arrayList, multiselect_list, HomeActivity.this);
         rv_showvideo.setAdapter(showVideoAdapter);
 
 
         host.setup();
         //Tab 1
-        TabHost.TabSpec spec = host.newTabSpec("Device");
+        TabHost.TabSpec spec = host.newTabSpec(Utilities.getString(mContext, R.string.device));
         spec.setContent(R.id.tab1);
-        spec.setIndicator("Device");
+        spec.setIndicator(Utilities.getString(mContext, R.string.device));
         host.addTab(spec);
 
         //Tab 2
-        spec = host.newTabSpec("favourite");
+        spec = host.newTabSpec(Utilities.getString(mContext,R.string.favorite ));
         spec.setContent(R.id.tab2);
-        spec.setIndicator("Favourites");
+        spec.setIndicator(Utilities.getString(mContext, R.string.favorite));
+        host.addTab(spec);
+
+
+        //Tab 3
+        spec = host.newTabSpec(Utilities.getString(mContext, R.string.latest_vdo));
+        spec.setContent(R.id.tab3);
+        spec.setIndicator(Utilities.getString(mContext, R.string.latest_vdo));
         host.addTab(spec);
 
         for (int i = 0; i < host.getTabWidget().getChildCount(); i++) {
@@ -187,17 +285,13 @@ public class HomeActivity extends AppCompatActivity
             final TextView tv = (TextView) host.getTabWidget().getChildAt(i).findViewById(android.R.id.title);
             tv.setTypeface(Helper.typeFace_corbel(this));
             tv.setTextColor(getResources().getColor(R.color.colorPrimary));
+            tv.setGravity(Gravity.CENTER);
            /* if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
                 host.getTabWidget().getChildAt(i).setBackgroundColor(getResources().getColor(R.color.white));
             }*/
         }
 
-     /*   //Tab 3
-        spec = host.newTabSpec("Cloud");
-        spec.setContent(R.id.tab3);
-        spec.setIndicator("Cloud");
-        host.addTab(spec);
-*/
+
 
         pager.setOnPageChangeListener(this);
         host.setOnTabChangedListener(this);
@@ -319,6 +413,177 @@ public class HomeActivity extends AppCompatActivity
 //        navigationView.setItemIconTintList(null);
 
         navigationView.setNavigationItemSelectedListener(this);
+
+
+
+
+        //add netwrk varibales
+        addprefs=new SharedPreferenceUtil(mContext);
+        mAdView = (AdView) findViewById(R.id.adView_home);
+        adContainer = findViewById(R.id.adMobView);
+        smaaToAddContainer = findViewById(R.id.smaaToAddContainer);
+        smaaTobannerView = new BannerView((this).getApplication());
+        smaaTobannerView.addAdListener(this);
+
+
+
+        // this broadcast  will  listen the  internet state change for sendig request  when internet becomes available
+        IntentFilter intentFilter = new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE");
+        internetChangerReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+
+                boolean isNetworkAvailable = AddConstants.checkIsOnline(mContext);
+
+                //  Toast.makeText(context, "isNetworkAvailable-->" + isNetworkAvailable, Toast.LENGTH_SHORT).show();
+
+                Log.d("isNetworkAvailable", "" + isNetworkAvailable);
+                if (isNetworkAvailable) {
+                    new WebCall().execute();
+
+                } else {
+                    if (mAdView != null && addprefs != null) {
+                        AddMobUtils util = new AddMobUtils();
+                        util.displayLocalBannerAdd(mAdView);
+                        //util.showInterstitial(addprefs,HomeActivity.this, null);
+                        //util.displayRewaredVideoAdd(addprefs, mContext, null);
+                    }
+                }
+            }
+
+        };
+        registerReceiver(internetChangerReceiver, intentFilter);
+        // this broadcast  will  listen the  internet state change for sendig request  when internet becomes available
+
+        if(addprefs!=null) {
+            boolean st=addprefs.getBoolanValue(AddConstants.isFcmRegistered, false);
+            System.out.print(""+st);
+            if(!addprefs.getBoolanValue(AddConstants.isFcmRegistered, false)) {
+                getPushToken();
+            }
+        }
+
+
+
+    }
+
+
+    private void getLatestVideos() {
+
+
+        this.videoListener=this;
+        videoRecycler = (RecyclerView) findViewById(R.id.videoRecycler);
+        videoList = new ArrayList<VideoDataModel>();
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mContext, LinearLayoutManager.VERTICAL, false);
+        videoRecycler.setLayoutManager(linearLayoutManager);
+
+
+        new WebCall_GetVideo().execute();
+
+
+    }
+
+    @Override
+    public void onVideoClicked(VideoDataModel videoDataModel) {
+
+        String url=videoDataModel.getVideoUrl();
+
+
+         if(url!=null) {
+             //Intent mIntent = new Intent(getActivity() , MediaWebActivity.class);
+             //startActivity(mIntent);
+             if (!url.trim().isEmpty()) {
+                 Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                 startActivity(browserIntent);
+             }
+         }
+
+
+    }
+
+    public class WebCall_GetVideo extends AsyncTask<String,String,String>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            //CustomProgressDialog.show(mContext, getResources().getString(R.string.loading_msg));
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+            try {
+                return OkhttpMethods.CallApiGetNews(mContext, AddConstants.API_URL_VIDEO);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ""+e.getMessage();
+            }
+        }
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+            Log.e("JsonResponse", s);
+            if (addprefs != null)
+            {
+                int responseCode = addprefs.getIntValue(AddConstants.API_RESPONSE_CODE_GET_NEWS, 0);
+                if (s != null  && responseCode==200 ) {
+
+
+                    try {
+                        JSONObject mainJson = new JSONObject(s);
+
+                        if (mainJson.has("status")) {
+
+                            String status = JsonParser.getkeyValue_Str(mainJson, "status");
+                            String data = JsonParser.getkeyValue_Str(mainJson, "data");
+
+                            if (status.equalsIgnoreCase("200")) {
+                                if (mainJson.has("data")) {
+
+                                    JSONArray jsonarray = new JSONArray(JsonParser.getkeyValue_Str(mainJson, "data"));
+
+                                    for (int i = 0; i < jsonarray.length(); i++) {
+                                        JSONObject dataJson = jsonarray.getJSONObject(i);
+                                        //Log.e("dataJson ", dataJson+"");
+                                        String author = JsonParser.getkeyValue_Str(dataJson, "author");
+                                        String title = JsonParser.getkeyValue_Str(dataJson, "title");
+                                        String content = JsonParser.getkeyValue_Str(dataJson, "content");
+                                        String date = JsonParser.getkeyValue_Str(dataJson, "date");
+                                        String thumbnail = JsonParser.getkeyValue_Str(dataJson, "thumbnail");
+                                        String url = JsonParser.getkeyValue_Str(dataJson, "url");
+                                        String slug=JsonParser.getkeyValue_Str(dataJson, "slug");
+
+                                        url=Helper.appendUrl(slug);
+
+                                        VideoDataModel model  =  new VideoDataModel();
+                                        model.setVideoAuthor(author);
+                                        model.setVideoTitle(title);
+                                        model.setVideoContent(content);
+                                        model.setVideoDate(date);
+                                        model.setVideoThumbnail(thumbnail);
+                                        model.setVideoUrl(url);
+                                        videoList.add(model);
+
+
+                                    }
+
+                                    videoAdapter = new VideoAdapter(videoList, videoListener , mContext);
+                                    videoRecycler.setAdapter(videoAdapter);
+
+                                } else {
+                                    String message = JsonParser.getkeyValue_Str(mainJson, "message");
+                                    Log.d("message", "" + message);
+                                }
+                            }
+                        }
+                    } catch (JSONException e) {
+                        Log.d("jsonParse", "error while parsing json -->" + e.getMessage());
+                        e.printStackTrace();
+                    }
+                } else {
+                    Log.e("Exception Code :", "" + responseCode);
+                }
+            }
+        }
     }
 
     @Override
@@ -395,7 +660,8 @@ public class HomeActivity extends AppCompatActivity
                 });
                 builder.show();
             } else {
-                Toast.makeText(this, "Unable to get Permission", Toast.LENGTH_LONG).show();
+                //Toast.makeText(this, Utilities, Toast.LENGTH_LONG).show();
+                Utilities.dispToast(mContext, R.string.unable_to_get_permission);
             }
         }
 
@@ -405,15 +671,22 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+        MyPreference myPreference=new MyPreference(this);
 
+        final String type = myPreference.getPlaytype(MyPreference.PREFS_NAME);
+        Log.i("playtype-homedestroy",type);
 
         editor = preferences.edit();
         editor.remove("type");
         editor.remove("videopostion");
         editor.remove("folderid");
         //editor.remove(MyPreference.PREFS_NAME);
-        editor.clear();
+//        editor.clear();
         editor.commit();
+
+
+        if(internetChangerReceiver!=null)
+            unregisterReceiver(internetChangerReceiver);
 
         super.onDestroy();
 
@@ -541,7 +814,14 @@ public class HomeActivity extends AppCompatActivity
 
         } else if (id == R.id.nav_settings) {
             startActivity(new Intent(HomeActivity.this, SettingsActivity.class));
-        } /* else if (id == R.id.nav_share) {
+        }
+        else if (id == R.id.nav_privacy_policy) {
+            Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(AddConstants.privacyUrl));
+            startActivity(browserIntent);
+        }
+
+
+        /* else if (id == R.id.nav_share) {
             Intent sendIntent = new Intent();
             sendIntent.setAction(Intent.ACTION_SEND);
             sendIntent.putExtra(Intent.EXTRA_TEXT,
@@ -736,6 +1016,11 @@ public class HomeActivity extends AppCompatActivity
         favrtAdapter.notifyDataSetChanged();
 
 
+
+
+
+
+
     }
 
 
@@ -893,7 +1178,7 @@ public class HomeActivity extends AppCompatActivity
             type = preferences.getString("type", "all");
 
             rv_showvideo.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-            showVideoAdapter = new ShowVideoAdapter(arrayList, multiselect_list, HomeActivity.this);
+            showVideoAdapter = new ShowVideoAdapter(mContext,arrayList, multiselect_list, HomeActivity.this);
             rv_showvideo.setAdapter(showVideoAdapter);
 
         } else if (s.equals("favourite")) {
@@ -965,6 +1250,26 @@ public class HomeActivity extends AppCompatActivity
         }*/
         pager.setCurrentItem(tabnumber);
 
+        //finish  action mode  if tab is changed by the user;
+        if(mActionMode!=null)
+        {
+            mActionMode.finish();
+        }
+
+
+    }
+
+    @Override
+    public void onReceiveAd(AdDownloaderInterface adDownloaderInterface, ReceivedBannerInterface receivedBannerInterface) {
+        if(receivedBannerInterface.getErrorCode() != ErrorCode.NO_ERROR){
+            // Toast.makeText(getBaseContext(), receivedBanner.getErrorMessage(), Toast.LENGTH_SHORT).show();
+            Log.d("SmaatoErrorMsg", ""+receivedBannerInterface.getErrorMessage());
+
+            if(receivedBannerInterface.getErrorMessage().equalsIgnoreCase(AddConstants.NO_ADDS))
+            {
+                smaaToAddContainer.setVisibility(View.GONE);
+            }
+        }
     }
 
 
@@ -986,7 +1291,7 @@ public class HomeActivity extends AppCompatActivity
         protected void onPostExecute(Integer FileCount) {
             super.onPostExecute(FileCount);
 
-            Toast.makeText(HomeActivity.this, FileCount + " file deleted", Toast.LENGTH_SHORT).show();
+            Toast.makeText(HomeActivity.this, FileCount +" "+ Utilities.getString(mContext, R.string.file_deleted), Toast.LENGTH_SHORT).show();
 
 
         }
@@ -1095,10 +1400,6 @@ public class HomeActivity extends AppCompatActivity
 */
 
 
-        if (mAdView != null) {
-            AddMobUtils util = new AddMobUtils();
-            util.displayBannerAdd(mAdView);
-        }
 
         //back from play screen focus on recent tab
         type = preferences.getString("type", "");
@@ -1139,21 +1440,28 @@ public class HomeActivity extends AppCompatActivity
     public static void initialiseData() {
         //Recycler view data
 //        mDataArray = DataHelper.getAlphabetData();
-
-        //Alphabet fast scroller data
-        mAlphabetItems = new ArrayList<>();
-        List<String> strAlphabets = new ArrayList<>();
-        for (int i = 0; i < arrayList.size(); i++) {
-            String name = arrayList.get(i).getName().toUpperCase();
+        try {
+            //Alphabet fast scroller data
+            mAlphabetItems = new ArrayList<>();
+            List<String> strAlphabets = new ArrayList<>();
+            for (int i = 0; i < arrayList.size(); i++) {
+                if (arrayList.get(i).getName() != null)
+                {
+                    String name = arrayList.get(i).getName().toUpperCase();
 //            if (name == null || name.trim().isEmpty())
 //                continue;
 
-            String word = name.substring(0, 1);
-            if (!strAlphabets.contains(word)) {
+                    String word = name.substring(0, 1);
+                    if (!strAlphabets.contains(word)) {
 
-                strAlphabets.add(word);
-                mAlphabetItems.add(new AlphabetItem(i, word, false));
+                        strAlphabets.add(word);
+                        mAlphabetItems.add(new AlphabetItem(i, word, false));
+                    }
+                }
             }
+        }catch (Exception  ex)
+        {
+            ex.printStackTrace();
         }
     }
 
@@ -1204,7 +1512,8 @@ public class HomeActivity extends AppCompatActivity
                         Uri uri = Uri.fromParts("package", getPackageName(), null);
                         intent.setData(uri);
                         startActivityForResult(intent, REQUEST_PERMISSION_SETTING);
-                        Toast.makeText(getBaseContext(), "Go to Permissions to Grant Storage and settings permissions.", Toast.LENGTH_LONG).show();
+                        Utilities.dispToast(mContext, R.string.go_to_permission);
+
                     }
                 });
                 builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
@@ -1229,4 +1538,408 @@ public class HomeActivity extends AppCompatActivity
 
         }
     }
+
+
+    public class WebCall extends AsyncTask<String,String,String>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            try {
+                JSONObject requestObj= AddConstants.prepareAddJsonRequest(mContext, AddConstants.VENDOR_ID);
+                return OkhttpMethods.CallApi(mContext,AddConstants.API_URL,requestObj.toString());
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ""+e.getMessage();
+            }
+        }
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            Log.d("JsonResponse", s);
+
+            if (addprefs != null)
+            {
+                int responseCode=addprefs.getIntValue(AddConstants.API_RESPONSE_CODE, 0);
+
+                if (s != null  && responseCode==200 ) {
+                    try {
+                        JSONObject mainJson = new JSONObject(s);
+                        if (mainJson.has("status")) {
+                            String status = JsonParser.getkeyValue_Str(mainJson, "status");
+
+                            String newVersion=JsonParser.getkeyValue_Str(mainJson,"appVersion");
+                            addprefs.setValue(AddConstants.APP_VERSION, newVersion);
+
+                            if (status.equalsIgnoreCase("true")) {
+
+                                String adShow = JsonParser.getkeyValue_Str(mainJson, "AdShow");
+
+                                if (adShow.equalsIgnoreCase("true")) {
+                                    if (mainJson.has("data")) {
+                                        JSONObject dataJson = mainJson.getJSONObject("data");
+
+                                        String show_Add = JsonParser.getkeyValue_Str(mainJson, "AdShow");
+                                        String adProviderId =JsonParser.getkeyValue_Str(dataJson, "adProviderId");
+                                        String adProviderName = JsonParser.getkeyValue_Str(dataJson, "adProviderName");
+
+                                        String appId_PublisherId = JsonParser.getkeyValue_Str(dataJson, "appId_PublisherId");
+                                        String bannerAdId = JsonParser.getkeyValue_Str(dataJson, "bannerAdId");
+                                        String interstitialAdId = JsonParser.getkeyValue_Str(dataJson, "interstitialAdId");
+                                        String videoAdId = JsonParser.getkeyValue_Str(dataJson, "videoAdId");
+
+
+//                                        String appId_PublisherId = "ca-app-pub-3940256099942544~3347511713";//testID
+//                                        String bannerAdId = "ca-app-pub-3940256099942544/6300978111"; //testId
+//                                        String interstitialAdId = "ca-app-pub-3940256099942544/1033173712";//testId
+//                                         String videoAdId = "ca-app-pub-3940256099942544/5224354917";//testId
+
+
+                                           //for smaato bannerAdd  testIds
+//                                        String appId_PublisherId = "0";//testID
+//                                        String bannerAdId = "0"; //testId
+
+
+                                        Log.d("AddiDs", adProviderName + " ==" + appId_PublisherId + "==" + bannerAdId + "==" + interstitialAdId + "==" + videoAdId);
+
+
+                                        //check for true value above in code so  can put true directly;
+                                        try {
+                                            addprefs.setValue(AddConstants.SHOW_ADD, Boolean.parseBoolean(show_Add));
+                                        }catch (Exception e)
+                                        {
+                                            // IN CASE OF EXCEPTION CONSIDER  FALSE AS THE VALUE WILL NOT BE TRUE,FALSE.
+                                            addprefs.setValue(AddConstants.SHOW_ADD, false);
+                                        }
+
+                                        addprefs.setValue(AddConstants.ADD_PROVIDER_ID, adProviderId);
+                                        addprefs.setValue(AddConstants.APP_ID, appId_PublisherId);
+                                        addprefs.setValue(AddConstants.BANNER_ADD_ID, bannerAdId);
+                                        addprefs.setValue(AddConstants.INTERESTIAL_ADD_ID, interstitialAdId);
+                                        addprefs.setValue(AddConstants.VIDEO_ADD_ID, videoAdId);
+                                             AddMobUtils util=new AddMobUtils();
+                                        if (adContainer != null  && adProviderId.equalsIgnoreCase(AddConstants.Adsense_Admob_GooglePrivideId))
+
+                                        {
+                                            // requst googleAdd
+
+                                            util.displayServerBannerAdd(addprefs, adContainer, mContext);
+                                            // util.showInterstitial(addprefs,HomeActivity.this, interstitialAdId);
+                                            //util.displayRewaredVideoAdd(addprefs,mContext, videoAdId);
+
+
+                                        }
+                                        else if (adProviderId.equalsIgnoreCase(AddConstants.InMobiProvideId))
+                                        {
+
+                                            // inmobi adds not being implemented in this version
+                                            // inmobi adds not being implemented in this version
+
+                                        }
+                                        else if( smaaTobannerView !=null && adProviderId.equalsIgnoreCase(AddConstants.SmaatoProvideId))
+                                        {
+                                            //requestSmaatoBanerAdds
+
+
+                                            try {
+                                                int publisherId = Integer.parseInt(addprefs.getStringValue(AddConstants.APP_ID, AddConstants.NOT_FOUND));
+                                                int addSpaceId = Integer.parseInt(addprefs.getStringValue(AddConstants.BANNER_ADD_ID, AddConstants.NOT_FOUND));
+                                                util.displaySmaatoBannerAdd(smaaTobannerView, smaaToAddContainer, publisherId, addSpaceId);
+                                            }catch (Exception e)
+                                            {
+                                                String string = e.getMessage();
+                                                System.out.print(""+string);
+                                            }
+
+
+//
+                                            //requestSmaatoBanerAdds
+                                        }
+
+                                        //requestfacebookBanerAdds
+                                         else if(adProviderId.equalsIgnoreCase(AddConstants.FaceBookAddProividerId))
+                                           {
+                                                   util.dispFacebookBannerAdd(mContext,addprefs , HomeActivity.this);
+                                              }
+
+
+
+
+                                    } else {
+                                        String message = JsonParser.getkeyValue_Str(mainJson, "message");
+                                        Log.d("message", "" + message);
+                                    }
+                                } else {
+                                    String message = JsonParser.getkeyValue_Str(mainJson, "message");
+
+                                    Log.d("message", "" + message);
+
+                                }
+
+
+                            }
+
+                            dispUpdateDialog();
+                        }
+
+                    } catch (JSONException e) {
+                        Log.d("jsonParse", "error while parsing json -->" + e.getMessage());
+                        e.printStackTrace();
+                    }
+
+
+                } else {
+                    // display loccal AddiDs Adds;
+                    if (mAdView != null) {
+                        AddMobUtils util = new AddMobUtils();
+                        util.displayLocalBannerAdd(mAdView);
+                        //util.showInterstitial(addprefs,HomeActivity.this, null);
+                        // util.displayRewaredVideoAdd(addprefs,mContext, null);
+                    }
+                }
+
+
+            }
+
+        }
+    }
+
+    private void getPushToken()
+    {
+        /***********************Start**********************************************/
+
+        deviceID = Settings.Secure.getString(getBaseContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+        Log.e("Android ID : ",""+deviceID);
+        nameOfDevice = Build.MANUFACTURER+" "+Build.MODEL+" "+Build.VERSION.RELEASE;
+        Log.e("Device Name : ",""+nameOfDevice);
+        PackageInfo pinfo = null;
+        try {
+            pinfo = getPackageManager().getPackageInfo(getPackageName(), 0);
+            appVersionName = pinfo.versionName;
+            Log.e("App Version Name : ",""+appVersionName);
+
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }catch (Exception ex){ ex.printStackTrace();}
+
+
+
+        FirebaseInstanceId.getInstance().getInstanceId().addOnSuccessListener( HomeActivity.this,
+                new OnSuccessListener<InstanceIdResult>() {
+                    @Override
+                    public void onSuccess(InstanceIdResult instanceIdResult) {
+                        fcm_Token = instanceIdResult.getToken();
+                        Log.e("New Token : ", fcm_Token);
+
+                        if (AddConstants.checkIsOnline(mContext)) {
+                            Log.e("Network is available ", "PushNotification Called");
+                            new PushNotificationCall().execute();
+                        } else {
+                            Log.e("No Network", "PushNotification Call failed");
+                        }
+                    }
+                });
+
+
+        Intent intent = new Intent();
+        String manufacturer = android.os.Build.MANUFACTURER;
+        switch (manufacturer) {
+
+            case "xiaomi":
+                intent.setComponent(new ComponentName("com.miui.securitycenter",
+                        "com.miui.permcenter.autostart.AutoStartManagementActivity"));
+                break;
+            case "oppo":
+                intent.setComponent(new ComponentName("com.coloros.safecenter",
+                        "com.coloros.safecenter.permission.startup.StartupAppListActivity"));
+
+                break;
+            case "vivo":
+                intent.setComponent(new ComponentName("com.vivo.permissionmanager",
+                        "com.vivo.permissionmanager.activity.BgStartUpManagerActivity"));
+                break;
+        }
+
+        List<ResolveInfo> arrayListInfo =  getPackageManager().queryIntentActivities(intent,
+                PackageManager.MATCH_DEFAULT_ONLY);
+
+        if (arrayListInfo.size() > 0) {
+            startActivity(intent);
+        }
+
+
+    }
+
+    public class PushNotificationCall extends AsyncTask<String,String,String>
+    {
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+        }
+
+        @Override
+        protected String doInBackground(String... strings) {
+
+            try {
+                Log.e("deviceId ", deviceID);
+                Log.e("deviceName ", nameOfDevice);
+                Log.e("fcmToken ", fcm_Token);
+                Log.e("appVer ", appVersionName);
+
+                JSONObject requestObj = AddConstants.prepareFcmJsonRequest(mContext, deviceID, nameOfDevice, fcm_Token , appVersionName);
+                return OkhttpMethods.CallApi(mContext, AddConstants.API_PUSH_NOTIFICATION, requestObj.toString());
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                return ""+e.getMessage();
+            }
+        }
+
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            Log.e("Push Json Response ", s);
+
+
+
+
+            if (s != null  ) {
+                try {
+                    JSONObject mainJson = new JSONObject(s);
+                    if (mainJson.has("status")) {
+                        String status = JsonParser.getkeyValue_Str(mainJson, "status");
+                        Log.e("status", "" + status);
+
+
+                        if (status.equalsIgnoreCase("false")) {
+
+                            if (mainJson.has("data")) {
+                                JSONObject dataJson = mainJson.getJSONObject("data");
+                            } else {
+                                String message = JsonParser.getkeyValue_Str(mainJson, "message");
+                                Log.e("message", "" + message);
+                            }
+                        }
+                        if (status.equalsIgnoreCase("false")) {
+                            Log.e("status", "" + status);
+
+                            if(max_execute<=5){
+                                new PushNotificationCall().execute();
+                                max_execute++;
+                            }
+                        }
+                        else {
+                            if(addprefs!=null)
+                                addprefs.setValue(AddConstants.isFcmRegistered, true);
+                        }
+                    }
+                } catch (JSONException e) {
+                    Log.d("jsonParse", "error while parsing json -->" + e.getMessage());
+                    e.printStackTrace();
+                }
+            } else {
+                Log.e("", "else"  );
+            }
+
+        }
+    }
+
+
+
+
+
+
+    private void dispUpdateDialog() {
+        try {
+            String currentVersion = "0";
+            String newVersion="0";
+            if(addprefs!=null)
+                newVersion=addprefs.getStringValue(AddConstants.APP_VERSION, AddConstants.NOT_FOUND);
+
+            try {
+                currentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+                Log.d("currentVersion", "" + currentVersion);
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+
+            if (Float.parseFloat(newVersion) > Float.parseFloat(currentVersion) && !newVersion.equalsIgnoreCase("0"))
+
+            {
+                if (mContext != null) {
+                    final Dialog dialog = new Dialog(mContext);
+                    dialog.setContentView(R.layout.dialog_version_update);
+                    long time = addprefs.getLongValue("displayedTime", 0);
+                    long diff=86400000; // one day
+                    //long diff=60000; // one minute;
+
+                    if (time < System.currentTimeMillis() - diff) {
+                        dialog.show();
+                        addprefs.setValue("displayedTime", System.currentTimeMillis());
+                    }
+
+                    TextView later = dialog.findViewById(R.id.idDialogLater);
+                    TextView updateNow = dialog.findViewById(R.id.idDialogUpdateNow);
+                    TextView idVersionDetailsText = dialog.findViewById(R.id.idVersionDetailsText);
+                    TextView idAppVersionText = dialog.findViewById(R.id.idAppVersionText);
+                    TextView idVersionTitleText = dialog.findViewById(R.id.idVersionTitleText);
+
+
+                    idVersionTitleText.setTypeface(Helper.typeFace_corbel(mContext));
+                    idVersionDetailsText.setTypeface(Helper.typeFace_corbel(mContext));
+                    idAppVersionText.setTypeface(Helper.typeFace_corbel(mContext));
+                    later.setTypeface(Helper.typeFace_corbel(mContext));
+                    updateNow.setTypeface(Helper.typeFace_corbel(mContext));
+
+                    idAppVersionText.setText(newVersion);
+
+                    later.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            dialog.dismiss();
+                        }
+                    });
+
+
+                    updateNow.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+
+                            final String appPackageName = getPackageName(); // package name of the app
+                            try {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackageName)));
+                            } catch (android.content.ActivityNotFoundException anfe) {
+                                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
+                            }
+
+
+                            dialog.dismiss();
+                        }
+                    });
+
+
+                }
+
+
+            }
+        }
+        catch (Exception e)
+        {
+
+        }
+
+    }
+
 }
